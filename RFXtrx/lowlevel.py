@@ -724,7 +724,8 @@ class Lighting5(Packet):
              0x01: 'EMW100 GAO/Everflourish',
              0x02: 'BBSB new types',
              0x03: 'MDREMOTE LED dimmer',
-             0x04: 'Conrad RSL2'}
+             0x04: 'Conrad RSL2',
+             0x0f: 'ProMax/IT'}
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
@@ -732,7 +733,9 @@ class Lighting5(Packet):
     ALIAS_TYPES = {'LightwaveRF': 0x00,
                    'Siemens': 0x00,
                    'EMW100 GAO': 0x01,
-                   'Everflourish': 0x01}
+                   'Everflourish': 0x01,
+                   'ProMax': 0x0f,
+                   'IT': 0x0f}
     """
     Mapping of subtype aliases to the corresponding subtype value
     """
@@ -763,10 +766,10 @@ class Lighting5(Packet):
     Mapping of command numeric values to strings, used for cmnd_string
     """
 
-    COMMANDS_02_04 = {0x00: 'Off',
-                      0x01: 'On',
-                      0x02: 'Group off',
-                      0x03: 'Group on'}
+    COMMANDS_02_04_0F = {0x00: 'Off',
+                         0x01: 'On',
+                         0x02: 'Group off',
+                         0x03: 'Group on'}
     """
     Mapping of command numeric values to strings, used for cmnd_string
     """
@@ -782,6 +785,7 @@ class Lighting5(Packet):
                    0x08: 'Speed-',
                    0x09: 'Speed+',
                    0x0a: 'Mode-'}
+
     """
     Mapping of command numeric values to strings, used for cmnd_string
     """
@@ -881,14 +885,16 @@ class Lighting5(Packet):
                 self.cmnd_string = self.COMMANDS_00[self.cmnd]
             elif self.subtype == 0x01 and self.cmnd in self.COMMANDS_01:
                 self.cmnd_string = self.COMMANDS_01[self.cmnd]
-            elif self.subtype == 0x02 and self.cmnd in self.COMMANDS_02_04:
-                self.cmnd_string = self.COMMANDS_02_04[self.cmnd]
+            elif self.subtype == 0x02 and self.cmnd in self.COMMANDS_02_04_0F:
+                self.cmnd_string = self.COMMANDS_02_04_0F[self.cmnd]
             elif self.subtype == 0x03 and self.cmnd in self.COMMANDS_03:
                 self.cmnd_string = self.COMMANDS_03[self.cmnd]
-            elif self.subtype == 0x04 and self.cmnd in self.COMMANDS_02_04:
-                self.cmnd_string = self.COMMANDS_02_04[self.cmnd]
+            elif self.subtype == 0x04 and self.cmnd in self.COMMANDS_02_04_0F:
+                self.cmnd_string = self.COMMANDS_02_04_0F[self.cmnd]
             elif self.subtype >= 0x05 and self.cmnd in self.COMMANDS_XX:
                 self.cmnd_string = self.COMMANDS_XX[self.cmnd]
+            elif self.subtype >= 0x0f and self.cmnd in self.COMMANDS_02_04_0F:
+                self.cmnd_string = self.COMMANDS_02_04_0F[self.cmnd]
             else:
                 self.cmnd_string = self._UNKNOWN_CMND.format(self.cmnd)
 
