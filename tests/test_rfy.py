@@ -38,4 +38,9 @@ class RfyTestCase(TestCase):
 
         rfy = RFXtrx.lowlevel.parse(bytearray(b'\x08\x1A\x01\x00\x0A\x00\x01\x01\x05'))
         self.assertEquals(rfy.cmnd_string, "Unknown command (0x05)")
-        self.assertEquals(rfy.type_string, "Unknown type (0x1a/0x01)")
+        self.assertEquals(rfy.type_string, "Rfy Extended")
+
+        rfy = RFXtrx.get_device(0x1A,3,'0a0001:2')
+        self.assertEqual(rfy.subtype, 3)
+        self.assertEquals(rfy.__str__(), "<class 'RFXtrx.RfyDevice'> type='ASA' id='0a0001:2'")
+        
