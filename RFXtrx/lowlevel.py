@@ -1987,7 +1987,9 @@ class Rfy(Packet):
     """
     Data class for the Rfy packet type
     """
-    TYPES = {0x00: 'Rfy'}
+    TYPES = {0x00: 'Rfy',
+             0x01: 'Rfy Extended',
+             0x03: 'ASA'}
     """
     Mapping of numeric subtype values to strings, used in type_string
     """

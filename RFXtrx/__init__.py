@@ -75,7 +75,7 @@ class RfyDevice(RFXtrxDevice):
         """ Send a 'Close' command using the given transport """
         pkt = lowlevel.Rfy()
         pkt.set_transmit(
-            0x00,
+            self.subtype,
             self.cmndseqnbr,
             self.id_combined,
             self.unitcode,
@@ -88,7 +88,7 @@ class RfyDevice(RFXtrxDevice):
         """ Send an 'Open' command using the given transport """
         pkt = lowlevel.Rfy()
         pkt.set_transmit(
-            0x00,
+            self.subtype,
             self.cmndseqnbr,
             self.id_combined,
             self.unitcode,
@@ -101,7 +101,7 @@ class RfyDevice(RFXtrxDevice):
         """ Send a 'Stop' command using the given transport """
         pkt = lowlevel.Rfy()
         pkt.set_transmit(
-            0x00,
+            self.subtype,
             self.cmndseqnbr,
             self.id_combined,
             self.unitcode,
