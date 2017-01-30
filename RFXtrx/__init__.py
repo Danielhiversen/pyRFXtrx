@@ -61,6 +61,55 @@ class RFXtrxDevice(object):
 # SwitchDevice class
 ###############################################################################
 
+class RollerTrolDevice(RFXtrxDevice):
+    """ Concrete class for a roller device """
+    def __init__(self, pkt):
+        super(RollerTrolDevice, self).__init__(pkt)
+        if isinstance(pkt, lowlevel.RollerTrol):
+            self.known_to_be_rollershutter = True
+            self.id_combined = pkt.id_combined
+            self.unitcode = pkt.unitcode
+            self.cmndseqnbr = 0
+
+    def send_close(self, transport):
+        """ Send a 'Close' command using the given transport """
+        pkt = lowlevel.RollerTrol()
+        pkt.set_transmit(
+            self.subtype,
+            self.cmndseqnbr,
+            self.id_combined,
+            self.unitcode,
+            0x01
+        )
+        self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
+        transport.send(pkt.data)
+
+    def send_open(self, transport):
+        """ Send an 'Open' command using the given transport """
+        pkt = lowlevel.RollerTrol()
+        pkt.set_transmit(
+            self.subtype,
+            self.cmndseqnbr,
+            self.id_combined,
+            self.unitcode,
+            0x00
+        )
+        self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
+        transport.send(pkt.data)
+
+    def send_stop(self, transport):
+        """ Send a 'Stop' command using the given transport """
+        pkt = lowlevel.RollerTrol()
+        pkt.set_transmit(
+            self.subtype,
+            self.cmndseqnbr,
+            self.id_combined,
+            self.unitcode,
+            0x02
+        )
+        self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
+        transport.send(pkt.data)
+
 class RfyDevice(RFXtrxDevice):
     """ Concrete class for a roller device """
     def __init__(self, pkt):
@@ -272,6 +321,10 @@ def get_device(packettype, subtype, id_string):
         pkt = lowlevel.Lighting6()
         pkt.parse_id(subtype, id_string)
         return LightingDevice(pkt)
+    elif packettype == 0x19:  # RollerTrol
+        pkt = lowlevel.RollerTrol()
+        pkt.parse_id(subtype, id_string)
+        return RollerTrolDevice(pkt)
     elif packettype == 0x1A:  # Rfy
         pkt = lowlevel.Rfy()
         pkt.parse_id(subtype, id_string)
@@ -382,6 +435,8 @@ class ControlEvent(RFXtrxEvent):
                 or isinstance(pkt, lowlevel.Lighting5) \
                 or isinstance(pkt, lowlevel.Lighting6):
             device = LightingDevice(pkt)
+        elif isinstance(pkt, lowlevel.RollerTrol):
+            device = RollerTrolDevice(pkt)
         elif isinstance(pkt, lowlevel.Rfy):
             device = RfyDevice(pkt)
         else:
@@ -650,3 +705,5 @@ class Connect(object):
 
 class Core(Connect):
     """ The main class for rfxcom-py. Has changed name to Connect """
+    
+    
