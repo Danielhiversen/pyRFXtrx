@@ -2190,7 +2190,7 @@ class RollerTrol(Packet):
         return self.__str__()
 
     def __str__(self):
-        return "RollerTrol [subtype={0}, seqnbr={1}, id={2}, cmnd={3}, " +"rssi{4}]" \
+        return "RollerTrol [subtype={0}, seqnbr={1}, id={2}, cmnd={3}, rssi{4}]" \
             .format(
                 self.subtype,
                 self.seqnbr,
