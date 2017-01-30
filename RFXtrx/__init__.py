@@ -705,3 +705,5 @@ class Connect(object):
 
 class Core(Connect):
     """ The main class for rfxcom-py. Has changed name to Connect """
+    
+    
