@@ -2190,7 +2190,8 @@ class RollerTrol(Packet):
         return self.__str__()
 
     def __str__(self):
-        return "RollerTrol [subtype={0}, seqnbr={1}, id={2}, cmnd={3}, rssi{4}]" \
+        return "RollerTrol [subtype={0}, seqnbr={1}, id={2}, cmnd={3}, "+\
+           "rssi{4}]"
             .format(
                 self.subtype,
                 self.seqnbr,
@@ -2208,7 +2209,6 @@ class RollerTrol(Packet):
         self.id_combined = None
         self.unitcode = None
         self.cmnd = None
-        #self.level = None
         self.cmnd_string = None
 
     def parse_id(self, subtype, id_string):
@@ -2241,7 +2241,7 @@ class RollerTrol(Packet):
         self.unitcode = data[7]
         self.cmnd = data[8]
         self.rssi_byte = data[9]
-        self.rssi = self.rssi_byte >> 4 
+        self.rssi = self.rssi_byte >> 4
         self._set_strings()
 
     def set_transmit(self, subtype, seqnbr, id_combined, unitcode, cmnd):
@@ -2257,7 +2257,7 @@ class RollerTrol(Packet):
         self.unitcode = unitcode
         self.cmnd = cmnd
         self.rssi_byte = 0
-        self.rssi = self.rssi_byte >> 4 
+        self.rssi = self.rssi_byte >> 4
         self.data = bytearray([self.packetlength, self.packettype,
                                self.subtype, self.seqnbr,
                                self.id1, self.id2, self.id3, self.unitcode,
