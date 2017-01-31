@@ -13,6 +13,7 @@ matrix:
   - python: '3.5'
     env: TOXENV=lint
   - python: "nightly"
+    env: TOXENV=py36
 cache:
   directories:
   - "$HOME/.cache/pip"
