@@ -587,7 +587,10 @@ class PySerialTransport(RFXtrxTransport):
     def receive_blocking(self):
         """ Wait until a packet is received and return with an RFXtrxEvent """
         while self._run_event.is_set():
-            data = self.serial.read()
+            Try
+                data = self.serial.read()
+            except TypeError:
+                continue
             if len(data) > 0:
                 if data == '\x00':
                     continue
