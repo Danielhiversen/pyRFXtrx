@@ -80,6 +80,8 @@ def parse(data):
         pkt = Energy()
     elif data[1] == 0x5B:
         pkt = Energy4()
+    elif data[1] == 0x5C:
+        pkt = Energy5()
     elif data[1] == 0x71:
         pkt = RfxMeter()
     else:
@@ -1873,6 +1875,73 @@ class Energy4(SensorPacket):
                                (data[17] << 8) + data[18]) / 223.666
         self.rssi_byte = data[19]
         self.battery = self.rssi_byte & 0x0f
+        self.rssi = self.rssi_byte >> 4
+        self._set_strings()
+
+    def _set_strings(self):
+        """Translate loaded numeric values into convenience strings"""
+        self.id_string = "{0:02x}:{1:02x}".format(self.id1, self.id2)
+        if self.subtype in self.TYPES:
+            self.type_string = self.TYPES[self.subtype]
+        else:
+            # Degrade nicely for yet unknown subtypes
+            self.type_string = self._UNKNOWN_TYPE.format(self.packettype,
+                                                         self.subtype)
+
+
+###############################################################################
+# Energy5 class
+###############################################################################
+
+
+class Energy5(SensorPacket):
+    """
+    Data class for the Energy "ELEC5" packet type
+    """
+
+    TYPES = {0x01: 'ELEC5'}
+    """
+    Mapping of numeric subtype values to strings, used in type_string
+    """
+
+    def __str__(self):
+        return ("Energy5 [subtype={0}, seqnbr={1}, id={2}, voltage={3}, " +
+                "current_amps={4}, current_watts={5}, total_watts={6}, " +
+                "powerfactor={7}, frequency={8}, rssi={9}]") \
+            .format(self.type_string, self.seqnbr, self.id_string, self.voltage,
+                    self.currentamps, self.currentwatt, self.totalwatthours,
+                    self.powerfactor, self.frequency, self.rssi)
+
+
+    def __init__(self):
+        """Constructor"""
+        super(Energy5, self).__init__()
+        self.id1 = None
+        self.id2 = None
+        self.voltage = None
+        self.currentamps = None
+        self.currentwatt = None
+        self.totalwatthours = None
+        self.powerfactor = None
+        self.frequency = None
+        self.rssi = None
+
+    def load_receive(self, data):
+        """Load data from a bytearray"""
+        self.data = data
+        self.packetlength = data[0]
+        self.packettype = data[1]
+        self.subtype = data[2]
+        self.seqnbr = data[3]
+        self.id1 = data[4]
+        self.id2 = data[5]
+        self.voltage = data[6] 
+        self.currentamps = float((data[7] << 8) + data[8]) / 100
+        self.currentwatt = float((data[9] << 8) + data[10]) / 10
+        self.totalwatthours = float((data[11] << 8) + data[12]) * 10
+        self.powerfactor = float(data[13]) / 100
+        self.frequency = float(data[14])
+        self.rssi_byte = data[15]
         self.rssi = self.rssi_byte >> 4
         self._set_strings()
 
