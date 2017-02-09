@@ -1907,10 +1907,10 @@ class Energy5(SensorPacket):
     def __str__(self):
         return ("Energy5 [subtype={0}, seqnbr={1}, id={2}, voltage={3}, " +
                 "current_amps={4}, current_watts={5}, total_watts={6}, " +
-                "powerfactor={7}, frequency={8}, rssi={9}]") \
+                "powerfactor={7}, frequency={8}, battery={9}, rssi={10}]") \
             .format(self.type_string, self.seqnbr, self.id_string, self.voltage,
                     self.currentamps, self.currentwatt, self.totalwatthours,
-                    self.powerfactor, self.frequency, self.rssi)
+                    self.powerfactor, self.frequency, self.battery, self.rssi)
 
 
     def __init__(self):
@@ -1924,6 +1924,7 @@ class Energy5(SensorPacket):
         self.totalwatthours = None
         self.powerfactor = None
         self.frequency = None
+        self.battery = None
         self.rssi = None
 
     def load_receive(self, data):
@@ -1942,6 +1943,7 @@ class Energy5(SensorPacket):
         self.powerfactor = float(data[13]) / 100
         self.frequency = float(data[14])
         self.rssi_byte = data[15]
+        self.battery = self.rssi_byte & 0x0f
         self.rssi = self.rssi_byte >> 4
         self._set_strings()
 
