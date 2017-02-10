@@ -66,3 +66,32 @@ class Elec4TestCase(TestCase):
         self.assertEquals(energy.currentamps2,514.1)
         self.assertEquals(energy.currentamps3,591.2)
         self.assertEquals(energy.totalwatthours,113527617921.3023)
+
+class Elec5TestCase(TestCase):
+
+    def setUp(self):
+
+        self.data = bytearray(b'\x0f\x5c\x01\x05'
+                              b'\x23\x95'
+                              b'\xbd'
+                              b'\x11\x12'
+                              b'\x14\x15'
+                              b'\x11\x12'
+                              b'\x00'
+                              b'\x32'
+                              b'\x80')
+        self.parser = RFXtrx.lowlevel.Energy5()
+
+    def test_parse_bytes(self):
+
+        energy = RFXtrx.lowlevel.parse(self.data)
+        self.assertEquals(energy.type_string,"ELEC5")
+        self.assertEquals(energy.seqnbr,5)
+        self.assertEquals(energy.id_string,"23:95")
+        self.assertEquals(energy.voltage,185)
+        self.assertEquals(energy.currentamps,437)
+        self.assertEquals(energy.currentwatt,514.1)
+        self.assertEquals(energy.totalwatthours,437)
+        self.assertEquals(energy.powerfactor,0)
+        self.assertEquals(energy.frequency,50)
+        
