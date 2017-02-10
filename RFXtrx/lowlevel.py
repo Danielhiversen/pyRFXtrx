@@ -1908,10 +1908,10 @@ class Energy5(SensorPacket):
         return ("Energy5 [subtype={0}, seqnbr={1}, id={2}, voltage={3}, " +
                 "current_amps={4}, current_watts={5}, total_watts={6}, " +
                 "powerfactor={7}, frequency={8}, rssi={9}]") \
-            .format(self.type_string, self.seqnbr, self.id_string, self.voltage,
-                    self.currentamps, self.currentwatt, self.totalwatthours,
-                    self.powerfactor, self.frequency, self.rssi)
-
+            .format(self.type_string, self.seqnbr, self.id_string,
+                    self.voltage, self.currentamps, self.currentwatt,
+                    self.totalwatthours, self.powerfactor, self.frequency,
+                    self.rssi)
 
     def __init__(self):
         """Constructor"""
