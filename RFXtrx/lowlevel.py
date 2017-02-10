@@ -1935,7 +1935,7 @@ class Energy5(SensorPacket):
         self.seqnbr = data[3]
         self.id1 = data[4]
         self.id2 = data[5]
-        self.voltage = data[6] 
+        self.voltage = data[6]
         self.currentamps = float((data[7] << 8) + data[8]) / 100
         self.currentwatt = float((data[9] << 8) + data[10]) / 10
         self.totalwatthours = float((data[11] << 8) + data[12]) * 10
