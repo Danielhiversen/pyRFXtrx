@@ -91,7 +91,7 @@ class Elec5TestCase(TestCase):
         self.assertEquals(energy.voltage,189)
         self.assertEquals(energy.currentamps,43.7)
         self.assertEquals(energy.currentwatt,514.1)
-        self.assertEquals(energy.totalwatthours,437)
+        self.assertEquals(energy.totalwatthours,43700)
         self.assertEquals(energy.powerfactor,0)
         self.assertEquals(energy.frequency,50)
         
