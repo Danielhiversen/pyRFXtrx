@@ -88,7 +88,7 @@ class Elec5TestCase(TestCase):
         self.assertEquals(energy.type_string,"ELEC5")
         self.assertEquals(energy.seqnbr,5)
         self.assertEquals(energy.id_string,"23:95")
-        self.assertEquals(energy.voltage,185)
+        self.assertEquals(energy.voltage,189)
         self.assertEquals(energy.currentamps,437)
         self.assertEquals(energy.currentwatt,514.1)
         self.assertEquals(energy.totalwatthours,437)
