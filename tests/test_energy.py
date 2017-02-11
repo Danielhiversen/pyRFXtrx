@@ -73,10 +73,10 @@ class Elec5TestCase(TestCase):
 
         self.data = bytearray(b'\x0f\x5c\x01\x05'
                               b'\x23\x95'
-                              b'\xbd'
-                              b'\x11\x12'
-                              b'\x14\x15'
-                              b'\x11\x12'
+                              b'\xb2'
+                              b'\x04\x48'
+                              b'\x20\xce'
+                              b'\x00\x76'
                               b'\x00'
                               b'\x32'
                               b'\x80')
@@ -88,10 +88,10 @@ class Elec5TestCase(TestCase):
         self.assertEquals(energy.type_string,"ELEC5")
         self.assertEquals(energy.seqnbr,5)
         self.assertEquals(energy.id_string,"23:95")
-        self.assertEquals(energy.voltage,189)
-        self.assertEquals(energy.currentamps,43.7)
-        self.assertEquals(energy.currentwatt,514.1)
-        self.assertEquals(energy.totalwatthours,43700)
+        self.assertEquals(energy.voltage,178)
+        self.assertEquals(energy.currentamps,10.96)
+        self.assertEquals(energy.currentwatt,839.8)
+        self.assertEquals(energy.totalwatthours,1180)
         self.assertEquals(energy.powerfactor,0)
         self.assertEquals(energy.frequency,50)
         
