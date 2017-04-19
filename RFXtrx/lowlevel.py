@@ -1108,7 +1108,7 @@ class Temp(SensorPacket):
         self.templow = data[7]
         self.temp = float(((self.temphigh & 0x7f) << 8) + self.templow) / 10
         if self.temphigh >= 0x80:
-            self.temp = -self.temp
+            self.temp = -1* self.temp
         self.rssi_byte = data[8]
         self.battery = self.rssi_byte & 0x0f
         self.rssi = self.rssi_byte >> 4
@@ -1306,7 +1306,7 @@ class TempHumid(SensorPacket):
         self.templow = data[7]
         self.temp = float(((self.temphigh & 0x7f) << 8) + self.templow) / 10
         if self.temphigh >= 0x80:
-            self.temp = -self.temp
+            self.temp = -1 * self.temp
         self.humidity = data[8]
         self.humidity_status = data[9]
         self.rssi_byte = data[10]
@@ -1508,7 +1508,7 @@ class TempHumidBaro(SensorPacket):
         self.templow = data[7]
         self.temp = float(((self.temphigh & 0x7f) << 8) + self.templow) / 10
         if self.temphigh >= 0x80:
-            self.temp = -self.temp
+            self.temp = -1 * self.temp
         self.humidity = data[8]
         self.humidity_status = data[9]
         self.baro1 = data[10]
@@ -1649,7 +1649,11 @@ class Wind(SensorPacket):
         self.average_speed = None
         self.gust = None
         self.temperature = None
+        self.temphigh = None
+        self.templow = None
         self.chill = None
+        self.chillhigh = None
+        self.chilllow = None
         self.battery = None
         self.rssi = None
 
@@ -1667,14 +1671,15 @@ class Wind(SensorPacket):
         self.gust = data[10] * 256.0 + data[11] / 10.0
         self.temphigh = data[12]
         self.templow = data[13]
-        self.temperature = float(((self.temphigh & 0x7f) << 8) + self.templow) / 10
+        self.temperature = float(((self.temphigh & 0x7f) << 8) + 
+                                 self.templow) / 10
         if self.temphigh >= 0x80:
-            self.temperature = -self.temperature
+            self.temperature = -1 * self.temperature
         self.chillhigh = data[14]
         self.chilllow = data[15]
         self.chill = float(((self.chillhigh & 0x7f) << 8) + self.chilllow) / 10
         if self.chillhigh >= 0x80:
-            self.chill = -self.chill
+            self.chill = -1 * self.chill
         if self.subtype == 0x03:
             self.battery = data[16] + 1 * 10
         else:
