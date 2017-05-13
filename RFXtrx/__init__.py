@@ -596,7 +596,7 @@ class PySerialTransport(RFXtrxTransport):
                 import time
                 try:
                     self.connect()
-                except:
+                except serial.serialutil.SerialException:
                     time.sleep(5)
             if not data or data == '\x00':
                 continue
