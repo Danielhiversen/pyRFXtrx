@@ -567,10 +567,16 @@ class PySerialTransport(RFXtrxTransport):
 
     def __init__(self, port, debug=False):
         self.debug = debug
+        self.port = port
+        self.serial = None
         self._run_event = threading.Event()
         self._run_event.set()
+        self.connect()
+        
+    def connect(self):
+        """ Open a serial connexion """
         try:
-            self.serial = serial.Serial(port, 38400, timeout=0.1)
+            self.serial = serial.Serial(self.port, 38400, timeout=0.1)
         except serial.serialutil.SerialException:
             import glob
             try:
@@ -586,6 +592,16 @@ class PySerialTransport(RFXtrxTransport):
                 data = self.serial.read()
             except TypeError:
                 continue
+            except serial.serialutil.SerialException:
+                if self.debug:
+                    print("ERROR: the serial port is not available anymore, try to reconnect")
+                import time
+                try:
+                    self.connect()
+                except:
+                    if self.debug:
+                        print("ERROR: reconnection failed, wait 5 seconds then retry")
+                    time.sleep(5)
             if not data or data == '\x00':
                 continue
             pkt = bytearray(data)
