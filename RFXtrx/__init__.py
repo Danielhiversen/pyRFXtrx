@@ -160,6 +160,19 @@ class RfyDevice(RFXtrxDevice):
         self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
         transport.send(pkt.data)
 
+    def send_program(self, transport):
+        """ Send a 'Program' command using the given transport """
+        pkt = lowlevel.Rfy()
+        pkt.set_transmit(
+            self.subtype,
+            self.cmndseqnbr,
+            self.id_combined,
+            self.unitcode,
+            0x07
+        )
+        self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
+        transport.send(pkt.data)
+
 
 class LightingDevice(RFXtrxDevice):
     """ Concrete class for a control device """
