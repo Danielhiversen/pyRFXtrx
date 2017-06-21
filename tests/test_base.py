@@ -186,7 +186,7 @@ class CoreTestCase(TestCase):
         bytes_array = [0x09, 0x57, 0x02, 0x02, 0x64, 0x00, 0x20, 0x02, 0x3c, 0x69]
         event = core.transport.parse(bytes_array)
         self.assertEquals(RFXtrx.SensorEvent, type(event))
-        self.assertEquals(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='UVN800' id='64:00'] values=[('Battery numeric', 9), ('Rssi numeric', 6), ('UV', 3)]")
+        self.assertEquals(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='UVN800' id='64:00'] values=[('Battery numeric', 9), ('Rssi numeric', 6), ('UV', 3.2)]")
 
         #Elec4
         bytes_array = [0x13, 0x5b, 0x01, 0x04, 0x2e, 0xB2, 0x01, 0x11, 0x12, 0x14, 0x15, 0x17, 0x18, 0x17, 0x18, 0x19, 0x20, 0x21, 0x22, 0x69]

@@ -1731,7 +1731,7 @@ class UV(SensorPacket):
         self.seqnbr = data[3]
         self.id1 = data[4]
         self.id2 = data[5]
-        self.uvi = data[6] / 10
+        self.uvi = float(data[6]) / 10
         self.rssi_byte = data[9]
         self.battery = self.rssi_byte & 0x0f
         self.rssi = self.rssi_byte >> 4
