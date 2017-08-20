@@ -626,7 +626,15 @@ class PySerialTransport(RFXtrxTransport):
         self.send(b'\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
         sleep(0.3)  # Should work with 0.05, but not for me
         self.serial.flushInput()
+
+        # Send Get Status
         self.send(b'\x0D\x00\x00\x01\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        self.receive_blocking()
+        
+        self.send(b'\x0D\x00\x00\x02\x03\x53\x1C\x08\x00\x04\x00\x00\x00\x00')
+        self.receive_blocking()
+	
+        self.send(b'\x0D\x00\x00\x03\x07\x00\x00\x00\x00\x00\x00\x00\x00\x00')
         return self.receive_blocking()
 
     def close(self):
