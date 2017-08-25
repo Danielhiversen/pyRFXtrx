@@ -683,7 +683,7 @@ class Connect(object):
         self._run_event = threading.Event()
         self._run_event.set()
         self._sensors = {}
-        self._event_callback = event_callback
+        self.event_callback = event_callback
 
         self.transport = transport_protocol(device, debug)
         self._thread = threading.Thread(target=self._connect)
@@ -696,8 +696,8 @@ class Connect(object):
         while self._run_event.is_set():
             event = self.transport.receive_blocking()
             if isinstance(event, RFXtrxEvent):
-                if self._event_callback:
-                    self._event_callback(event)
+                if self.event_callback:
+                    self.event_callback(event)
                 if isinstance(event, SensorEvent):
                     self._sensors[event.device.id_string] = event.device
 
