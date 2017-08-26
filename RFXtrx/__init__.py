@@ -175,6 +175,9 @@ class LightingDevice(RFXtrxDevice):
         if isinstance(pkt, lowlevel.Lighting3):
             self.system = pkt.system
             self.channel = pkt.channel
+        if isinstance(pkt, lowlevel.Lighting4):
+            self.cmd = pkt.cmd
+            self.pulse = pkt.pulse
         if isinstance(pkt, lowlevel.Lighting5):
             self.id_combined = pkt.id_combined
             self.unitcode = pkt.unitcode
@@ -200,6 +203,12 @@ class LightingDevice(RFXtrxDevice):
             pkt = lowlevel.Lighting3()
             pkt.set_transmit(self.subtype, 0, self.system, self.channel,
                              turn_on and 0x10 or 0x1a)
+            transport.send(pkt.data)
+        elif self.packettype == 0x13:  # Lighting4
+            pkt = lowlevel.Lighting4()
+            code = self.cmd & ~1
+            code |= 0x1 if turn_on else 0x0
+            pkt.set_transmit(self.subtype, 0, code, self.pulse)
             transport.send(pkt.data)
         elif self.packettype == 0x14:  # Lighting5
             pkt = lowlevel.Lighting5()
