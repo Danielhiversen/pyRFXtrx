@@ -164,6 +164,7 @@ class RfyDevice(RFXtrxDevice):
 class LightingDevice(RFXtrxDevice):
     """ Concrete class for a control device """
 
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, pkt):
         super(LightingDevice, self).__init__(pkt)
         if isinstance(pkt, lowlevel.Lighting1):
