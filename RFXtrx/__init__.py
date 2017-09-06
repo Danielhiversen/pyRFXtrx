@@ -629,13 +629,8 @@ class PySerialTransport(RFXtrxTransport):
 
         # Send Get Status
         self.send(b'\x0D\x00\x00\x01\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00')
-        self.receive_blocking()
-        
-        self.send(b'\x0D\x00\x00\x02\x03\x53\x1C\x08\x00\x04\x00\x00\x00\x00')
-        self.receive_blocking()
-	
-        self.send(b'\x0D\x00\x00\x03\x07\x00\x00\x00\x00\x00\x00\x00\x00\x00')
         return self.receive_blocking()
+
 
     def close(self):
         """ close connection to rfxtrx device """
@@ -687,10 +682,13 @@ class Connect(object):
     """
     #  pylint: disable=too-many-instance-attributes
     def __init__(self, device, event_callback=None, debug=False,
-                 transport_protocol=PySerialTransport):
+                 transport_protocol=PySerialTransport,
+                 modes=None):
         self._run_event = threading.Event()
         self._run_event.set()
         self._sensors = {}
+        self._status = None
+        self._modes = modes
         self._event_callback = event_callback
 
         self.transport = transport_protocol(device, debug)
@@ -700,7 +698,15 @@ class Connect(object):
 
     def _connect(self):
         """Connect """
-        self.transport.reset()
+        self._status = self.transport.reset()
+
+        print ("status: %s", self._status)
+
+        if self._modes is not None: 
+            self.set_recmodes(self._modes)
+
+        self.send_start()
+
         while self._run_event.is_set():
             event = self.transport.receive_blocking()
             if isinstance(event, RFXtrxEvent):
@@ -721,6 +727,30 @@ class Connect(object):
         self.transport.close()
         self._thread.join()
 
+    def set_recmodes(self, modenames):
+        """ Sets the device modes (which protocols to decode) """
+        data = bytearray([0x0D, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 
+                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
 
+        # Keep the values read during init.
+        data[5] = self._status.device.tranceiver_type
+        data[6] = self._status.device.output_power
+
+        # Build the mode data bytes from the mode names
+        for mode in modenames:
+            byteno, bitno = lowlevel.get_recmode_tuple(mode)
+            if byteno is None:
+                raise ValueError('Unknown mode name '+mode)
+
+            data[7 + byteno] |= 1 << bitno
+
+        self.transport.send(data)
+        return self.transport.receive_blocking()
+
+    def send_start(self):
+        """ Sends the Start RFXtrx transceiver command """
+        self.transport.send(b'\x0D\x00\x00\x03\x07\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        return self.transport.receive_blocking()
+    
 class Core(Connect):
     """ The main class for rfxcom-py. Has changed name to Connect """

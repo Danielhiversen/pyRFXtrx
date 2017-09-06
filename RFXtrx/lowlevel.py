@@ -151,17 +151,6 @@ class Packet(object):
 # Status class
 ###############################################################################
 
-def _decode_flags(data, words):
-    """Decode flags """
-    words = words.split()
-    res = set()
-    for word in words:
-        if data % 2:
-            res.add(word)
-        data //= 2
-    return res
-
-
 class Status(Packet):
     """
     Data class for the Status packet type
@@ -179,20 +168,69 @@ class Status(Packet):
         0x5A: '868.35MHz FSK',
         0x5B: '868.95MHz'
     }
+
+    """ 
+    Receiving modes names names. DO NOT alter their order.
+    """
+    RECMODES = [
+        [
+            "aeblyss",
+            "rubicson",
+            "fineoffset",
+            "lighting4",
+            "rsl",
+            "byronsx",
+            "imagintronix",
+            "undecoded"
+        ],
+        [
+            "mertik",
+            "adlightwave",
+            "hideki",
+            "lacrosse",
+            "fs20",
+            "proguard",
+            "blindst0",
+            "blindst1234"
+        ],
+        [ 
+            "x10",
+            "arc",
+            "ac",
+            "homeeasy",
+            "mediantech",
+            "oregon",
+            "ati",
+            "visonic"
+        ],
+        [
+            "keeloq",
+            "homeconfort"
+        ]
+    ]
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
 
     def __str__(self):
-        return ("Status [subtype={0}, firmware={1}, devices={2}]") \
-            .format(self.type_string, self.firmware_version, self.devices)
+        return ("Status [subtype={0}, firmware={1}, pow={2}, modes={3}]") \
+            .format(self.type_string, self.firmware_version, self.output_power, self.devices)
 
     def __init__(self):
         """Constructor"""
         super(Status, self).__init__()
         self.tranceiver_type = None
         self.firmware_version = None
+        self.output_power = None
         self.devices = None
+
+    def decode_recmodes(self, data, index):
+        res = set()
+        for i in range (0, len(self.RECMODES[index])-1):
+          if (data & (1 << i)) != 0:
+            res.add (self.RECMODES[index][i])
+        return res
+
 
     def load_receive(self, data):
         """Load data from a bytearray"""
@@ -202,16 +240,13 @@ class Status(Packet):
 
         self.tranceiver_type = data[5]
         self.firmware_version = data[6]
+        self.output_power = data[13]
 
         devs = set()
-        devs.update(_decode_flags(data[7] / 0x80,
-                                  'undecoded'))
-        devs.update(_decode_flags(data[8],
-                                  'mertik lightwarerf hideki' +
-                                  ' lacrosse fs20 proguard'))
-        devs.update(_decode_flags(data[9],
-                                  'x10 arc ac homeeasy ikeakoppla' +
-                                  ' oregon ati visonic'))
+        devs.update(self.decode_recmodes(data[7], 0))
+        devs.update(self.decode_recmodes(data[8], 1))
+        devs.update(self.decode_recmodes(data[9], 2))
+        devs.update(self.decode_recmodes(data[10], 3))
         self.devices = sorted(devs)
 
         self._set_strings()
@@ -224,6 +259,15 @@ class Status(Packet):
             # Degrade nicely for yet unknown subtypes
             self.type_string = 'Unknown'
 
+def get_recmode_tuple(mode_name):
+    """
+    Look for a receiving mode in the RECMODES lists from a name.
+    Return a tuple (listno, sublistno), or None if not found.
+    """
+    for i in range(0, len(Status.RECMODES)-1):
+        if mode_name in Status.RECMODES[i]:
+          return (i, Status.RECMODES[i].index(mode_name))
+    return (None, None)
 
 ###############################################################################
 # Lighting1 class

@@ -33,9 +33,9 @@ def main():
     else:
         rfxcom_device = '/dev/serial/by-id/usb-RFXCOM_RFXtrx433_A1Y0NJGR-if00-port0'
 
-    core = RFXtrx.Core(rfxcom_device, print_callback, debug=True)
+    core = RFXtrx.Core(rfxcom_device, print_callback, debug=True) #, modes=['lighting4', 'ac', 'oregon'])
 
-
+    print (core)
     while True:
         print(core.sensors())
         time.sleep(2)
