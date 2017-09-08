@@ -169,7 +169,7 @@ class Status(Packet):
         0x5B: '868.95MHz'
     }
 
-    """ 
+    """
     Receiving modes names. DO NOT alter their order.
     """
     RECMODES = [
@@ -193,7 +193,7 @@ class Status(Packet):
             "blindst0",
             "blindst1234"
         ],
-        [ 
+        [
             "x10",
             "arc",
             "ac",
@@ -227,11 +227,10 @@ class Status(Packet):
     def _decode_recmodes(self, data, index):
         res = set()
 
-        for i in range (0, len(self.RECMODES[index])):
-          if (data & (1 << i)) != 0:
-            res.add (self.RECMODES[index][i])
+        for i in range(0, len(self.RECMODES[index])):
+            if (data & (1 << i)) != 0:
+                res.add(self.RECMODES[index][i])
         return res
-
 
     def load_receive(self, data):
         """Load data from a bytearray"""
@@ -263,11 +262,12 @@ class Status(Packet):
 def get_recmode_tuple(mode_name):
     """
     Look for a receiving mode in the RECMODES lists from a name.
-    Return a tuple (listno, sublistno), or None if not found.
+    Return a tuple (listno, sublistno), or (None, None) if
+    not found.
     """
     for i in range(0, len(Status.RECMODES)):
         if mode_name in Status.RECMODES[i]:
-          return (i, Status.RECMODES[i].index(mode_name))
+            return (i, Status.RECMODES[i].index(mode_name))
     return (None, None)
 
 ###############################################################################

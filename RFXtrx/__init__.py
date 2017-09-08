@@ -627,7 +627,6 @@ class PySerialTransport(RFXtrxTransport):
         sleep(0.3)  # Should work with 0.05, but not for me
         self.serial.flushInput()
 
-
     def close(self):
         """ close connection to rfxtrx device """
         self._run_event.clear()
@@ -676,7 +675,7 @@ class Connect(object):
     """ The main class for rfxcom-py.
     Has methods for sensors.
     """
-    #  pylint: disable=too-many-instance-attributes
+    #  pylint: disable=too-many-instance-attributes, too-many-arguments
     def __init__(self, device, event_callback=None, debug=False,
                  transport_protocol=PySerialTransport,
                  modes=None):
@@ -698,12 +697,12 @@ class Connect(object):
         self.transport.reset()
         self._status = self.send_get_status()
 
-        if self._modes is not None: 
+        if self._modes is not None:
             self.set_recmodes(self._modes)
             self._status = self.send_get_status()
 
         if self._debug:
-            print ("RFXTRX: ", self._status.device)
+            print("RFXTRX: ", self._status.device)
 
         self.send_start()
 
@@ -729,7 +728,7 @@ class Connect(object):
 
     def set_recmodes(self, modenames):
         """ Sets the device modes (which protocols to decode) """
-        data = bytearray([0x0D, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 
+        data = bytearray([0x0D, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00,
                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
 
         # Keep the values read during init.
@@ -757,6 +756,5 @@ class Connect(object):
         self.transport.send(b'\x0D\x00\x00\x01\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00')
         return self.transport.receive_blocking()
 
-    
 class Core(Connect):
     """ The main class for rfxcom-py. Has changed name to Connect """
