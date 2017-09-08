@@ -164,6 +164,7 @@ class RfyDevice(RFXtrxDevice):
 class LightingDevice(RFXtrxDevice):
     """ Concrete class for a control device """
 
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, pkt):
         super(LightingDevice, self).__init__(pkt)
         if isinstance(pkt, lowlevel.Lighting1):
@@ -175,6 +176,9 @@ class LightingDevice(RFXtrxDevice):
         if isinstance(pkt, lowlevel.Lighting3):
             self.system = pkt.system
             self.channel = pkt.channel
+        if isinstance(pkt, lowlevel.Lighting4):
+            self.cmd = pkt.cmd
+            self.pulse = pkt.pulse
         if isinstance(pkt, lowlevel.Lighting5):
             self.id_combined = pkt.id_combined
             self.unitcode = pkt.unitcode
@@ -200,6 +204,12 @@ class LightingDevice(RFXtrxDevice):
             pkt = lowlevel.Lighting3()
             pkt.set_transmit(self.subtype, 0, self.system, self.channel,
                              turn_on and 0x10 or 0x1a)
+            transport.send(pkt.data)
+        elif self.packettype == 0x13:  # Lighting4
+            pkt = lowlevel.Lighting4()
+            code = self.cmd & ~1
+            code |= 0x1 if turn_on else 0x0
+            pkt.set_transmit(self.subtype, 0, code, self.pulse)
             transport.send(pkt.data)
         elif self.packettype == 0x14:  # Lighting5
             pkt = lowlevel.Lighting5()
@@ -685,7 +695,7 @@ class Connect(object):
         self._status = None
         self._modes = modes
         self._debug = debug
-        self._event_callback = event_callback
+        self.event_callback = event_callback
 
         self.transport = transport_protocol(device, debug)
         self._thread = threading.Thread(target=self._connect)
@@ -709,8 +719,8 @@ class Connect(object):
         while self._run_event.is_set():
             event = self.transport.receive_blocking()
             if isinstance(event, RFXtrxEvent):
-                if self._event_callback:
-                    self._event_callback(event)
+                if self.event_callback:
+                    self.event_callback(event)
                 if isinstance(event, SensorEvent):
                     self._sensors[event.device.id_string] = event.device
 
