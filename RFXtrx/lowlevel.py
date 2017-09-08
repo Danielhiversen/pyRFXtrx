@@ -170,7 +170,7 @@ class Status(Packet):
     }
 
     """ 
-    Receiving modes names names. DO NOT alter their order.
+    Receiving modes names. DO NOT alter their order.
     """
     RECMODES = [
         [
@@ -224,9 +224,10 @@ class Status(Packet):
         self.output_power = None
         self.devices = None
 
-    def decode_recmodes(self, data, index):
+    def _decode_recmodes(self, data, index):
         res = set()
-        for i in range (0, len(self.RECMODES[index])-1):
+
+        for i in range (0, len(self.RECMODES[index])):
           if (data & (1 << i)) != 0:
             res.add (self.RECMODES[index][i])
         return res
@@ -243,10 +244,10 @@ class Status(Packet):
         self.output_power = data[13]
 
         devs = set()
-        devs.update(self.decode_recmodes(data[7], 0))
-        devs.update(self.decode_recmodes(data[8], 1))
-        devs.update(self.decode_recmodes(data[9], 2))
-        devs.update(self.decode_recmodes(data[10], 3))
+        devs.update(self._decode_recmodes(data[7], 0))
+        devs.update(self._decode_recmodes(data[8], 1))
+        devs.update(self._decode_recmodes(data[9], 2))
+        devs.update(self._decode_recmodes(data[10], 3))
         self.devices = sorted(devs)
 
         self._set_strings()
@@ -264,7 +265,7 @@ def get_recmode_tuple(mode_name):
     Look for a receiving mode in the RECMODES lists from a name.
     Return a tuple (listno, sublistno), or None if not found.
     """
-    for i in range(0, len(Status.RECMODES)-1):
+    for i in range(0, len(Status.RECMODES)):
         if mode_name in Status.RECMODES[i]:
           return (i, Status.RECMODES[i].index(mode_name))
     return (None, None)

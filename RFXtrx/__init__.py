@@ -606,7 +606,7 @@ class PySerialTransport(RFXtrxTransport):
             data = self.serial.read(pkt[0])
             pkt.extend(bytearray(data))
             if self.debug:
-                print("Recv: " + " ".join("0x{0:02x}".format(x) for x in pkt))
+                print("RFXTRX: Recv: " + " ".join("0x{0:02x}".format(x) for x in pkt))
             return self.parse(pkt)
 
     def send(self, data):
@@ -618,7 +618,7 @@ class PySerialTransport(RFXtrxTransport):
         else:
             raise ValueError("Invalid type")
         if self.debug:
-            print("Send: " + " ".join("0x{0:02x}".format(x) for x in pkt))
+            print("RFXTRX: Send: " + " ".join("0x{0:02x}".format(x) for x in pkt))
         self.serial.write(pkt)
 
     def reset(self):
@@ -626,10 +626,6 @@ class PySerialTransport(RFXtrxTransport):
         self.send(b'\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
         sleep(0.3)  # Should work with 0.05, but not for me
         self.serial.flushInput()
-
-        # Send Get Status
-        self.send(b'\x0D\x00\x00\x01\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00')
-        return self.receive_blocking()
 
 
     def close(self):
@@ -651,7 +647,7 @@ class DummyTransport(RFXtrxTransport):
             return None
         pkt = bytearray(data)
         if self.debug:
-            print("Recv: " + " ".join("0x{0:02x}".format(x) for x in pkt))
+            print("RFXTRX: Recv: " + " ".join("0x{0:02x}".format(x) for x in pkt))
         return self.parse(pkt)
 
     def receive_blocking(self, data=None):
@@ -663,7 +659,7 @@ class DummyTransport(RFXtrxTransport):
             requested) """
         pkt = bytearray(data)
         if self.debug:
-            print("Send: " + " ".join("0x{0:02x}".format(x) for x in pkt))
+            print("RFXTRX: Send: " + " ".join("0x{0:02x}".format(x) for x in pkt))
 
 
 class DummyTransport2(PySerialTransport):
@@ -689,6 +685,7 @@ class Connect(object):
         self._sensors = {}
         self._status = None
         self._modes = modes
+        self._debug = debug
         self._event_callback = event_callback
 
         self.transport = transport_protocol(device, debug)
@@ -698,12 +695,15 @@ class Connect(object):
 
     def _connect(self):
         """Connect """
-        self._status = self.transport.reset()
-
-        print ("status: %s", self._status)
+        self.transport.reset()
+        self._status = self.send_get_status()
 
         if self._modes is not None: 
             self.set_recmodes(self._modes)
+            self._status = self.send_get_status()
+
+        if self._debug:
+            print ("RFXTRX: ", self._status.device)
 
         self.send_start()
 
@@ -751,6 +751,12 @@ class Connect(object):
         """ Sends the Start RFXtrx transceiver command """
         self.transport.send(b'\x0D\x00\x00\x03\x07\x00\x00\x00\x00\x00\x00\x00\x00\x00')
         return self.transport.receive_blocking()
+
+    def send_get_status(self):
+        """ Sends the Get Status command """
+        self.transport.send(b'\x0D\x00\x00\x01\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        return self.transport.receive_blocking()
+
     
 class Core(Connect):
     """ The main class for rfxcom-py. Has changed name to Connect """
