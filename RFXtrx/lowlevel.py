@@ -198,7 +198,7 @@ class Status(Packet):
             "arc",
             "ac",
             "homeeasy",
-            "mediantech",
+            "meiantech",
             "oregon",
             "ati",
             "visonic"
@@ -213,7 +213,7 @@ class Status(Packet):
     """
 
     def __str__(self):
-        return ("Status [subtype={0}, firmware={1}, pow={2}, modes={3}]") \
+        return ("Status [subtype={0}, firmware={1}, output_power={2}, modes={3}]") \
             .format(self.type_string, self.firmware_version, self.output_power, self.devices)
 
     def __init__(self):
