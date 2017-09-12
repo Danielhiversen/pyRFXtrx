@@ -772,5 +772,6 @@ class Connect(object):
                             b'\x00\x00\x00\x00\x00\x00\x00')
         return self.transport.receive_blocking()
 
+
 class Core(Connect):
     """ The main class for rfxcom-py. Has changed name to Connect """
