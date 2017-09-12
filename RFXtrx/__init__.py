@@ -7,7 +7,7 @@
 # pyRFXtrx is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version. 
+# (at your option) any later version.
 #
 # pyRFXtrx is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -616,7 +616,8 @@ class PySerialTransport(RFXtrxTransport):
             data = self.serial.read(pkt[0])
             pkt.extend(bytearray(data))
             if self.debug:
-                print("RFXTRX: Recv: " + " ".join("0x{0:02x}".format(x) for x in pkt))
+                print("RFXTRX: Recv: " +
+                      " ".join("0x{0:02x}".format(x) for x in pkt))
             return self.parse(pkt)
 
     def send(self, data):
@@ -628,7 +629,8 @@ class PySerialTransport(RFXtrxTransport):
         else:
             raise ValueError("Invalid type")
         if self.debug:
-            print("RFXTRX: Send: " + " ".join("0x{0:02x}".format(x) for x in pkt))
+            print("RFXTRX: Send: " +
+                  " ".join("0x{0:02x}".format(x) for x in pkt))
         self.serial.write(pkt)
 
     def reset(self):
@@ -656,7 +658,8 @@ class DummyTransport(RFXtrxTransport):
             return None
         pkt = bytearray(data)
         if self.debug:
-            print("RFXTRX: Recv: " + " ".join("0x{0:02x}".format(x) for x in pkt))
+            print("RFXTRX: Recv: " +
+                  " ".join("0x{0:02x}".format(x) for x in pkt))
         return self.parse(pkt)
 
     def receive_blocking(self, data=None):
@@ -668,7 +671,8 @@ class DummyTransport(RFXtrxTransport):
             requested) """
         pkt = bytearray(data)
         if self.debug:
-            print("RFXTRX: Send: " + " ".join("0x{0:02x}".format(x) for x in pkt))
+            print("RFXTRX: Send: " +
+                  " ".join("0x{0:02x}".format(x) for x in pkt))
 
 
 class DummyTransport2(PySerialTransport):
@@ -758,12 +762,14 @@ class Connect(object):
 
     def send_start(self):
         """ Sends the Start RFXtrx transceiver command """
-        self.transport.send(b'\x0D\x00\x00\x03\x07\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        self.transport.send(b'\x0D\x00\x00\x03\x07\x00\x00' +
+                            b'\x00\x00\x00\x00\x00\x00\x00')
         return self.transport.receive_blocking()
 
     def send_get_status(self):
         """ Sends the Get Status command """
-        self.transport.send(b'\x0D\x00\x00\x01\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        self.transport.send(b'\x0D\x00\x00\x01\x02\x00\x00' +
+                            b'\x00\x00\x00\x00\x00\x00\x00')
         return self.transport.receive_blocking()
 
 class Core(Connect):
