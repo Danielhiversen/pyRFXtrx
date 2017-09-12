@@ -213,8 +213,11 @@ class Status(Packet):
     """
 
     def __str__(self):
-        return ("Status [subtype={0}, firmware={1}, output_power={2}, modes={3}]") \
-            .format(self.type_string, self.firmware_version, self.output_power, self.devices)
+        return ("Status [subtype={0}, firmware={1}, output_power={2}, "
+                "modes={3}]").format(self.type_string, 
+                                     self.firmware_version, 
+                                     self.output_power, 
+                                     self.devices)
 
     def __init__(self):
         """Constructor"""
@@ -259,6 +262,7 @@ class Status(Packet):
             # Degrade nicely for yet unknown subtypes
             self.type_string = 'Unknown'
 
+
 def get_recmode_tuple(mode_name):
     """
     Look for a receiving mode in the RECMODES lists from a name.
@@ -269,6 +273,7 @@ def get_recmode_tuple(mode_name):
         if mode_name in Status.RECMODES[i]:
             return (i, Status.RECMODES[i].index(mode_name))
     return (None, None)
+
 
 ###############################################################################
 # Lighting1 class
@@ -766,7 +771,6 @@ class Lighting4(Packet):
 ###############################################################################
 # Lighting5 class
 ###############################################################################
-
 
 class Lighting5(Packet):
     """
