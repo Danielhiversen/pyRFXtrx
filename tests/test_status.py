@@ -14,7 +14,7 @@ class StatusTestCase(TestCase):
     def test_parse_bytes(self):
         status = RFXtrx.lowlevel.parse(self.data)
         self.assertEquals(RFXtrx.lowlevel.Status, type(status))
-        self.assertEquals(status.devices, ['ac', 'arc', 'hideki', 'homeeasy', 'lacrosse', 'keeloq', 'oregon', 'x10'])
+        self.assertEquals(status.devices, ['ac', 'arc', 'hideki', 'homeeasy', 'keeloq', 'lacrosse', 'oregon', 'x10'])
         self.assertEquals(status.type_string,'433.92MHz')
         self.assertEquals(status.firmware_version,69)
         self.assertEquals(status.output_power,0)
