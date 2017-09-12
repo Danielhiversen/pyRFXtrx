@@ -762,13 +762,13 @@ class Connect(object):
 
     def send_start(self):
         """ Sends the Start RFXtrx transceiver command """
-        self.transport.send(b'\x0D\x00\x00\x03\x07\x00\x00' +
+        self.transport.send(b'\x0D\x00\x00\x03\x07\x00\x00'
                             b'\x00\x00\x00\x00\x00\x00\x00')
         return self.transport.receive_blocking()
 
     def send_get_status(self):
         """ Sends the Get Status command """
-        self.transport.send(b'\x0D\x00\x00\x01\x02\x00\x00' +
+        self.transport.send(b'\x0D\x00\x00\x01\x02\x00\x00'
                             b'\x00\x00\x00\x00\x00\x00\x00')
         return self.transport.receive_blocking()
 
