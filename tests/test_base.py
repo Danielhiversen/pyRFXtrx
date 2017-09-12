@@ -285,7 +285,7 @@ class CoreTestCase(TestCase):
         light2 = RFXtrx.lowlevel.parse(data2)
 
         data3 = bytearray(b'\x0A\x52\x02\x11\x70\x02\x00\xA7'
-                         b'\x2D\x00\x89')
+                          b'\x2D\x00\x89')
         temphum = RFXtrx.lowlevel.parse(data3)
 
         self.assertTrue(light==light2)
@@ -375,9 +375,14 @@ class CoreTestCase(TestCase):
         self.assertEquals(event.__str__(),"<class 'RFXtrx.ControlEvent'> device=[<class 'RFXtrx.LightingDevice'> type='X10 lighting' id='E5'] values=[('Command', 'On'), ('Rssi numeric', 7)]")
 
         #status
-        bytes_array = bytearray(b'\x0D\x01\x00\x01\x02\x53\x45\x00\x0C'
-                                b'\x2F\x01\x01\x00\x00')
+        bytes_array = bytearray(b'\x0D\x01\x00\x01\x02\x53\x45'
+                                b'\x10' # msg3: rsl
+                                b'\x0C' # msg4: hideki lacrosse
+                                b'\x2F' # msg5: x10 arc ac homeeasy oregon
+                                b'\x01' # msg6: keeloq
+                                b'\x01\x00\x00' # unused
+                               )
         event= core.transport.receive(bytes_array)
         self.assertEquals(RFXtrx.StatusEvent, type(event))
-        self.assertEquals(event.__str__(),"<class 'RFXtrx.StatusEvent'> device=[Status [subtype=433.92MHz, firmware=69, devices=['ac', 'arc', 'hideki', 'homeeasy', 'lacrosse', 'oregon', 'x10']]]")
+        self.assertEquals(event.__str__(),"<class 'RFXtrx.StatusEvent'> device=[Status [subtype=433.92MHz, firmware=69, output_power=0, devices=['ac', 'arc', 'hideki', 'homeeasy', 'lacrosse', 'keeloq', 'oregon', 'rsl', 'x10']]]")
         core.close_connection()

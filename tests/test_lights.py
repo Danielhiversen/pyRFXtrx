@@ -16,7 +16,8 @@ class TestRFXTRlowlevel(unittest.TestCase):
         x.load_receive(bytearray([0x0d, 0x01, 0x00, 0x01, 0x02, 0x53, 0x3e, 0x00, 0x0c, 0x2f, 0x01, 0x01, 0x00, 0x00]))
         self.assertEqual(x.type_string, "433.92MHz")
         self.assertEqual(x.firmware_version, 62)
-        self.assertEqual(x.devices, ['ac', 'arc', 'hideki', 'homeeasy', 'lacrosse', 'oregon', 'x10'])
+        self.assertEqual(x.output_power, 0)
+        self.assertEqual(x.devices, ['ac', 'arc', 'hideki', 'homeeasy', 'keeloq', 'lacrosse', 'oregon', 'x10'])
 
         self.assertEqual(list(x.data), [13, 1, 0, 1, 2, 83, 62, 0, 12, 47, 1, 1, 0, 0])
         self.assertEqual(x.packetlength, 13)
