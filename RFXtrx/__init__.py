@@ -500,13 +500,13 @@ class _dummySerial(object):
     def __init__(self, *args, **kwargs):
         self._read_num = 0
         self._data = {}
-        self._data[0] = [0x0D, 0x01, 0x00, 0x01, 0x02, 0x53, 0x45, # status
-                         0x10, # msg3: rsl
-                         0x0C, # msg4: hideki lacrosse
-                         0x2F, # msg5: x10 arc ac homeeasy oregon
-                         0x01, # msg6: keeloq
+        self._data[0] = [0x0D, 0x01, 0x00, 0x01, 0x02, 0x53, 0x45,  # status
+                         0x10,  # msg3: rsl
+                         0x0C,  # msg4: hideki lacrosse
+                         0x2F,  # msg5: x10 arc ac homeeasy oregon
+                         0x01,  # msg6: keeloq
                          0x01, 0x00, 0x00]
-        self._data[1] = [0x00, 0x00, 0x00, 0x00, 0x00, # response to start
+        self._data[1] = [0x00, 0x00, 0x00, 0x00, 0x00,  # response to start
                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
         self._data[2] = [0x0b, 0x15, 0x00, 0x2a, 0x12,
                          0x34, 0x41, 0x05, 0x03, 0x01, 0x00, 0x70]  # light
@@ -691,6 +691,7 @@ class DummyTransport2(PySerialTransport):
         self.debug = debug
         self._run_event = threading.Event()
         self._run_event.set()
+
 
 class Connect(object):
     """ The main class for rfxcom-py.
