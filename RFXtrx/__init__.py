@@ -766,6 +766,7 @@ class Connect(object):
             data[7 + byteno] |= 1 << bitno
 
         self.transport.send(data)
+        self._modes = modenames
         return self.transport.receive_blocking()
 
     def send_start(self):
