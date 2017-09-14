@@ -345,6 +345,12 @@ class CoreTestCase(TestCase):
         device = RFXtrx.get_device(event.device.packettype, event.device.subtype, event.device.id_string)
         self.assertTrue(device==event.device)
 
+        # Lighting4
+        bytes_array = [0x09, 0x13, 0x00, 0x2a, 0x12, 0x34, 0x56, 0x01, 0x5e, 0x70]
+        event = core.transport.parse(bytes_array)
+        device = RFXtrx.get_device(event.device.packettype, event.device.subtype, event.device.id_string)
+        self.assertTrue(device==event.device)
+
         # Lighting5
         bytes_array = bytearray(b'\x0A\x14\x00\xAD\xF3\x94\xAB'
                               b'\x01\x01\x00\x60')
@@ -364,6 +370,14 @@ class CoreTestCase(TestCase):
         event = core.transport.parse(bytes_array)
         self.assertRaises(ValueError, RFXtrx.get_device,event.device.packettype, event.device.subtype, event.device.id_string)
         core.close_connection()
+
+    def test_set_recmodes(self):
+        my_modes = ['arc', 'oregon', 'x10']
+        core = RFXtrx.Connect(self.path, event_callback=_callback, debug=False, 
+                              transport_protocol=RFXtrx.DummyTransport, modes=my_modes)
+        self.assertEquals(core._modes, my_modes)
+        with self.assertRaises(ValueError):
+          core.set_recmodes(['arc', 'oregon', 'unknown-mode'])
 
     def test_receive(self):
         core = RFXtrx.Connect(self.path, event_callback=_callback, debug=False, transport_protocol=RFXtrx.DummyTransport)
