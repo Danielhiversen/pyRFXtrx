@@ -377,14 +377,14 @@ class CoreTestCase(TestCase):
         self.assertEquals(None, core._modes)
 
         modes = ['ac', 'arc', 'hideki', 'homeeasy', 'keeloq', 'lacrosse', 'oregon', 'rsl', 'x10']
-        bytes = bytearray(b'\x0D\x01\x00\x01\x02\x53\x45'
+        bytes_array = bytearray(b'\x0D\x01\x00\x01\x02\x53\x45'
                           b'\x10' # msg3: rsl
                           b'\x0C' # msg4: hideki lacrosse
                           b'\x2F' # msg5: x10 arc ac homeeasy oregon
                           b'\x01' # msg6: keeloq
                           b'\x01\x00\x00' # unused
                          )
-        core._status = RFXtrxTransport.parse(bytes)
+        core._status = core.transport.receive(bytes_array)
         core.set_recmodes(modes)
         self.assertEquals(modes, core._modes)
 
