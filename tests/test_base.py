@@ -372,13 +372,22 @@ class CoreTestCase(TestCase):
         core.close_connection()
 
     def test_set_recmodes(self):
-        my_modes = ['arc', 'oregon', 'x10']
         core = RFXtrx.Connect(self.path, event_callback=_callback, debug=False, 
-                              transport_protocol=RFXtrx.DummyTransport2)
+                              transport_protocol=RFXtrx.DummyTransport)
         self.assertEquals(None, core._modes)
-        # set modes
-        core.set_recmodes(my_modes)
-        self.assertEquals(my_modes, core._modes)
+
+        modes = ['ac', 'arc', 'hideki', 'homeeasy', 'keeloq', 'lacrosse', 'oregon', 'rsl', 'x10']
+        bytes = bytearray(b'\x0D\x01\x00\x01\x02\x53\x45'
+                          b'\x10' # msg3: rsl
+                          b'\x0C' # msg4: hideki lacrosse
+                          b'\x2F' # msg5: x10 arc ac homeeasy oregon
+                          b'\x01' # msg6: keeloq
+                          b'\x01\x00\x00' # unused
+                         )
+        core._status = RFXtrxTransport.parse(bytes)
+        core.set_recmodes(modes)
+        self.assertEquals(modes, core._modes)
+
         # set an unknown mode
         with self.assertRaises(ValueError):
           core.set_recmodes(['arc', 'oregon', 'unknown-mode'])
