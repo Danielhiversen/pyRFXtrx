@@ -28,10 +28,10 @@ Status
 >>> 
 >>> x = lowlevel.Status()
 >>> print(x)
-Status [subtype=None, firmware=None, devices=None]
+Status [subtype=None, firmware=None, output_power=None, devices=None]
 >>> x.load_receive(bytearray([0x0d, 0x01, 0x00, 0x01, 0x02, 0x53, 0x3e, 0x00, 0x0c, 0x2f, 0x01, 0x01, 0x00, 0x00]))
 >>> print(x)
-Status [subtype=433.92MHz, firmware=62, devices=['ac', 'arc', 'hideki', 'homeeasy', 'lacrosse', 'oregon', 'x10']]
+Status [subtype=433.92MHz, firmware=62, output_power=0, devices=['ac', 'arc', 'hideki', 'homeeasy', 'keeloq', 'lacrosse', 'oregon', 'x10']]
 >>> 
 >>> print(list(x.data))
 [13, 1, 0, 1, 2, 83, 62, 0, 12, 47, 1, 1, 0, 0]
@@ -43,10 +43,12 @@ Status [subtype=433.92MHz, firmware=62, devices=['ac', 'arc', 'hideki', 'homeeas
 83
 >>> print(x.firmware_version)
 62
+>>> print(x.output_power)
+0
 >>> print(x.type_string)
 433.92MHz
 >>> print(x.devices)
-['ac', 'arc', 'hideki', 'homeeasy', 'lacrosse', 'oregon', 'x10']
+['ac', 'arc', 'hideki', 'homeeasy', 'keeloq', 'lacrosse', 'oregon', 'x10']
 
 
 Lighting1
