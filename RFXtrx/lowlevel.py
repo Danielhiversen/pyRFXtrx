@@ -22,7 +22,7 @@ This module provides low level packet parsing and generation code for the
 RFXtrx.
 """
 # pylint: disable=C0302,R0902,R0903,R0911,R0913
-# pylint: disable= too-many-lines, too-many-statements, E722
+# pylint: disable= too-many-lines, too-many-statements
 
 
 def parse(data):
@@ -354,7 +354,7 @@ class Lighting1(Packet):
                     self.housecode = hcode_num
             self.unitcode = int(id_string[1:])
             self._set_strings()
-        except:
+        except ValueError:
             raise ValueError("Invalid id_string")
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
@@ -473,7 +473,7 @@ class Lighting2(Packet):
             self.id4 = self.id_combined & 0xff
             self.unitcode = int(id_string[8:])
             self._set_strings()
-        except:
+        except ValueError:
             raise ValueError("Invalid id_string")
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
@@ -596,7 +596,7 @@ class Lighting3(Packet):
             self.channel1 = self.channel & 0xff
             self.channel2 = self.channel >> 8
             self._set_strings()
-        except:
+        except ValueError:
             raise ValueError("Invalid id_string")
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
@@ -708,7 +708,7 @@ class Lighting4(Packet):
             self.cmd2 = (self.cmd >> 8) & 0xff
             self.cmd3 = self.cmd & 0xff
             self._set_strings()
-        except:
+        except ValueError:
             raise ValueError("Invalid id_string")
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
@@ -882,7 +882,7 @@ class Lighting5(Packet):
             self.id3 = self.id_combined & 0xff
             self.unitcode = int(id_string[7:])
             self._set_strings()
-        except:
+        except ValueError:
             raise ValueError("Invalid id_string")
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
@@ -1009,7 +1009,7 @@ class Lighting6(Packet):
             self.groupcode = ord(id_string[5])
             self.unitcode = int(id_string[6:])
             self._set_strings()
-        except:
+        except ValueError:
             raise ValueError("Invalid id_string")
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
@@ -2284,7 +2284,7 @@ class Rfy(Packet):
             self.id3 = self.id_combined & 0xff
             self.unitcode = int(id_string[7:])
             self._set_strings()
-        except:
+        except ValueError:
             raise ValueError("Invalid id_string")
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
@@ -2400,7 +2400,7 @@ class RollerTrol(Packet):
             self.id3 = self.id_combined & 0xff
             self.unitcode = int(id_string[7:])
             self._set_strings()
-        except:
+        except ValueError:
             raise ValueError("Invalid id_string")
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
