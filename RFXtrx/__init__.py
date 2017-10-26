@@ -20,7 +20,7 @@
 """
 This module provides the base implementation for pyRFXtrx
 """
-# pylint: disable=R0903
+# pylint: disable=R0903, E722
 from __future__ import print_function
 
 from time import sleep
