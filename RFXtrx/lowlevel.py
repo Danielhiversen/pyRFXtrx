@@ -22,7 +22,7 @@ This module provides low level packet parsing and generation code for the
 RFXtrx.
 """
 # pylint: disable=C0302,R0902,R0903,R0911,R0913
-# pylint: disable= too-many-lines, too-many-statements
+# pylint: disable= too-many-lines, too-many-statements, E722
 
 
 def parse(data):
