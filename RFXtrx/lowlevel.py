@@ -1670,7 +1670,7 @@ class TempRain(SensorPacket):
     Data class for the TempRain packet type
     """
 
-    TYPES = {0x01: 'TR1 - WS1200' }
+    TYPES = {0x01: 'TR1 - WS1200'}
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
@@ -1689,8 +1689,8 @@ class TempRain(SensorPacket):
         self.id2 = None
         self.temphigh = None
         self.templow = None
-        self.temp = None        
-        self.raintotal = None        
+        self.temp = None
+        self.raintotal = None
         self.battery = None
 
     def load_receive(self, data):
@@ -1707,7 +1707,7 @@ class TempRain(SensorPacket):
         self.temp = float(((self.temphigh & 0x7f) << 8) + self.templow) / 10
         if self.temphigh >= 0x80:
             self.temp = -1 * self.temp
-        self.raintotal = float(((data[8] & 0x7f) << 8) + data[9]) / 10        
+        self.raintotal = float(((data[8] & 0x7f) << 8) + data[9]) / 10
         self.rssi_byte = data[10]
         self.battery = self.rssi_byte & 0x0f
         self.rssi = self.rssi_byte >> 4
