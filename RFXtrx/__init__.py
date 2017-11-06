@@ -372,7 +372,7 @@ class SensorEvent(RFXtrxEvent):
         if isinstance(pkt, lowlevel.RfxMeter):
             self.values['Counter value'] = pkt.value
         if isinstance(pkt, (lowlevel.Temp, lowlevel.TempHumid,
-                            lowlevel.TempHumidBaro)):
+                            lowlevel.TempHumidBaro, lowlevel.TempRain)):
             self.values['Temperature'] = pkt.temp
         if isinstance(pkt, lowlevel.Bbq):
             self.values['Temperature'] = pkt.temp1
@@ -388,6 +388,8 @@ class SensorEvent(RFXtrxEvent):
             self.values['Forecast numeric'] = pkt.forecast
         if isinstance(pkt, lowlevel.Rain):
             self.values['Rain rate'] = pkt.rainrate
+            self.values['Rain total'] = pkt.raintotal
+        if isinstance(pkt, lowlevel.TempRain):
             self.values['Rain total'] = pkt.raintotal
         if isinstance(pkt, lowlevel.Wind):
             self.values['Wind direction'] = pkt.direction

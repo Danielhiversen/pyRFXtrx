@@ -270,6 +270,13 @@ class CoreTestCase(TestCase):
         event = core.transport.parse(bytes_array)
         self.assertEquals(None, event)
 
+        #temprain
+        bytes_array = [0x0a, 0x4f, 0x01, 0x06, 0xee, 0x09, 0x00, 0x65, 0x00, 0x03, 0x69]
+        event = core.transport.parse(bytes_array)
+        self.assertEquals(RFXtrx.SensorEvent, type(event))
+        self.assertEquals(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='TR1 - WS1200' id='ee:09'] values=[('Battery numeric', 9), ('Rain total', 0.3), ('Rssi numeric', 6), ('Temperature', 10.1)]")
+       
+
         core.close_connection()
 
 

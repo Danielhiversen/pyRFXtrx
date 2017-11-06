@@ -62,6 +62,8 @@ def parse(data):
         pkt = Temp()
     elif data[1] == 0x4E:
         pkt = Bbq()
+    elif data[1] == 0x4F:
+        pkt = TempRain()
     elif data[1] == 0x51:
         pkt = Humid()
     elif data[1] == 0x52:
@@ -1644,6 +1646,69 @@ class Rain(SensorPacket):
                                (self.raintotal2 << 8) +
                                self.raintotal3) / 10
         self.rssi_byte = data[11]
+        self.battery = self.rssi_byte & 0x0f
+        self.rssi = self.rssi_byte >> 4
+        self._set_strings()
+
+    def _set_strings(self):
+        """Translate loaded numeric values into convenience strings"""
+        self.id_string = "{0:02x}:{1:02x}".format(self.id1, self.id2)
+        if self.subtype in self.TYPES:
+            self.type_string = self.TYPES[self.subtype]
+        else:
+            # Degrade nicely for yet unknown subtypes
+            self.type_string = self._UNKNOWN_TYPE.format(self.packettype,
+                                                         self.subtype)
+
+
+###############################################################################
+# TempRain class
+###############################################################################
+
+class TempRain(SensorPacket):
+    """
+    Data class for the TempRain packet type
+    """
+
+    TYPES = {0x01: 'TR1 - WS1200' }
+    """
+    Mapping of numeric subtype values to strings, used in type_string
+    """
+
+    def __str__(self):
+        return ("TempRain [subtype={0}, seqnbr={1}, id={2}, temp={3}, " +
+                "totalrain={4}, battery={5}, rssi={6}]") \
+            .format(self.type_string, self.seqnbr, self.id_string,
+                    self.temp, self.totalrain,
+                    self.battery, self.rssi)
+
+    def __init__(self):
+        """Constructor"""
+        super(TempRain, self).__init__()
+        self.id1 = None
+        self.id2 = None
+        self.temphigh = None
+        self.templow = None
+        self.temp = None        
+        self.raintotal = None        
+        self.battery = None
+
+    def load_receive(self, data):
+        """Load data from a bytearray"""
+        self.data = data
+        self.packetlength = data[0]
+        self.packettype = data[1]
+        self.subtype = data[2]
+        self.seqnbr = data[3]
+        self.id1 = data[4]
+        self.id2 = data[5]
+        self.temphigh = data[6]
+        self.templow = data[7]
+        self.temp = float(((self.temphigh & 0x7f) << 8) + self.templow) / 10
+        if self.temphigh >= 0x80:
+            self.temp = -1 * self.temp
+        self.raintotal = float(((data[8] & 0x7f) << 8) + data[9]) / 10        
+        self.rssi_byte = data[10]
         self.battery = self.rssi_byte & 0x0f
         self.rssi = self.rssi_byte >> 4
         self._set_strings()
