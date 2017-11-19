@@ -168,7 +168,10 @@ class Status(Packet):
         0x58: '868.30MHz FSK',
         0x59: '868.35MHz',
         0x5A: '868.35MHz FSK',
-        0x5B: '868.95MHz'
+        0x5B: '868.95MHz',
+        0x5C: '868.30MHz FSK PKT',
+        0x5D: '868.35MHz FSK PKT',
+        0x5E: '868.40MHz FSK PKT'
     }
 
     """
@@ -294,7 +297,10 @@ class Lighting1(Packet):
              0x05: 'IMPULS',
              0x06: 'RisingSun',
              0x07: 'Philips SBC',
-             0x08: 'Energenie'}
+             0x08: 'Energenie',
+             0x09: 'Energenie5',
+             0x0A: 'GDR2',
+             0x0B: 'HQ'}
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
@@ -418,7 +424,8 @@ class Lighting2(Packet):
 
     TYPES = {0x00: 'AC',
              0x01: 'HomeEasy EU',
-             0x02: 'ANSLUT'}
+             0x02: 'ANSLUT',
+             0x03: 'Kambrook'}
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
@@ -784,7 +791,19 @@ class Lighting5(Packet):
              0x02: 'BBSB new types',
              0x03: 'MDREMOTE LED dimmer',
              0x04: 'Conrad RSL2',
-             0x0f: 'ProMax/IT'}
+             0x05: 'Livolo',
+             0x06: 'TRC02',
+             0x07: 'Aoke',
+             0x08: 'TRC02_2',
+             0x09: 'Eurodomest',
+             0x0A: 'Livolo appliance',
+             0x0B: 'RGB432W',
+             0x0C: 'MDREMOTE 107',
+             0x0D: 'Legrand CAD',
+             0x0E: 'Avantek',
+             0x0F: 'ProMax/IT',
+             0x10: 'MDREMOTE 108',
+             0x11: 'Kangtai'}
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
@@ -1123,7 +1142,8 @@ class Temp(SensorPacket):
              0x07: 'Viking 02811',
              0x08: 'La Crosse WS2300',
              0x09: 'RUBiCSON',
-             0x0a: 'TFA 30.3133'}
+             0x0A: 'TFA 30.3133',
+             0x0B: 'WT0122'}
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
@@ -1245,7 +1265,8 @@ class Humid(SensorPacket):
     """
 
     TYPES = {0x01: 'LaCrosse TX3',
-             0x02: 'LaCrosse WS2300'}
+             0x02: 'LaCrosse WS2300',
+             0x03: 'Inovalley S80'}
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
@@ -1317,7 +1338,11 @@ class TempHumid(SensorPacket):
              0x07: 'TFA TS34C, Cresta',
              0x08: 'WT260,WT260H,WT440H,WT450,WT450H',
              0x09: 'Viking 02035,02038',
-             0x0a: 'Rubicson'}
+             0x0A: 'Rubicson',
+             0x0B: 'EW109',
+             0x0C: 'Imagintronix',
+             0x0D: 'Alecto WS1700',
+             0x0E: 'Alecto'}
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
@@ -1453,7 +1478,16 @@ class RfxMeter(SensorPacket):
     Data class for the RFXMeter packet type
     """
 
-    TYPES = {0x00: 'RFXMeter Data Packet'}
+    TYPES = {0x00: 'RFXMeter Count',
+             0x01: 'RFXMeter Interval',
+             0x02: 'RFXMeter Calibration',
+             0x03: 'RFXMeter Address',
+             0x04: 'RFXMeter Counter reset',
+             0x0B: 'RFXMeter Counter set',
+             0x0C: 'RFXMeter Set interval',
+             0x0D: 'RFXMeter Set calibration',
+             0x0E: 'RFXMeter Set Address',
+             0x0F: 'RFXMeter Ident'}
 
     """
     Mapping of numeric subtype values to strings, used in type_string
@@ -1598,12 +1632,13 @@ class Rain(SensorPacket):
     Data class for the rain packet type
     """
     TYPES = {
-        0x01: "RGR126/682/918",
-        0x02: "PCR800",
-        0x03: "TFA",
-        0x04: "UPM RG700",
-        0x05: "WS2300",
-        0x06: "La Crosse TX5"}
+        0x01: 'RGR126/682/918',
+        0x02: 'PCR800',
+        0x03: 'TFA',
+        0x04: 'UPM RG700',
+        0x05: 'WS2300',
+        0x06: 'La Crosse TX5',
+        0x07: 'Alecto'}
 
     def __str__(self):
         return ("Rain [subtype={0}, seqnbr={1}, id={2}, rainrate={3}, " +
@@ -1739,7 +1774,8 @@ class Wind(SensorPacket):
              0x03: 'STR918, WGR918, WGR928',
              0x04: 'TFA',
              0x05: 'UPM WDS500',
-             0x06: 'WS2300'}
+             0x06: 'WS2300',
+             0x07: 'Alecto WS4500'}
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
@@ -1819,8 +1855,9 @@ class UV(SensorPacket):
     """
     Data class for the uv packet type
     """
-    TYPES = {
-        0x02: "UVN800"}
+    TYPES = {0x01: 'UVN128, UV138',
+             0x02: 'UVN800',
+             0x03: 'TFA'}
 
     def __str__(self):
         return ("UV [subtype={0}, seqnbr={1}, id={2}, uv={3}," +
@@ -1872,7 +1909,7 @@ class Energy1(SensorPacket):
     Data class for the Energy "ELEC1" packet type
     """
 
-    TYPES = {0x01: 'ELEC1'}
+    TYPES = {0x01: 'ELEC1, Electrisave'}
 
     def __str__(self):
         return ("Energy1 [subtype={0}, seqnbr={1}, id={2}, count={3}, " +
@@ -1933,8 +1970,8 @@ class Energy(SensorPacket):
     Data class for the Energy packet type
     """
 
-    TYPES = {0x01: 'CM119/160',
-             0x02: 'CM180'}
+    TYPES = {0x01: 'ELEC2, CM119/160',
+             0x02: 'ELEC3, CM180'}
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
@@ -2003,7 +2040,7 @@ class Energy4(SensorPacket):
     Data class for the Energy "ELEC4" packet type
     """
 
-    TYPES = {0x01: 'CM180i'}
+    TYPES = {0x01: 'ELEC4, CM180i'}
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
@@ -2073,7 +2110,7 @@ class Energy5(SensorPacket):
     Data class for the Energy "ELEC5" packet type
     """
 
-    TYPES = {0x01: 'ELEC5'}
+    TYPES = {0x01: 'ELEC5, Revolt'}
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
@@ -2208,7 +2245,8 @@ class Security1(SensorPacket):
              0x06: 'Visonic Codesecure',
              0x07: 'Visonic Powercode Door/Window Sensor Auxilary Contact',
              0x08: 'Meiantech',
-             0x09: 'Alecto SA30 Smoke Detector'}
+             0x09: 'Alecto SA30 Smoke Detector',
+             0x0A: 'RM174RF Smoke Detector'}
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
