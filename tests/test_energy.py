@@ -13,7 +13,7 @@ class Elec1TestCase(TestCase):
 
         energy = RFXtrx.lowlevel.parse(self.data)
         print(energy)
-        self.assertEquals(energy.type_string,"ELEC1, CM113, Electrisave")
+        self.assertEquals(energy.type_string,"ELEC1, Electrisave")
         self.assertEquals(energy.seqnbr,167)
         self.assertEquals(energy.id_string,"56:00")
         self.assertEquals(energy.count,10)

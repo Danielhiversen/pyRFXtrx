@@ -192,7 +192,7 @@ class CoreTestCase(TestCase):
         bytes_array = [0x13, 0x5b, 0x01, 0x04, 0x2e, 0xB2, 0x01, 0x11, 0x12, 0x14, 0x15, 0x17, 0x18, 0x17, 0x18, 0x19, 0x20, 0x21, 0x22, 0x69]
         event = core.transport.parse(bytes_array)
         self.assertEquals(RFXtrx.SensorEvent, type(event))
-        self.assertEquals(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='CM180i' id='2e:b2'] values=[('Battery numeric', 9), ('Count', 1), ('Current Ch. 1', 437.0), ('Current Ch. 2', 514.1), ('Current Ch. 3', 591.2), ('Rssi numeric', 6), ('Total usage', 113527617921.3023)]")
+        self.assertEquals(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='ELEC4, CM180i' id='2e:b2'] values=[('Battery numeric', 9), ('Count', 1), ('Current Ch. 1', 437.0), ('Current Ch. 2', 514.1), ('Current Ch. 3', 591.2), ('Rssi numeric', 6), ('Total usage', 113527617921.3023)]")
 
         #Lighting5
         bytes_array = bytearray(b'\x0A\x14\x00\xAD\xF3\x94\xAB'
@@ -261,7 +261,7 @@ class CoreTestCase(TestCase):
         event = core.transport.parse(bytes_array)
         self.assertEquals(RFXtrx.SensorEvent, type(event))
         self.assertEqual(event.device.subtype, 0x00)
-        self.assertEqual(event.device.type_string, 'RFXMeter Data Packet')
+        self.assertEqual(event.device.type_string, 'RFXMeter Count')
         self.assertEqual(event.device.id_string, '21')
         self.assertEquals(event.values['Counter value'], 2105252)
 
