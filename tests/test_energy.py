@@ -13,7 +13,7 @@ class Elec1TestCase(TestCase):
 
         energy = RFXtrx.lowlevel.parse(self.data)
         print(energy)
-        self.assertEquals(energy.type_string,"ELEC1")
+        self.assertEquals(energy.type_string,"ELEC1, CM113, Electrisave")
         self.assertEquals(energy.seqnbr,167)
         self.assertEquals(energy.id_string,"56:00")
         self.assertEquals(energy.count,10)
@@ -34,7 +34,7 @@ class Elec2TestCase(TestCase):
     def test_parse_bytes(self):
 
         energy = RFXtrx.lowlevel.parse(self.data)
-        self.assertEquals(energy.type_string,"CM119/160")
+        self.assertEquals(energy.type_string,"ELEC2, CM119/160")
         self.assertEquals(energy.seqnbr,0)
         self.assertEquals(energy.id_string,"2e:b2")
         self.assertEquals(energy.count,3)
@@ -58,7 +58,7 @@ class Elec4TestCase(TestCase):
     def test_parse_bytes(self):
 
         energy = RFXtrx.lowlevel.parse(self.data)
-        self.assertEquals(energy.type_string,"CM180i")
+        self.assertEquals(energy.type_string,"ELEC4, CM180i")
         self.assertEquals(energy.seqnbr,4)
         self.assertEquals(energy.id_string,"2e:b2")
         self.assertEquals(energy.count,1)
@@ -85,7 +85,7 @@ class Elec5TestCase(TestCase):
     def test_parse_bytes(self):
 
         energy = RFXtrx.lowlevel.parse(self.data)
-        self.assertEquals(energy.type_string,"ELEC5")
+        self.assertEquals(energy.type_string,"ELEC5, Revolt")
         self.assertEquals(energy.seqnbr,5)
         self.assertEquals(energy.id_string,"23:95")
         self.assertEquals(energy.voltage,178)

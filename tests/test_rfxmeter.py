@@ -14,7 +14,7 @@ class RfxMeterTestCase(TestCase):
     def test_parse_bytes(self):
         rfxmeterpacket = RFXtrx.lowlevel.parse(self.data)
         self.assertEquals(RFXtrx.lowlevel.RfxMeter, type(rfxmeterpacket))
-        self.assertEquals(rfxmeterpacket.type_string, 'RFXMeter Data Packet')
+        self.assertEquals(rfxmeterpacket.type_string, 'RFXMeter Count')
         self.assertEquals(rfxmeterpacket.id_string, '21')
         self.assertEquals(rfxmeterpacket.value3, 0x20)
         self.assertEquals(rfxmeterpacket.value2, 0x1F)
