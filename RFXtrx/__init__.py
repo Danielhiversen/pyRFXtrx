@@ -280,11 +280,15 @@ class LightingDevice(RFXtrxDevice):
                                  ((level + 6) * 16 // 100) - 1)
                 transport.send(pkt.data)
         elif self.packettype == 0x12:  # Lighting3
-            raise ValueError("Dim level unsupported for Lighting3")
-            # Should not be too hard to add dim level support for Lighting3
-            # (Ikea Koppla) due to the availability of the level 1 .. level 9
-            # commands. I just need someone to help me with defining a mapping
-            # between a percentage and a level
+            if level == 0:
+                self.send_off(transport)
+            elif level == 100:
+                self.send_on(transport)
+            else:
+                pkt = lowlevel.Lighting3()
+                pkt.set_transmit(self.subtype, 0, self.system, self.channel,
+                                 (level * 9 // 100) + 17)
+                transport.send(pkt.data)
         elif self.packettype == 0x14:  # Lighting5
             if level == 0:
                 self.send_off(transport)
