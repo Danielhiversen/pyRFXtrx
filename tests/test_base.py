@@ -56,7 +56,10 @@ class CoreTestCase(TestCase):
         event = core.transport.parse(bytes_array)
         event.device.send_on(core.transport)
         event.device.send_off(core.transport)
-        self.assertRaises(ValueError,event.device.send_dim,core.transport,50)
+        self.assertRaises(ValueError,event.device.send_dim,core.transport,150)
+        self.assertRaises(ValueError,event.device.send_dim,core.transport,-1)
+        event.device.send_dim(core.transport,50)
+        event.device.send_dim(core.transport,0)
 
         # Lighting4
         bytes_array = [0x09, 0x13, 0x00, 0x2a, 0x12, 0x34, 0x56, 0x01, 0x5e, 0x70]
