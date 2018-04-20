@@ -34,7 +34,7 @@ from . import lowlevel
 ###############################################################################
 
 
-class RFXtrxDevice(object):
+class RFXtrxDevice(object): # pylint: disable=invalid-name
     """ Superclass for all devices """
 
     def __init__(self, pkt):
@@ -263,6 +263,7 @@ class LightingDevice(RFXtrxDevice):
         """ Send a 'Dim' command with the given level using the given
             transport
         """
+        #  pylint: disable=too-many-branches
         if level < 0 or level > 100:
             raise ValueError("Dim level must be between 0 and 100")
 
@@ -574,6 +575,7 @@ class RFXtrxTransport(object):
             # Store the latest RF signal data
             obj.data = data
             return obj
+        return None
 
     def reset(self):
         """ reset the rfxtrx device """
