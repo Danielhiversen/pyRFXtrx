@@ -14,6 +14,9 @@ matrix:
     env: TOXENV=lint
   - python: "nightly"
     env: TOXENV=py36
+
+  allow_failures:
+  - python: 'nightly'
 cache:
   directories:
   - "$HOME/.cache/pip"
