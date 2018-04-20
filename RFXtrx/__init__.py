@@ -33,8 +33,8 @@ from . import lowlevel
 # RFXtrxDevice class
 ###############################################################################
 
-
-class RFXtrxDevice(object): # pylint: disable=invalid-name
+# pylint: disable=invalid-name
+class RFXtrxDevice(object):
     """ Superclass for all devices """
 
     def __init__(self, pkt):
