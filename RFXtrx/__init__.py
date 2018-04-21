@@ -20,7 +20,7 @@
 """
 This module provides the base implementation for pyRFXtrx
 """
-# pylint: disable=R0903
+# pylint: disable=R0903, invalid-name
 from __future__ import print_function
 
 from time import sleep
@@ -33,7 +33,6 @@ from . import lowlevel
 # RFXtrxDevice class
 ###############################################################################
 
-# pylint: disable=invalid-name
 class RFXtrxDevice(object):
     """ Superclass for all devices """
 
