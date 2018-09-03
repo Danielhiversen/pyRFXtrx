@@ -2348,7 +2348,9 @@ class Rfy(Packet):
 
     COMMANDS = {0x00: 'Stop',
                 0x01: 'Up',
-                0x03: 'Down'}
+                0x03: 'Down',
+                0x13: 'Enable sun automation',
+                0x14: 'Disable sun automation'}
     """
     Mapping of command numeric values to strings, used for cmnd_string
     """
