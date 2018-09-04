@@ -344,8 +344,8 @@ def get_device(packettype, subtype, id_string):
         pkt = lowlevel.Rfy()
         pkt.parse_id(subtype, id_string)
         return RfyDevice(pkt)
-    else:
-        raise ValueError("Unsupported packettype")
+
+    raise ValueError("Unsupported packettype")
 
 
 ###############################################################################
