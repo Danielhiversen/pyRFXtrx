@@ -33,7 +33,7 @@ from . import lowlevel
 # RFXtrxDevice class
 ###############################################################################
 
-class RFXtrxDevice(object):
+class RFXtrxDevice:
     """ Superclass for all devices """
 
     def __init__(self, pkt):
@@ -352,7 +352,7 @@ def get_device(packettype, subtype, id_string):
 # RFXtrxEvent class
 ###############################################################################
 
-class RFXtrxEvent(object):
+class RFXtrxEvent:
     """ Abstract superclass for all events """
 
     def __init__(self, device):
@@ -500,7 +500,7 @@ class StatusEvent(RFXtrxEvent):
 ###############################################################################
 
 
-class _dummySerial(object):
+class _dummySerial:
     """ Dummy class for testing"""
     # pylint: disable=unused-argument
     def __init__(self, *args, **kwargs):
@@ -553,7 +553,7 @@ class _dummySerial(object):
 # RFXtrxTransport class
 ###############################################################################
 
-class RFXtrxTransport(object):
+class RFXtrxTransport:
     """ Abstract superclass for all transport mechanisms """
 
     # pylint: disable=attribute-defined-outside-init
@@ -699,7 +699,7 @@ class DummyTransport2(PySerialTransport):
         self._run_event.set()
 
 
-class Connect(object):
+class Connect:
     """ The main class for rfxcom-py.
     Has methods for sensors.
     """
