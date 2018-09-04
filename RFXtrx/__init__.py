@@ -316,31 +316,31 @@ def get_device(packettype, subtype, id_string):
         pkt = lowlevel.Lighting1()
         pkt.parse_id(subtype, id_string)
         return LightingDevice(pkt)
-    elif packettype == 0x11:  # Lighting2
+    if packettype == 0x11:  # Lighting2
         pkt = lowlevel.Lighting2()
         pkt.parse_id(subtype, id_string)
         return LightingDevice(pkt)
-    elif packettype == 0x12:  # Lighting3
+    if packettype == 0x12:  # Lighting3
         pkt = lowlevel.Lighting3()
         pkt.parse_id(subtype, id_string)
         return LightingDevice(pkt)
-    elif packettype == 0x13:  # Lighting4
+    if packettype == 0x13:  # Lighting4
         pkt = lowlevel.Lighting4()
         pkt.parse_id(subtype, id_string)
         return LightingDevice(pkt)
-    elif packettype == 0x14:  # Lighting5
+    if packettype == 0x14:  # Lighting5
         pkt = lowlevel.Lighting5()
         pkt.parse_id(subtype, id_string)
         return LightingDevice(pkt)
-    elif packettype == 0x15:  # Lighting6
+    if packettype == 0x15:  # Lighting6
         pkt = lowlevel.Lighting6()
         pkt.parse_id(subtype, id_string)
         return LightingDevice(pkt)
-    elif packettype == 0x19:  # RollerTrol
+    if packettype == 0x19:  # RollerTrol
         pkt = lowlevel.RollerTrol()
         pkt.parse_id(subtype, id_string)
         return RollerTrolDevice(pkt)
-    elif packettype == 0x1A:  # Rfy
+    if packettype == 0x1A:  # Rfy
         pkt = lowlevel.Rfy()
         pkt.parse_id(subtype, id_string)
         return RfyDevice(pkt)
