@@ -99,7 +99,7 @@ def parse(data):
 # Packet class
 ###############################################################################
 
-class Packet(object):
+class Packet():
     """ Abstract superclass for all low level packets """
 
     _UNKNOWN_TYPE = "Unknown type ({0:#04x}/{1:#04x})"
