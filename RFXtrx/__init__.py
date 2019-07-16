@@ -26,6 +26,7 @@ from __future__ import print_function
 from time import sleep
 import threading
 import serial
+import socket
 from . import lowlevel
 
 
@@ -691,44 +692,45 @@ class PySerialTransport(RFXtrxTransport):
 
 
 class PyNetworkTransport(RFXtrxTransport):
-    """ Implementation of a transport using PySerial """
+    """ Implementation of a transport using sockets """
 
     def __init__(self, port, debug=False):
         self.debug = debug
-        self.port = port
-        self.serial = None
+        self.host = "192.168.2.6"                            # TODO not hardcode
+        self.port = 10001                                    # TODO not hardcode
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._run_event = threading.Event()
         self._run_event.set()
         self.connect()
 
     def connect(self):
-        """ Open a serial connexion """
+        """ Open a socket connection """
         try:
-            self.serial = serial.Serial(self.port, 38400, timeout=0.1)
-        except serial.serialutil.SerialException:
-            import glob
-            port = glob.glob('/dev/serial/by-id/usb-RFXCOM_*-port0')[0]
-            self.serial = serial.Serial(port, 38400, timeout=0.1)
+            self.sock.connect((self.host, self.port))
+        except socket.error:
+            print('RFXTRX: Failed to create socket')
+            # This may throw exception for use by caller:
+            self.sock.connect((self.host, self.port))
 
     def receive_blocking(self):
         """ Wait until a packet is received and return with an RFXtrxEvent """
         data = None
         while self._run_event.is_set():
             try:
-                data = self.serial.read()
+                data = self.sock.recv()
             except TypeError:
                 continue
-            except serial.serialutil.SerialException:
+            except socket.error:
                 import time
                 try:
                     self.connect()
-                except serial.serialutil.SerialException:
+                except socket.error:
                     time.sleep(5)
                     continue
             if not data or data == '\x00':
                 continue
             pkt = bytearray(data)
-            data = self.serial.read(pkt[0])
+            data = self.sock.recv(pkt[0])
             pkt.extend(bytearray(data))
             if self.debug:
                 print("RFXTRX: Recv: " +
@@ -746,18 +748,18 @@ class PyNetworkTransport(RFXtrxTransport):
         if self.debug:
             print("RFXTRX: Send: " +
                   " ".join("0x{0:02x}".format(x) for x in pkt))
-        self.serial.write(pkt)
+        self.sock.send(pkt)
 
     def reset(self):
         """ Reset the RFXtrx """
         self.send(b'\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
-        sleep(0.3)  # Should work with 0.05, but not for me
-        self.serial.flushInput()
+        sleep(0.3)
+        self.sock.sendall(b'')
 
     def close(self):
         """ close connection to rfxtrx device """
         self._run_event.clear()
-        self.serial.close()
+        self.sock.close()
 
 
 class DummyTransport(RFXtrxTransport):
