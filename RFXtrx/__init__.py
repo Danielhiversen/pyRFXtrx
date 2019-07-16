@@ -685,6 +685,81 @@ class PySerialTransport(RFXtrxTransport):
         self.serial.close()
 
 
+###############################################################################
+# PyNetworkTransport class
+###############################################################################
+
+
+class PyNetworkTransport(RFXtrxTransport):
+    """ Implementation of a transport using PySerial """
+
+    def __init__(self, port, debug=False):
+        self.debug = debug
+        self.port = port
+        self.serial = None
+        self._run_event = threading.Event()
+        self._run_event.set()
+        self.connect()
+
+    def connect(self):
+        """ Open a serial connexion """
+        try:
+            self.serial = serial.Serial(self.port, 38400, timeout=0.1)
+        except serial.serialutil.SerialException:
+            import glob
+            port = glob.glob('/dev/serial/by-id/usb-RFXCOM_*-port0')[0]
+            self.serial = serial.Serial(port, 38400, timeout=0.1)
+
+    def receive_blocking(self):
+        """ Wait until a packet is received and return with an RFXtrxEvent """
+        data = None
+        while self._run_event.is_set():
+            try:
+                data = self.serial.read()
+            except TypeError:
+                continue
+            except serial.serialutil.SerialException:
+                import time
+                try:
+                    self.connect()
+                except serial.serialutil.SerialException:
+                    time.sleep(5)
+                    continue
+            if not data or data == '\x00':
+                continue
+            pkt = bytearray(data)
+            data = self.serial.read(pkt[0])
+            pkt.extend(bytearray(data))
+            if self.debug:
+                print("RFXTRX: Recv: " +
+                      " ".join("0x{0:02x}".format(x) for x in pkt))
+            return self.parse(pkt)
+
+    def send(self, data):
+        """ Send the given packet """
+        if isinstance(data, bytearray):
+            pkt = data
+        elif isinstance(data, (bytes, str)):
+            pkt = bytearray(data)
+        else:
+            raise ValueError("Invalid type")
+        if self.debug:
+            print("RFXTRX: Send: " +
+                  " ".join("0x{0:02x}".format(x) for x in pkt))
+        self.serial.write(pkt)
+
+    def reset(self):
+        """ Reset the RFXtrx """
+        self.send(b'\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        sleep(0.3)  # Should work with 0.05, but not for me
+        self.serial.flushInput()
+
+    def close(self):
+        """ close connection to rfxtrx device """
+        self._run_event.clear()
+        self.serial.close()
+
+
 class DummyTransport(RFXtrxTransport):
     """ Dummy transport for testing purposes """
 
@@ -731,7 +806,7 @@ class Connect:
     """
     #  pylint: disable=too-many-instance-attributes, too-many-arguments
     def __init__(self, device, event_callback=None, debug=False,
-                 transport_protocol=PySerialTransport,
+                 transport_protocol=PyNetworkTransport,
                  modes=None):
         self._run_event = threading.Event()
         self._run_event.set()
