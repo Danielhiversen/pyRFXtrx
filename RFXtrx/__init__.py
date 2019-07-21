@@ -25,8 +25,8 @@ from __future__ import print_function
 
 from time import sleep
 import threading
-import serial
 import socket
+import serial
 from . import lowlevel
 
 
@@ -654,7 +654,7 @@ class PySerialTransport(RFXtrxTransport):
             if not data or data == '\x00':
                 continue
             pkt = bytearray(data)
-            data = self.serial.read(pkt[0])         # potential race condition? incomplete data if timeout before all bytes are read.
+            data = self.serial.read(pkt[0])
             pkt.extend(bytearray(data))
             if self.debug:
                 print("RFXTRX: Recv: " +
