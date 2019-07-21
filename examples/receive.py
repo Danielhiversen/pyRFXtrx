@@ -31,12 +31,13 @@ def main():
     if len(sys.argv) >= 2:
         rfxcom_device = sys.argv[1]
     else:
-        rfxcom_device = '/dev/ttyUSB0'
+        rfxcom_device = ('192.168.2.6', 10001)
+        # rfxcom_device = '/dev/ttyUSB0'
     # Start docker with this parameter:       --device=/dev/ttyUSB0
 
     modes_list = sys.argv[2].split() if len(sys.argv) > 2 else None
     print ("modes: ", modes_list)
-    core = RFXtrx.Core(rfxcom_device, print_callback, debug=True, modes=modes_list)
+    core = RFXtrx.Core(rfxcom_device, print_callback, transport_protocol=RFXtrx.PyNetworkTransport, debug=True, modes=modes_list)
 
     print (core)
     while True:

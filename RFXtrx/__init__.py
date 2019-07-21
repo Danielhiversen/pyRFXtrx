@@ -694,10 +694,9 @@ class PySerialTransport(RFXtrxTransport):
 class PyNetworkTransport(RFXtrxTransport):
     """ Implementation of a transport using sockets """
 
-    def __init__(self, port, debug=False):
+    def __init__(self, hostport, debug=False):
         self.debug = debug
-        self.host = "192.168.2.6"                            # TODO not hardcode
-        self.port = 10001                                    # TODO not hardcode
+        self.hostport = hostport    # must be a (host, port) tuple
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._run_event = threading.Event()
         self._run_event.set()
@@ -706,11 +705,12 @@ class PyNetworkTransport(RFXtrxTransport):
     def connect(self):
         """ Open a socket connection """
         try:
-            self.sock.connect((self.host, self.port))
+            self.sock.connect(self.hostport)
+            print("RFXTRX: Connected to network socket")
         except socket.error:
-            print('RFXTRX: Failed to create socket')
+            print('RFXTRX: Failed to create socket, check host port config')
             # This may throw exception for use by caller:
-            self.sock.connect((self.host, self.port))
+            self.sock.connect(self.hostport)
 
     def receive_blocking(self):
         """ Wait until a packet is received and return with an RFXtrxEvent """
@@ -718,8 +718,6 @@ class PyNetworkTransport(RFXtrxTransport):
         while self._run_event.is_set():
             try:
                 data = self.sock.recv(1)
-            except TypeError:
-                continue
             except socket.error:
                 import time
                 try:
@@ -809,7 +807,7 @@ class Connect:
     """
     #  pylint: disable=too-many-instance-attributes, too-many-arguments
     def __init__(self, device, event_callback=None, debug=False,
-                 transport_protocol=PyNetworkTransport,
+                 transport_protocol=PySerialTransport,
                  modes=None):
         self._run_event = threading.Event()
         self._run_event.set()
@@ -834,7 +832,7 @@ class Connect:
             self._status = self.send_get_status()
 
         if self._debug:
-            print("RFXTRX: ", self._status.device if self._status is not None else 'No self._status OOPS')   # todo remove inline-if TEST
+            print("RFXTRX: ", self._status.device)
 
         self.send_start()
 
