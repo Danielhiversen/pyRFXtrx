@@ -654,7 +654,7 @@ class PySerialTransport(RFXtrxTransport):
             if not data or data == '\x00':
                 continue
             pkt = bytearray(data)
-            data = self.serial.read(pkt[0])
+            data = self.serial.read(pkt[0])         # potential race condition? incomplete data if timeout before all bytes are read.
             pkt.extend(bytearray(data))
             if self.debug:
                 print("RFXTRX: Recv: " +
@@ -717,7 +717,7 @@ class PyNetworkTransport(RFXtrxTransport):
         data = None
         while self._run_event.is_set():
             try:
-                data = self.sock.recv()
+                data = self.sock.recv(1)
             except TypeError:
                 continue
             except socket.error:
@@ -730,8 +730,9 @@ class PyNetworkTransport(RFXtrxTransport):
             if not data or data == '\x00':
                 continue
             pkt = bytearray(data)
-            data = self.sock.recv(pkt[0])
-            pkt.extend(bytearray(data))
+            while len(pkt) < pkt[0]:
+                data = self.sock.recv(pkt[0])
+                pkt.extend(bytearray(data))
             if self.debug:
                 print("RFXTRX: Recv: " +
                       " ".join("0x{0:02x}".format(x) for x in pkt))
@@ -833,7 +834,7 @@ class Connect:
             self._status = self.send_get_status()
 
         if self._debug:
-            print("RFXTRX: ", self._status.device)
+            print("RFXTRX: ", self._status.device if self._status is not None else 'No self._status OOPS')   # todo remove inline-if TEST
 
         self.send_start()
 
