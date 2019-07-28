@@ -296,7 +296,7 @@ class LightingDevice(RFXtrxDevice):
             raise ValueError("Dim level unsupported for Lighting1")
             # Supporting a dim level for X10 directly is not possible because
             # RFXtrx does not support sending extended commands
-        elif self.packettype == 0x11:  # Lighting2
+        if self.packettype == 0x11:  # Lighting2
             if level == 0:
                 self.send_off(transport)
             else:
@@ -326,8 +326,7 @@ class LightingDevice(RFXtrxDevice):
                 transport.send(pkt.data)
         elif self.packettype == 0x15:  # Lighting6
             raise ValueError("Dim level unsupported for Lighting6")
-        else:
-            raise ValueError("Unsupported packettype")
+        raise ValueError("Unsupported packettype")
 
 
 ###############################################################################
@@ -555,12 +554,10 @@ class _dummySerial:
 
     def write(self, *args, **kwargs):
         """ Dummy function for writing"""
-        pass
 
     # pylint: disable=invalid-name
     def flushInput(self, *args, **kwargs):
         """ Called by PySerialTransport"""
-        pass
 
     def read(self, data=None):
         """ Dummy function for reading"""
@@ -572,7 +569,6 @@ class _dummySerial:
 
     def close(self):
         """ close connection to rfxtrx device """
-        pass
 
 
 ###############################################################################
@@ -604,11 +600,9 @@ class RFXtrxTransport:
 
     def reset(self):
         """ reset the rfxtrx device """
-        pass
 
     def close(self):
         """ close connection to rfxtrx device """
-        pass
 
 ###############################################################################
 # PySerialTransport class
