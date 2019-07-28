@@ -326,7 +326,8 @@ class LightingDevice(RFXtrxDevice):
                 transport.send(pkt.data)
         elif self.packettype == 0x15:  # Lighting6
             raise ValueError("Dim level unsupported for Lighting6")
-        raise ValueError("Unsupported packettype")
+        else:
+            raise ValueError("Unsupported packettype")
 
 
 ###############################################################################
