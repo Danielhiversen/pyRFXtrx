@@ -23,10 +23,14 @@ This module provides the base implementation for pyRFXtrx
 # pylint: disable=R0903, invalid-name
 from __future__ import print_function
 
-from time import sleep
-import threading
+import glob
 import socket
+import threading
+import time
+from time import sleep
+
 import serial
+
 from . import lowlevel
 
 
@@ -627,9 +631,10 @@ class PySerialTransport(RFXtrxTransport):
         try:
             self.serial = serial.Serial(self.port, 38400, timeout=0.1)
         except serial.serialutil.SerialException:
-            import glob
-            port = glob.glob('/dev/serial/by-id/usb-RFXCOM_*-port0')[0]
-            self.serial = serial.Serial(port, 38400, timeout=0.1)
+            port = glob.glob('/dev/serial/by-id/usb-RFXCOM_*-port0')
+            if len(port) < 1:
+                return 
+            self.serial = serial.Serial(port[0], 38400, timeout=0.1)
 
     def receive_blocking(self):
         """ Wait until a packet is received and return with an RFXtrxEvent """
@@ -640,7 +645,6 @@ class PySerialTransport(RFXtrxTransport):
             except TypeError:
                 continue
             except serial.serialutil.SerialException:
-                import time
                 try:
                     self.connect()
                 except serial.serialutil.SerialException:
@@ -714,7 +718,6 @@ class PyNetworkTransport(RFXtrxTransport):
             try:
                 data = self.sock.recv(1)
             except socket.error:
-                import time
                 try:
                     self.connect()
                 except socket.error:
