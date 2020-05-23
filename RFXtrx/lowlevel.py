@@ -2349,6 +2349,10 @@ class Rfy(Packet):
     COMMANDS = {0x00: 'Stop',
                 0x01: 'Up',
                 0x03: 'Down',
+                0x0F: 'Up05sec',
+                0x10: 'Down05sec',
+                0x11: 'Up2sec',
+                0x12: 'Down2sec',
                 0x13: 'Enable sun automation',
                 0x14: 'Disable sun automation'}
     """

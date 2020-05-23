@@ -151,6 +151,58 @@ class RfyDevice(RFXtrxDevice):
         self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
         transport.send(pkt.data)
 
+    def send_up05sec(self, transport):
+        """ Send an 'Up05sec' command (UP or TILT UP depending on blind motor settings) using the given transport """
+        pkt = lowlevel.Rfy()
+        pkt.set_transmit(
+            self.subtype,
+            self.cmndseqnbr,
+            self.id_combined,
+            self.unitcode,
+            0x0F
+        )
+        self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
+        transport.send(pkt.data)
+
+    def send_down05sec(self, transport):
+        """ Send a 'Down05sec' command (DOWN or TILT DOWN depending on blind motor settings) using the given transport """
+        pkt = lowlevel.Rfy()
+        pkt.set_transmit(
+            self.subtype,
+            self.cmndseqnbr,
+            self.id_combined,
+            self.unitcode,
+            0x10
+        )
+        self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
+        transport.send(pkt.data)
+
+    def send_up2sec(self, transport):
+        """ Send an 'Up2sec' command (UP or TILT UP depending on blind motor settings) using the given transport """
+        pkt = lowlevel.Rfy()
+        pkt.set_transmit(
+            self.subtype,
+            self.cmndseqnbr,
+            self.id_combined,
+            self.unitcode,
+            0x11
+        )
+        self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
+        transport.send(pkt.data)
+
+    def send_down2sec(self, transport):
+        """ Send a 'Down2sec' command (DOWN or TILT DOWN depending on blind motor settings) using the given transport """
+        pkt = lowlevel.Rfy()
+        pkt.set_transmit(
+            self.subtype,
+            self.cmndseqnbr,
+            self.id_combined,
+            self.unitcode,
+            0x12
+        )
+        self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
+        transport.send(pkt.data)
+
     def send_stop(self, transport):
         """ Send a 'Stop' command using the given transport """
         pkt = lowlevel.Rfy()
