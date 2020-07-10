@@ -557,6 +557,7 @@ class _dummySerial:
                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00]  # sensor1
         self._data[7] = [0x0a, 0x20, 0x00, 0x00, 0x00,
                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00]  # sensor2
+        self._close_event = threading.Event()
 
     def write(self, *args, **kwargs):
         """ Dummy function for writing"""
@@ -568,6 +569,7 @@ class _dummySerial:
     def read(self, data=None):
         """ Dummy function for reading"""
         if data is not None or self._read_num >= len(self._data):
+            self._close_event.wait(0.1)
             return []
         res = self._data[self._read_num]
         self._read_num = self._read_num + 1
@@ -575,6 +577,7 @@ class _dummySerial:
 
     def close(self):
         """ close connection to rfxtrx device """
+        self._close_event.set()
 
 
 ###############################################################################
@@ -765,10 +768,12 @@ class DummyTransport(RFXtrxTransport):
     def __init__(self, device="", debug=True):
         self.device = device
         self.debug = debug
+        self._close_event = threading.Event()
 
     def receive(self, data=None):
         """ Emulate a receive by parsing the given data """
         if data is None:
+            self._close_event.wait(0.1)
             return None
         pkt = bytearray(data)
         if self.debug:
@@ -788,6 +793,9 @@ class DummyTransport(RFXtrxTransport):
             print("RFXTRX: Send: " +
                   " ".join("0x{0:02x}".format(x) for x in pkt))
 
+    def close(self):
+        """Close."""
+        self._close_event.set()
 
 class DummyTransport2(PySerialTransport):
     """ Dummy transport for testing purposes """

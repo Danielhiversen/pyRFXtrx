@@ -19,7 +19,7 @@ class CoreTestCase(TestCase):
     def test_constructor(self):
         global num_calbacks
         core = RFXtrx.Core(self.path, event_callback=_callback, debug=False,transport_protocol=RFXtrx.DummyTransport2)
-        while num_calbacks < 5:
+        while num_calbacks < 6:
             time.sleep(0.1)
 
         self.assertEquals(len(core.sensors()),2)
@@ -384,6 +384,7 @@ class CoreTestCase(TestCase):
     def test_set_recmodes(self):
         core = RFXtrx.Connect(self.path, event_callback=_callback, debug=False, 
                               transport_protocol=RFXtrx.DummyTransport)
+        time.sleep(0.2)
         self.assertEquals(None, core._modes)
 
         modes = ['ac', 'arc', 'hideki', 'homeeasy', 'keeloq', 'lacrosse', 'oregon', 'rsl', 'x10']
@@ -404,6 +405,7 @@ class CoreTestCase(TestCase):
 
     def test_receive(self):
         core = RFXtrx.Connect(self.path, event_callback=_callback, debug=False, transport_protocol=RFXtrx.DummyTransport)
+        time.sleep(0.2)
         # Lighting1
         bytes_array = bytearray([0x07, 0x10, 0x00, 0x2a, 0x45, 0x05, 0x01, 0x70])
         event= core.transport.receive(bytes_array)
