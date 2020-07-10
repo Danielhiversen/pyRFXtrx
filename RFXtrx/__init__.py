@@ -334,6 +334,18 @@ class LightingDevice(RFXtrxDevice):
         else:
             raise ValueError("Unsupported packettype")
 
+class ChimeDevice(RFXtrxDevice):
+    """ Concrete class for a control device """
+    def __init__(self, pkt):
+        super(ChimeDevice, self).__init__(pkt)
+        self.id1 = pkt.id1
+        self.id2 = pkt.id2
+
+    def send_sound(self, transport, sound):
+        """Trigger a chime sound on device."""
+        pkt = lowlevel.Chime()
+        pkt.set_transmit(self.subtype, 0, self.id1, self.id2, sound)
+        transport.send(pkt.data)
 
 ###############################################################################
 # get_devide method
@@ -367,6 +379,9 @@ def get_device(packettype, subtype, id_string):
         pkt = lowlevel.Lighting6()
         pkt.parse_id(subtype, id_string)
         return LightingDevice(pkt)
+    if packettype == 0x16:
+        pkt = lowlevel.Chime()
+        pkt.parse_id(subtype, id_string)
     if packettype == 0x19:  # RollerTrol
         pkt = lowlevel.RollerTrol()
         pkt.parse_id(subtype, id_string)
@@ -486,6 +501,8 @@ class ControlEvent(RFXtrxEvent):
             device = RollerTrolDevice(pkt)
         elif isinstance(pkt, lowlevel.Rfy):
             device = RfyDevice(pkt)
+        elif isinstance(pkt, lowlevel.Chime):
+            device = ChimeDevice(pkt)
         else:
             device = RFXtrxDevice(pkt)
         super(ControlEvent, self).__init__(device)
