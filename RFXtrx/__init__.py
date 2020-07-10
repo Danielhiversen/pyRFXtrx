@@ -458,8 +458,6 @@ class SensorEvent(RFXtrxEvent):
             self.values['Current'] = pkt.currentamps
             self.values['Energy usage'] = pkt.currentwatt
             self.values['Total usage'] = pkt.totalwatthours
-        if isinstance(pkt, lowlevel.Chime):
-            self.values['Sound'] = pkt.sound
         if isinstance(pkt, lowlevel.Security1):
             self.values['Sensor Status'] = pkt.security1_status_string
         if not isinstance(pkt, (lowlevel.Energy5, lowlevel.RfxMeter)):
@@ -507,6 +505,9 @@ class ControlEvent(RFXtrxEvent):
         if isinstance(pkt, lowlevel.Lighting5) \
                 and pkt.cmnd in [0x0d, 0x0e, 0x0f]:
             self.device.known_to_be_rollershutter = True
+
+        if isinstance(pkt, lowlevel.Chime):
+            self.values['Sound'] = pkt.sound
 
         if pkt.rssi is not None:
             self.values['Rssi numeric'] = pkt.rssi

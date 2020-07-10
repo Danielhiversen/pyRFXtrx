@@ -2172,7 +2172,7 @@ class Energy5(SensorPacket):
 ###############################################################################
 
 
-class Chime(SensorPacket):
+class Chime(Packet):
     """
     Data class for the Chime packet type
     """
@@ -2200,6 +2200,8 @@ class Chime(SensorPacket):
         self.sound = None
         self.battery = None
         self.rssi = None
+        self.cmnd = None
+        self.cmnd_string = None
 
     def load_receive(self, data):
         """Load data from a bytearray"""
@@ -2225,6 +2227,7 @@ class Chime(SensorPacket):
             # Degrade nicely for yet unknown subtypes
             self.type_string = self._UNKNOWN_TYPE.format(self.packettype,
                                                          self.subtype)
+        self.cmnd_string = "Chime"
 
 ###############################################################################
 # Security1 class
