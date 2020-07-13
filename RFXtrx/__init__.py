@@ -379,9 +379,10 @@ def get_device(packettype, subtype, id_string):
         pkt = lowlevel.Lighting6()
         pkt.parse_id(subtype, id_string)
         return LightingDevice(pkt)
-    if packettype == 0x16:
+    if packettype == 0x16:  # Chime
         pkt = lowlevel.Chime()
         pkt.parse_id(subtype, id_string)
+        return ChimeDevice(pkt)
     if packettype == 0x19:  # RollerTrol
         pkt = lowlevel.RollerTrol()
         pkt.parse_id(subtype, id_string)
