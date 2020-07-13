@@ -334,6 +334,7 @@ class LightingDevice(RFXtrxDevice):
         else:
             raise ValueError("Unsupported packettype")
 
+
 class ChimeDevice(RFXtrxDevice):
     """ Concrete class for a control device """
     def __init__(self, pkt):
@@ -346,6 +347,7 @@ class ChimeDevice(RFXtrxDevice):
         pkt = lowlevel.Chime()
         pkt.set_transmit(self.subtype, 0, self.id1, self.id2, sound)
         transport.send(pkt.data)
+
 
 ###############################################################################
 # get_devide method
@@ -815,6 +817,7 @@ class DummyTransport(RFXtrxTransport):
     def close(self):
         """Close."""
         self._close_event.set()
+
 
 class DummyTransport2(PySerialTransport):
     """ Dummy transport for testing purposes """
