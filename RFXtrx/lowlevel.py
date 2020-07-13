@@ -2209,7 +2209,7 @@ class Chime(Packet):
             self.packettype = 0x16
             self.subtype = subtype
             self.id1 = int(id_string[:2], 16)
-            self.id2 = int(id_string[2:4], 16)
+            self.id2 = int(id_string[3:5], 16)
             self._set_strings()
         except ValueError:
             raise ValueError("Invalid id_string")
