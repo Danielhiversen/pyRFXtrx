@@ -841,6 +841,7 @@ class Connect:
                     self.event_callback(event)
                 if isinstance(event, SensorEvent):
                     self._sensors[event.device.id_string] = event.device
+        self.transport.close()
 
     def sensors(self):
         """ Return all found sensors.
@@ -851,7 +852,6 @@ class Connect:
     def close_connection(self):
         """ Close connection to rfxtrx device """
         self._run_event.clear()
-        self.transport.close()
         self._thread.join()
 
     def set_recmodes(self, modenames):
