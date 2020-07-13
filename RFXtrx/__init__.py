@@ -808,7 +808,6 @@ class Connect:
                  transport_protocol=PySerialTransport,
                  modes=None):
         self._run_event = threading.Event()
-        self._run_event.set()
         self._sensors = {}
         self._status = None
         self._modes = modes
@@ -819,6 +818,7 @@ class Connect:
         self._thread = threading.Thread(target=self._connect)
         self._thread.setDaemon(True)
         self._thread.start()
+        self._run_event.wait()
 
     def _connect(self):
         """Connect """
@@ -834,6 +834,8 @@ class Connect:
 
         self.send_start()
 
+        self._run_event.set()
+
         while self._run_event.is_set():
             event = self.transport.receive_blocking()
             if isinstance(event, RFXtrxEvent):
@@ -841,7 +843,6 @@ class Connect:
                     self.event_callback(event)
                 if isinstance(event, SensorEvent):
                     self._sensors[event.device.id_string] = event.device
-        self.transport.close()
 
     def sensors(self):
         """ Return all found sensors.
@@ -852,6 +853,7 @@ class Connect:
     def close_connection(self):
         """ Close connection to rfxtrx device """
         self._run_event.clear()
+        self.transport.close()
         self._thread.join()
 
     def set_recmodes(self, modenames):
