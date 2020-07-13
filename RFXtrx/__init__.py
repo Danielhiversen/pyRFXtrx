@@ -342,7 +342,7 @@ class ChimeDevice(RFXtrxDevice):
         self.id1 = pkt.id1
         self.id2 = pkt.id2
 
-    def send_sound(self, transport, sound):
+    def send_chime(self, transport, sound):
         """Trigger a chime sound on device."""
         pkt = lowlevel.Chime()
         pkt.set_transmit(self.subtype, 0, self.id1, self.id2, sound)

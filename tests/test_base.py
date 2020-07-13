@@ -233,6 +233,7 @@ class CoreTestCase(TestCase):
         event = core.transport.parse(bytes_array)
         self.assertEquals(RFXtrx.ControlEvent, type(event))
         self.assertEquals(event.__str__(),"<class 'RFXtrx.ControlEvent'> device=[<class 'RFXtrx.ChimeDevice'> type='Byron SX' id='00:00'] values=[('Command', 'Chime'), ('Rssi numeric', 0), ('Sound', 0)]")
+        event.device.send_chime(core.transport, 1)
 
         #security1
         bytes_array = [0x0a, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
