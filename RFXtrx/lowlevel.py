@@ -143,7 +143,7 @@ class Packet():
         return self.id_string == other.id_string
 
     def __str__(self):
-        return self.id_string
+        return "Packet [id_string={0}]".format(self.id_string)
 
     def __repr__(self):
         return self.__str__()
