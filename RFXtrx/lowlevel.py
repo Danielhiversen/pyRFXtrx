@@ -2203,6 +2203,19 @@ class Chime(Packet):
         self.cmnd = None
         self.cmnd_string = None
 
+    def parse_id(self, subtype, id_string):
+        """Parse a string id into individual components"""
+        try:
+            self.packettype = 0x16
+            self.subtype = subtype
+            self.id1 = int(id_string[:2], 16)
+            self.id2 = int(id_string[2:4], 16)
+            self._set_strings()
+        except ValueError:
+            raise ValueError("Invalid id_string")
+        if self.id_string != id_string:
+            raise ValueError("Invalid id_string")
+
     def load_receive(self, data):
         """Load data from a bytearray"""
         self.data = data
