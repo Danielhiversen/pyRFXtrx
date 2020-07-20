@@ -1817,17 +1817,18 @@ class Wind(SensorPacket):
         self.direction = data[6] * 256 + data[7]
         self.average_speed = data[8] * 256.0 + data[9] / 10.0
         self.gust = data[10] * 256.0 + data[11] / 10.0
-        self.temphigh = data[12]
-        self.templow = data[13]
-        self.temperature = float(((self.temphigh & 0x7f) << 8) +
-                                 self.templow) / 10
-        if self.temphigh >= 0x80:
-            self.temperature = -1 * self.temperature
-        self.chillhigh = data[14]
-        self.chilllow = data[15]
-        self.chill = float(((self.chillhigh & 0x7f) << 8) + self.chilllow) / 10
-        if self.chillhigh >= 0x80:
-            self.chill = -1 * self.chill
+        if self.subtype not in (0x06, 0x07):
+            self.temphigh = data[12]
+            self.templow = data[13]
+            self.temperature = float(((self.temphigh & 0x7f) << 8) +
+                                    self.templow) / 10
+            if self.temphigh >= 0x80:
+                self.temperature = -1 * self.temperature
+            self.chillhigh = data[14]
+            self.chilllow = data[15]
+            self.chill = float(((self.chillhigh & 0x7f) << 8) + self.chilllow) / 10
+            if self.chillhigh >= 0x80:
+                self.chill = -1 * self.chill
         if self.subtype == 0x03:
             self.battery = data[16] + 1 * 10
         else:

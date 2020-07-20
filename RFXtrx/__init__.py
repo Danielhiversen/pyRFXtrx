@@ -430,8 +430,10 @@ class SensorEvent(RFXtrxEvent):
             self.values['Wind direction'] = pkt.direction
             self.values['Wind average speed'] = pkt.average_speed
             self.values['Wind gust'] = pkt.gust
-            self.values['Temperature'] = pkt.temperature
-            self.values['Chill'] = pkt.chill
+            if pkt.temperature is not None:
+                self.values['Temperature'] = pkt.temperature
+            if pkt.chill is not None:
+                self.values['Chill'] = pkt.chill
         if isinstance(pkt, lowlevel.UV):
             self.values['UV'] = pkt.uvi
         if isinstance(pkt, lowlevel.Energy):
