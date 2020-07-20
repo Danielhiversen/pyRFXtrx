@@ -1821,7 +1821,7 @@ class Wind(SensorPacket):
             self.temphigh = data[12]
             self.templow = data[13]
             self.temperature = float(((self.temphigh & 0x7f) << 8) +
-                                    self.templow) / 10
+                                     self.templow) / 10
             if self.temphigh >= 0x80:
                 self.temperature = -1 * self.temperature
             self.chillhigh = data[14]
