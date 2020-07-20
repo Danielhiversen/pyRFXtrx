@@ -1815,8 +1815,8 @@ class Wind(SensorPacket):
         self.id1 = data[4]
         self.id2 = data[5]
         self.direction = data[6] * 256 + data[7]
-        self.average_speed = data[8] * 256.0 + data[9] / 10.0
-        self.gust = data[10] * 256.0 + data[11] / 10.0
+        self.average_speed = (data[8] * 256.0 + data[9]) / 10.0
+        self.gust = (data[10] * 256.0 + data[11]) / 10.0
         if self.subtype not in (0x06, 0x07):
             self.temphigh = data[12]
             self.templow = data[13]
