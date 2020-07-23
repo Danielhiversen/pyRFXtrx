@@ -21,18 +21,20 @@
 This module provides the base implementation for pyRFXtrx
 """
 # pylint: disable=R0903, invalid-name
-from __future__ import print_function
 
 import glob
 import socket
 import threading
 import time
+import logging
+
 from time import sleep
 
 import serial
 
 from . import lowlevel
 
+_LOGGER = logging.getLogger(__name__)
 
 ###############################################################################
 # RFXtrxDevice class
@@ -642,8 +644,7 @@ class RFXtrxTransport:
 class PySerialTransport(RFXtrxTransport):
     """ Implementation of a transport using PySerial """
 
-    def __init__(self, port, debug=False):
-        self.debug = debug
+    def __init__(self, port):
         self.port = port
         self.serial = None
         self._run_event = threading.Event()
@@ -679,9 +680,10 @@ class PySerialTransport(RFXtrxTransport):
             pkt = bytearray(data)
             data = self.serial.read(pkt[0])
             pkt.extend(bytearray(data))
-            if self.debug:
-                print("RFXTRX: Recv: " +
-                      " ".join("0x{0:02x}".format(x) for x in pkt))
+            _LOGGER.debug(
+                "Recv: " +
+                " ".join("0x{0:02x}".format(x) for x in pkt)
+            )
             return self.parse(pkt)
 
     def send(self, data):
@@ -692,9 +694,10 @@ class PySerialTransport(RFXtrxTransport):
             pkt = bytearray(data)
         else:
             raise ValueError("Invalid type")
-        if self.debug:
-            print("RFXTRX: Send: " +
-                  " ".join("0x{0:02x}".format(x) for x in pkt))
+        _LOGGER.debug(
+            "Send: " +
+            " ".join("0x{0:02x}".format(x) for x in pkt)
+        )
         self.serial.write(pkt)
 
     def reset(self):
@@ -717,8 +720,7 @@ class PySerialTransport(RFXtrxTransport):
 class PyNetworkTransport(RFXtrxTransport):
     """ Implementation of a transport using sockets """
 
-    def __init__(self, hostport, debug=False):
-        self.debug = debug
+    def __init__(self, hostport):
         self.hostport = hostport    # must be a (host, port) tuple
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._run_event = threading.Event()
@@ -729,9 +731,9 @@ class PyNetworkTransport(RFXtrxTransport):
         """ Open a socket connection """
         try:
             self.sock.connect(self.hostport)
-            print("RFXTRX: Connected to network socket")
+            _LOGGER.info("Connected to network socket")
         except socket.error:
-            print('RFXTRX: Failed to create socket, check host port config')
+            _LOGGER.error('Failed to create socket, check host port config')
             # This may throw exception for use by caller:
             self.sock.connect(self.hostport)
 
@@ -753,9 +755,10 @@ class PyNetworkTransport(RFXtrxTransport):
             while len(pkt) < pkt[0]:
                 data = self.sock.recv(pkt[0])
                 pkt.extend(bytearray(data))
-            if self.debug:
-                print("RFXTRX: Recv: " +
-                      " ".join("0x{0:02x}".format(x) for x in pkt))
+            _LOGGER.debug(
+                "Recv: " +
+                " ".join("0x{0:02x}".format(x) for x in pkt)
+            )
             return self.parse(pkt)
 
     def send(self, data):
@@ -766,9 +769,10 @@ class PyNetworkTransport(RFXtrxTransport):
             pkt = bytearray(data)
         else:
             raise ValueError("Invalid type")
-        if self.debug:
-            print("RFXTRX: Send: " +
-                  " ".join("0x{0:02x}".format(x) for x in pkt))
+        _LOGGER.debug(
+            "Send: " +
+            " ".join("0x{0:02x}".format(x) for x in pkt)
+        )
         self.sock.send(pkt)
 
     def reset(self):
@@ -786,9 +790,8 @@ class PyNetworkTransport(RFXtrxTransport):
 class DummyTransport(RFXtrxTransport):
     """ Dummy transport for testing purposes """
 
-    def __init__(self, device="", debug=True):
+    def __init__(self, device=""):
         self.device = device
-        self.debug = debug
         self._close_event = threading.Event()
 
     def receive(self, data=None):
@@ -797,9 +800,10 @@ class DummyTransport(RFXtrxTransport):
             self._close_event.wait(0.1)
             return None
         pkt = bytearray(data)
-        if self.debug:
-            print("RFXTRX: Recv: " +
-                  " ".join("0x{0:02x}".format(x) for x in pkt))
+        _LOGGER.debug(
+            "Recv: " +
+            " ".join("0x{0:02x}".format(x) for x in pkt)
+        )
         return self.parse(pkt)
 
     def receive_blocking(self, data=None):
@@ -810,9 +814,10 @@ class DummyTransport(RFXtrxTransport):
         """ Emulate a send by doing nothing (except printing debug info if
             requested) """
         pkt = bytearray(data)
-        if self.debug:
-            print("RFXTRX: Send: " +
-                  " ".join("0x{0:02x}".format(x) for x in pkt))
+        _LOGGER.debug(
+            "Send: " +
+            " ".join("0x{0:02x}".format(x) for x in pkt)
+        )
 
     def close(self):
         """Close."""
@@ -822,9 +827,8 @@ class DummyTransport(RFXtrxTransport):
 class DummyTransport2(PySerialTransport):
     """ Dummy transport for testing purposes """
     #  pylint: disable=super-init-not-called
-    def __init__(self, device="", debug=True):
+    def __init__(self, device=""):
         self.serial = _dummySerial(device, 38400, timeout=0.1)
-        self.debug = debug
         self._run_event = threading.Event()
         self._run_event.set()
 
@@ -834,17 +838,16 @@ class Connect:
     Has methods for sensors.
     """
     #  pylint: disable=too-many-instance-attributes, too-many-arguments
-    def __init__(self, device, event_callback=None, debug=False,
+    def __init__(self, device, event_callback=None,
                  transport_protocol=PySerialTransport,
                  modes=None):
         self._run_event = threading.Event()
         self._sensors = {}
         self._status = None
         self._modes = modes
-        self._debug = debug
         self.event_callback = event_callback
 
-        self.transport = transport_protocol(device, debug)
+        self.transport = transport_protocol(device)
         self._thread = threading.Thread(target=self._connect)
         self._thread.setDaemon(True)
         self._thread.start()
@@ -859,8 +862,10 @@ class Connect:
             self.set_recmodes(self._modes)
             self._status = self.send_get_status()
 
-        if self._debug:
-            print("RFXTRX: ", self._status.device)
+        if self._status:
+            _LOGGER.debug(
+                "Status: %s", self._status.device
+            )
 
         self.send_start()
 

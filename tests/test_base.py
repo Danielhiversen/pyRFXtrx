@@ -18,7 +18,7 @@ class CoreTestCase(TestCase):
 
     def test_constructor(self):
         global num_calbacks
-        core = RFXtrx.Core(self.path, event_callback=_callback, debug=False,transport_protocol=RFXtrx.DummyTransport2)
+        core = RFXtrx.Core(self.path, event_callback=_callback, transport_protocol=RFXtrx.DummyTransport2)
         while num_calbacks < 6:
             time.sleep(0.1)
 
@@ -29,7 +29,7 @@ class CoreTestCase(TestCase):
 
     def test_format_packet(self):
         # Lighting1
-        core = RFXtrx.Connect(self.path, event_callback=_callback, debug=False, transport_protocol=RFXtrx.DummyTransport)
+        core = RFXtrx.Connect(self.path, event_callback=_callback, transport_protocol=RFXtrx.DummyTransport)
         bytes_array = bytearray([0x07, 0x10, 0x00, 0x2a, 0x45, 0x05, 0x01, 0x70])
         event = core.transport.parse(bytes_array)
         self.assertEquals(RFXtrx.ControlEvent, type(event))
@@ -304,7 +304,7 @@ class CoreTestCase(TestCase):
         self.assertFalse(temphum==energy)
 
     def test_equal_device_check(self):
-        core = RFXtrx.Connect(self.path, event_callback=_callback, debug=False, transport_protocol=RFXtrx.DummyTransport)
+        core = RFXtrx.Connect(self.path, event_callback=_callback, transport_protocol=RFXtrx.DummyTransport)
         data1 = bytearray(b'\x11\x5A\x01\x00\x2E\xB2\x03\x00\x00'
                           b'\x02\xB4\x00\x00\x0C\x46\xA8\x11\x69')
         energy = core.transport.receive(data1)
@@ -337,7 +337,7 @@ class CoreTestCase(TestCase):
         core.close_connection()
 
     def test_get_device(self):
-        core = RFXtrx.Connect(self.path, event_callback=_callback, debug=False, transport_protocol=RFXtrx.DummyTransport)
+        core = RFXtrx.Connect(self.path, event_callback=_callback, transport_protocol=RFXtrx.DummyTransport)
         # Lighting1
         bytes_array = bytearray([0x07, 0x10, 0x00, 0x2a, 0x45, 0x05, 0x01, 0x70])
         event = core.transport.parse(bytes_array)
@@ -383,7 +383,7 @@ class CoreTestCase(TestCase):
         core.close_connection()
 
     def test_set_recmodes(self):
-        core = RFXtrx.Connect(self.path, event_callback=_callback, debug=False, 
+        core = RFXtrx.Connect(self.path, event_callback=_callback, 
                               transport_protocol=RFXtrx.DummyTransport)
         time.sleep(0.2)
         self.assertEquals(None, core._modes)
@@ -405,7 +405,7 @@ class CoreTestCase(TestCase):
           core.set_recmodes(['arc', 'oregon', 'unknown-mode'])
 
     def test_receive(self):
-        core = RFXtrx.Connect(self.path, event_callback=_callback, debug=False, transport_protocol=RFXtrx.DummyTransport)
+        core = RFXtrx.Connect(self.path, event_callback=_callback, transport_protocol=RFXtrx.DummyTransport)
         time.sleep(0.2)
         # Lighting1
         bytes_array = bytearray([0x07, 0x10, 0x00, 0x2a, 0x45, 0x05, 0x01, 0x70])

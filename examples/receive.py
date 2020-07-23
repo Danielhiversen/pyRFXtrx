@@ -19,6 +19,7 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+import logging
 sys.path.append("../")
 
 import RFXtrx
@@ -28,6 +29,8 @@ def print_callback(event):
     print(event)
 
 def main():
+    logging.basicConfig(level=logging.DEBUG)
+
     if len(sys.argv) >= 2:
         rfxcom_device = sys.argv[1]
     else:
@@ -35,7 +38,7 @@ def main():
 
     modes_list = sys.argv[2].split() if len(sys.argv) > 2 else None
     print ("modes: ", modes_list)
-    core = RFXtrx.Core(rfxcom_device, print_callback, debug=True, modes=modes_list)
+    core = RFXtrx.Core(rfxcom_device, print_callback, modes=modes_list)
 
     print (core)
     while True:
