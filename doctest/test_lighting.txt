@@ -1,5 +1,9 @@
 Lighting tests
 ==============
+>>> import logging
+>>> import sys
+>>> logging.root.handlers #= []
+>>> logging.basicConfig(level=logging.DEBUG, format="RFXTRX: %(message)s", handlers=[logging.StreamHandler(sys.stdout)])
 
 
 Lighting1
