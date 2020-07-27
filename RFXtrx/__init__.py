@@ -36,6 +36,7 @@ from . import lowlevel
 
 _LOGGER = logging.getLogger(__name__)
 
+
 ###############################################################################
 # RFXtrxDevice class
 ###############################################################################
@@ -681,7 +682,7 @@ class PySerialTransport(RFXtrxTransport):
             data = self.serial.read(pkt[0])
             pkt.extend(bytearray(data))
             _LOGGER.debug(
-                "Recv: " +
+                "Recv: %s",
                 " ".join("0x{0:02x}".format(x) for x in pkt)
             )
             return self.parse(pkt)
@@ -695,7 +696,7 @@ class PySerialTransport(RFXtrxTransport):
         else:
             raise ValueError("Invalid type")
         _LOGGER.debug(
-            "Send: " +
+            "Send: %s",
             " ".join("0x{0:02x}".format(x) for x in pkt)
         )
         self.serial.write(pkt)
@@ -756,7 +757,7 @@ class PyNetworkTransport(RFXtrxTransport):
                 data = self.sock.recv(pkt[0])
                 pkt.extend(bytearray(data))
             _LOGGER.debug(
-                "Recv: " +
+                "Recv: %s",
                 " ".join("0x{0:02x}".format(x) for x in pkt)
             )
             return self.parse(pkt)
@@ -770,7 +771,7 @@ class PyNetworkTransport(RFXtrxTransport):
         else:
             raise ValueError("Invalid type")
         _LOGGER.debug(
-            "Send: " +
+            "Send: %s",
             " ".join("0x{0:02x}".format(x) for x in pkt)
         )
         self.sock.send(pkt)
@@ -801,7 +802,7 @@ class DummyTransport(RFXtrxTransport):
             return None
         pkt = bytearray(data)
         _LOGGER.debug(
-            "Recv: " +
+            "Recv: %s",
             " ".join("0x{0:02x}".format(x) for x in pkt)
         )
         return self.parse(pkt)
@@ -810,12 +811,12 @@ class DummyTransport(RFXtrxTransport):
         """ Emulate a receive by parsing the given data """
         return self.receive(data)
 
-    def send(self, data):
+    def send(self, data):  # pylint: disable=R0201
         """ Emulate a send by doing nothing (except printing debug info if
             requested) """
         pkt = bytearray(data)
         _LOGGER.debug(
-            "Send: " +
+            "Send: %s",
             " ".join("0x{0:02x}".format(x) for x in pkt)
         )
 
