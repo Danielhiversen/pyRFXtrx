@@ -24,6 +24,64 @@ RFXtrx.
 # pylint: disable=C0302,R0902,R0903,R0911,R0913
 # pylint: disable= too-many-lines, too-many-statements
 
+def get_packet(packettype):
+    """Return a packet based on the packet type."""
+    if packettype == 0x01:
+        pkt = Status()
+    elif packettype == 0x10:
+        pkt = Lighting1()
+    elif packettype == 0x11:
+        pkt = Lighting2()
+    elif packettype == 0x12:
+        pkt = Lighting3()
+    elif packettype == 0x13:
+        pkt = Lighting4()
+    elif packettype == 0x14:
+        pkt = Lighting5()
+    elif packettype == 0x15:
+        pkt = Lighting6()
+    elif packettype == 0x16:
+        pkt = Chime()
+    elif packettype == 0x19:
+        pkt = RollerTrol()
+    elif packettype == 0x1A:
+        pkt = Rfy()
+    elif packettype == 0x20:
+        pkt = Security1()
+    elif packettype == 0x50:
+        pkt = Temp()
+    elif packettype == 0x4E:
+        pkt = Bbq()
+    elif packettype == 0x4F:
+        pkt = TempRain()
+    elif packettype == 0x51:
+        pkt = Humid()
+    elif packettype == 0x52:
+        pkt = TempHumid()
+    elif packettype == 0x53:
+        pkt = Baro()
+    elif packettype == 0x54:
+        pkt = TempHumidBaro()
+    elif packettype == 0x55:
+        pkt = Rain()
+    elif packettype == 0x56:
+        pkt = Wind()
+    elif packettype == 0x57:
+        pkt = UV()
+    elif packettype == 0x59:
+        pkt = Energy1()
+    elif packettype == 0x5A:
+        pkt = Energy()
+    elif packettype == 0x5B:
+        pkt = Energy4()
+    elif packettype == 0x5C:
+        pkt = Energy5()
+    elif packettype == 0x71:
+        pkt = RfxMeter()
+    else:
+        pkt = None
+
+    return pkt
 
 def parse(data):
     # pylint: disable=too-many-branches
@@ -36,59 +94,8 @@ def parse(data):
     if len(data) != expected_length:
         return None
 
-    if data[1] == 0x01:
-        pkt = Status()
-    elif data[1] == 0x10:
-        pkt = Lighting1()
-    elif data[1] == 0x11:
-        pkt = Lighting2()
-    elif data[1] == 0x12:
-        pkt = Lighting3()
-    elif data[1] == 0x13:
-        pkt = Lighting4()
-    elif data[1] == 0x14:
-        pkt = Lighting5()
-    elif data[1] == 0x15:
-        pkt = Lighting6()
-    elif data[1] == 0x16:
-        pkt = Chime()
-    elif data[1] == 0x19:
-        pkt = RollerTrol()
-    elif data[1] == 0x1A:
-        pkt = Rfy()
-    elif data[1] == 0x20:
-        pkt = Security1()
-    elif data[1] == 0x50:
-        pkt = Temp()
-    elif data[1] == 0x4E:
-        pkt = Bbq()
-    elif data[1] == 0x4F:
-        pkt = TempRain()
-    elif data[1] == 0x51:
-        pkt = Humid()
-    elif data[1] == 0x52:
-        pkt = TempHumid()
-    elif data[1] == 0x53:
-        pkt = Baro()
-    elif data[1] == 0x54:
-        pkt = TempHumidBaro()
-    elif data[1] == 0x55:
-        pkt = Rain()
-    elif data[1] == 0x56:
-        pkt = Wind()
-    elif data[1] == 0x57:
-        pkt = UV()
-    elif data[1] == 0x59:
-        pkt = Energy1()
-    elif data[1] == 0x5A:
-        pkt = Energy()
-    elif data[1] == 0x5B:
-        pkt = Energy4()
-    elif data[1] == 0x5C:
-        pkt = Energy5()
-    elif data[1] == 0x71:
-        pkt = RfxMeter()
-    else:
+    pkt = get_packet(data[1])
+    if pkt is None:
         return None
 
     pkt.load_receive(data)

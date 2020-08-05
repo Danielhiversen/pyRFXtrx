@@ -351,6 +351,28 @@ class ChimeDevice(RFXtrxDevice):
         pkt.set_transmit(self.subtype, 0, self.id1, self.id2, sound)
         transport.send(pkt.data)
 
+###############################################################################
+# get_device_from_pkt method
+###############################################################################
+
+
+def get_device_from_pkt(pkt):
+    """Construct a device object from a packet."""
+    # pylint: disable=too-many-boolean-expressions
+    if isinstance(pkt, (lowlevel.Lighting1, lowlevel.Lighting2,
+                        lowlevel.Lighting3, lowlevel.Lighting4,
+                        lowlevel.Lighting5, lowlevel.Lighting6)):
+        device = LightingDevice(pkt)
+    elif isinstance(pkt, lowlevel.RollerTrol):
+        device = RollerTrolDevice(pkt)
+    elif isinstance(pkt, lowlevel.Rfy):
+        device = RfyDevice(pkt)
+    elif isinstance(pkt, lowlevel.Chime):
+        device = ChimeDevice(pkt)
+    else:
+        device = RFXtrxDevice(pkt)
+    return device
+
 
 ###############################################################################
 # get_devide method
@@ -359,45 +381,12 @@ class ChimeDevice(RFXtrxDevice):
 
 def get_device(packettype, subtype, id_string):
     """ Return a device base on its identifying values """
-    # pylint: disable=too-many-return-statements
-    if packettype == 0x10:  # Lighting1
-        pkt = lowlevel.Lighting1()
-        pkt.parse_id(subtype, id_string)
-        return LightingDevice(pkt)
-    if packettype == 0x11:  # Lighting2
-        pkt = lowlevel.Lighting2()
-        pkt.parse_id(subtype, id_string)
-        return LightingDevice(pkt)
-    if packettype == 0x12:  # Lighting3
-        pkt = lowlevel.Lighting3()
-        pkt.parse_id(subtype, id_string)
-        return LightingDevice(pkt)
-    if packettype == 0x13:  # Lighting4
-        pkt = lowlevel.Lighting4()
-        pkt.parse_id(subtype, id_string)
-        return LightingDevice(pkt)
-    if packettype == 0x14:  # Lighting5
-        pkt = lowlevel.Lighting5()
-        pkt.parse_id(subtype, id_string)
-        return LightingDevice(pkt)
-    if packettype == 0x15:  # Lighting6
-        pkt = lowlevel.Lighting6()
-        pkt.parse_id(subtype, id_string)
-        return LightingDevice(pkt)
-    if packettype == 0x16:  # Chime
-        pkt = lowlevel.Chime()
-        pkt.parse_id(subtype, id_string)
-        return ChimeDevice(pkt)
-    if packettype == 0x19:  # RollerTrol
-        pkt = lowlevel.RollerTrol()
-        pkt.parse_id(subtype, id_string)
-        return RollerTrolDevice(pkt)
-    if packettype == 0x1A:  # Rfy
-        pkt = lowlevel.Rfy()
-        pkt.parse_id(subtype, id_string)
-        return RfyDevice(pkt)
+    pkt = lowlevel.get_packet(packettype)
+    if pkt is None or not hasattr(pkt, "parse_id"):
+        raise ValueError("Unsupported packettype")
+    pkt.parse_id(subtype, id_string)
+    return get_device_from_pkt(pkt)
 
-    raise ValueError("Unsupported packettype")
 
 
 ###############################################################################
@@ -420,7 +409,7 @@ class SensorEvent(RFXtrxEvent):
 
     def __init__(self, pkt):
         #  pylint: disable=too-many-branches, too-many-statements
-        device = RFXtrxDevice(pkt)
+        device = get_device_from_pkt(pkt)
         super().__init__(device)
 
         self.values = {}
@@ -500,19 +489,7 @@ class ControlEvent(RFXtrxEvent):
     """ Concrete class for control events """
 
     def __init__(self, pkt):
-        # pylint: disable=too-many-boolean-expressions
-        if isinstance(pkt, (lowlevel.Lighting1, lowlevel.Lighting2,
-                            lowlevel.Lighting3, lowlevel.Lighting4,
-                            lowlevel.Lighting5, lowlevel.Lighting6)):
-            device = LightingDevice(pkt)
-        elif isinstance(pkt, lowlevel.RollerTrol):
-            device = RollerTrolDevice(pkt)
-        elif isinstance(pkt, lowlevel.Rfy):
-            device = RfyDevice(pkt)
-        elif isinstance(pkt, lowlevel.Chime):
-            device = ChimeDevice(pkt)
-        else:
-            device = RFXtrxDevice(pkt)
+        device = get_device_from_pkt(pkt)
         super().__init__(device)
 
         self.values = {}
