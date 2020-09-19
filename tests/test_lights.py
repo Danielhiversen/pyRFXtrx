@@ -211,10 +211,10 @@ class test_Lighting3(unittest.TestCase):
     def test_parse_bytes(self):
 
         light = RFXtrx.lowlevel.parse(self.data)
-        self.assertEquals(RFXtrx.lowlevel.Lighting5, type(light))
-        self.assertEquals(light.type_string,"LightwaveRF, Siemens")
-        self.assertEquals(light.seqnbr,173)
-        self.assertEquals(light.id_string,"f394ab:1")
-        self.assertEquals(light.cmnd_string,"On")
-        self.assertEquals(light.cmnd,1)
-        self.assertEquals(light.level,0)
+        self.assertEqual(RFXtrx.lowlevel.Lighting5, type(light))
+        self.assertEqual(light.type_string,"LightwaveRF, Siemens")
+        self.assertEqual(light.seqnbr,173)
+        self.assertEqual(light.id_string,"f394ab:1")
+        self.assertEqual(light.cmnd_string,"On")
+        self.assertEqual(light.cmnd,1)
+        self.assertEqual(light.level,0)

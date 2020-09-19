@@ -13,24 +13,24 @@ class StatusTestCase(TestCase):
 
     def test_parse_bytes(self):
         status = RFXtrx.lowlevel.parse(self.data)
-        self.assertEquals(RFXtrx.lowlevel.Status, type(status))
-        self.assertEquals(status.devices, ['ac', 'arc', 'hideki', 'homeeasy', 'keeloq', 'lacrosse', 'oregon', 'x10'])
-        self.assertEquals(status.type_string,'433.92MHz')
-        self.assertEquals(status.firmware_version,69)
-        self.assertEquals(status.output_power,0)
+        self.assertEqual(RFXtrx.lowlevel.Status, type(status))
+        self.assertEqual(status.devices, ['ac', 'arc', 'hideki', 'homeeasy', 'keeloq', 'lacrosse', 'oregon', 'x10'])
+        self.assertEqual(status.type_string,'433.92MHz')
+        self.assertEqual(status.firmware_version,69)
+        self.assertEqual(status.output_power,0)
         self.assertTrue(status.has_value('devices'))
 
     def test_validate_bytes_short(self):
 
         data = self.data[:1]
         status = RFXtrx.lowlevel.parse(data)
-        self.assertEquals(status, None)
+        self.assertEqual(status, None)
         
     def test_validate_unkown_packet_type(self):
 
         self.data[1] = 0xFF
         status = RFXtrx.lowlevel.parse(self.data)
-        self.assertEquals(status, None)
+        self.assertEqual(status, None)
 
         
 
