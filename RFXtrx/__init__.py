@@ -71,7 +71,7 @@ class RFXtrxDevice:
 class RollerTrolDevice(RFXtrxDevice):
     """ Concrete class for a roller device """
     def __init__(self, pkt):
-        super(RollerTrolDevice, self).__init__(pkt)
+        super().__init__(pkt)
         if isinstance(pkt, lowlevel.RollerTrol):
             self.known_to_be_rollershutter = True
             self.id_combined = pkt.id_combined
@@ -121,7 +121,7 @@ class RollerTrolDevice(RFXtrxDevice):
 class RfyDevice(RFXtrxDevice):
     """ Concrete class for a roller device """
     def __init__(self, pkt):
-        super(RfyDevice, self).__init__(pkt)
+        super().__init__(pkt)
         if isinstance(pkt, lowlevel.Rfy):
             self.known_to_be_rollershutter = True
             self.id_combined = pkt.id_combined
@@ -199,7 +199,7 @@ class LightingDevice(RFXtrxDevice):
 
     # pylint: disable=too-many-instance-attributes
     def __init__(self, pkt):
-        super(LightingDevice, self).__init__(pkt)
+        super().__init__(pkt)
         if isinstance(pkt, lowlevel.Lighting1):
             self.housecode = pkt.housecode
             self.unitcode = pkt.unitcode
@@ -341,7 +341,7 @@ class LightingDevice(RFXtrxDevice):
 class ChimeDevice(RFXtrxDevice):
     """ Concrete class for a control device """
     def __init__(self, pkt):
-        super(ChimeDevice, self).__init__(pkt)
+        super().__init__(pkt)
         self.id1 = pkt.id1
         self.id2 = pkt.id2
 
@@ -421,7 +421,7 @@ class SensorEvent(RFXtrxEvent):
     def __init__(self, pkt):
         #  pylint: disable=too-many-branches, too-many-statements
         device = RFXtrxDevice(pkt)
-        super(SensorEvent, self).__init__(device)
+        super().__init__(device)
 
         self.values = {}
         self.pkt = pkt
@@ -513,7 +513,7 @@ class ControlEvent(RFXtrxEvent):
             device = ChimeDevice(pkt)
         else:
             device = RFXtrxDevice(pkt)
-        super(ControlEvent, self).__init__(device)
+        super().__init__(device)
 
         self.values = {}
         self.values['Command'] = pkt.value('cmnd_string')
