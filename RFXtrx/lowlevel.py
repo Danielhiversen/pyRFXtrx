@@ -362,8 +362,8 @@ class Lighting1(Packet):
                     self.housecode = hcode_num
             self.unitcode = int(id_string[1:])
             self._set_strings()
-        except ValueError:
-            raise ValueError("Invalid id_string")
+        except ValueError as exc:
+            raise ValueError("Invalid id_string") from exc
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
 
@@ -482,8 +482,8 @@ class Lighting2(Packet):
             self.id4 = self.id_combined & 0xff
             self.unitcode = int(id_string[8:])
             self._set_strings()
-        except ValueError:
-            raise ValueError("Invalid id_string")
+        except ValueError as exc:
+            raise ValueError("Invalid id_string") from exc
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
 
@@ -605,8 +605,8 @@ class Lighting3(Packet):
             self.channel1 = self.channel & 0xff
             self.channel2 = self.channel >> 8
             self._set_strings()
-        except ValueError:
-            raise ValueError("Invalid id_string")
+        except ValueError as exc:
+            raise ValueError("Invalid id_string") from exc
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
 
@@ -717,8 +717,8 @@ class Lighting4(Packet):
             self.cmd2 = (self.cmd >> 8) & 0xff
             self.cmd3 = self.cmd & 0xff
             self._set_strings()
-        except ValueError:
-            raise ValueError("Invalid id_string")
+        except ValueError as exc:
+            raise ValueError("Invalid id_string") from exc
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
 
@@ -903,8 +903,8 @@ class Lighting5(Packet):
             self.id3 = self.id_combined & 0xff
             self.unitcode = int(id_string[7:])
             self._set_strings()
-        except ValueError:
-            raise ValueError("Invalid id_string")
+        except ValueError as exc:
+            raise ValueError("Invalid id_string") from exc
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
 
@@ -1030,8 +1030,8 @@ class Lighting6(Packet):
             self.groupcode = ord(id_string[5])
             self.unitcode = int(id_string[6:])
             self._set_strings()
-        except ValueError:
-            raise ValueError("Invalid id_string")
+        except ValueError as exc:
+            raise ValueError("Invalid id_string") from exc
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
 
@@ -2213,8 +2213,8 @@ class Chime(Packet):
             self.id1 = int(id_string[:2], 16)
             self.id2 = int(id_string[3:5], 16)
             self._set_strings()
-        except ValueError:
-            raise ValueError("Invalid id_string")
+        except ValueError as exc:
+            raise ValueError("Invalid id_string") from exc
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
 
@@ -2428,8 +2428,8 @@ class Rfy(Packet):
             self.id3 = self.id_combined & 0xff
             self.unitcode = int(id_string[7:])
             self._set_strings()
-        except ValueError:
-            raise ValueError("Invalid id_string")
+        except ValueError as exc:
+            raise ValueError("Invalid id_string") from exc
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
 
@@ -2544,8 +2544,8 @@ class RollerTrol(Packet):
             self.id3 = self.id_combined & 0xff
             self.unitcode = int(id_string[7:])
             self._set_strings()
-        except ValueError:
-            raise ValueError("Invalid id_string")
+        except ValueError as exc:
+            raise ValueError("Invalid id_string") from exc
         if self.id_string != id_string:
             raise ValueError("Invalid id_string")
 
