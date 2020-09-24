@@ -1079,7 +1079,7 @@ Wind
 Wind [subtype=None, seqnbr=None, id=None, direction=None, average_speed=None, gust=None, temperature=None, chill=None, battery=None, rssi=None]
 >>> x.load_receive(bytearray([0x10, 0x56, 0x01, 0x03, 0x2F, 0x00, 0x00, 0xF7, 0x00, 0x20, 0x00, 0x24, 0x81, 0x60, 0x82, 0x50, 0x59]))
 >>> print(x)
-Wind [subtype=WTGR800, seqnbr=3, id=2f:00, direction=247, average_speed=3.2, gust=3.6, temperature=-35.2, chill=-59.2, battery=9, rssi=5]
+Wind [subtype=WTGR800, seqnbr=3, id=2f:00, direction=247, average_speed=3.2, gust=3.6, temperature=None, chill=None, battery=9, rssi=5]
 >>> 
 >>> print(list(x.data))
 [16, 86, 1, 3, 47, 0, 0, 247, 0, 32, 0, 36, 129, 96, 130, 80, 89]
@@ -1106,9 +1106,9 @@ WTGR800
 >>> print(x.gust)
 3.6
 >>> print(x.temperature)
--35.2
+None
 >>> print(x.chill)
--59.2
+None
 >>> print(x.rssi_byte)
 89
 >>> print(x.rssi)
