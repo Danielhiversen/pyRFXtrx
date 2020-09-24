@@ -22,13 +22,3 @@ install: pip install -U tox coveralls
 language: python
 script: tox
 after_success: coveralls
-deploy:
-  provider: pypi
-  user: dahoiv
-  skip_existing: true
-  password:
-    secure: DQvNzatG4iBuvoKmc+eTL3mJnd+DHa/qJa24w8jVjppDY9A69G/bUsHuQvvMrbWSBTlXykMRqr3jIM9Vch/GK4o4DmMwfvxXfTSU8M9WJzRJ+AI3m05MO/tq3BUyiNp3zNyXJUq2QEVUT5utnYCFWB0CioUrFjD15cVVoyIRhQE=
-  on:
-    tags: true
-    distributions: sdist bdist_wheel
-    repo: Danielhiversen/pyRFXtrx
