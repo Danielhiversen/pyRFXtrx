@@ -1832,7 +1832,7 @@ class Wind(SensorPacket):
             if self.chillhigh >= 0x80:
                 self.chill = -1 * self.chill
         if self.subtype == 0x03:
-            self.battery = data[16] + 1 * 10
+            self.battery = data[16]
         else:
             self.rssi_byte = data[16]
             self.battery = self.rssi_byte & 0x0f
@@ -2015,7 +2015,7 @@ class Energy(SensorPacket):
                            (data[15] << 8) + data[16]) / 223.666
 
         if self.subtype == 0x03:
-            self.battery = data[17] + 1 * 10
+            self.battery = data[17]
         else:
             self.rssi_byte = data[17]
             self.battery = self.rssi_byte & 0x0f
