@@ -15,6 +15,7 @@ class CoreTestCase(TestCase):
         self.path = '/dev/serial/...'
         global num_calbacks
         num_calbacks = 0
+        self.maxDiff = 1000
 
     def test_constructor(self):
         global num_calbacks
@@ -183,7 +184,7 @@ class CoreTestCase(TestCase):
         bytes_array = [0x10, 0x56, 0x01, 0x03, 0x2F, 0x00, 0x00, 0xF7, 0x00, 0x20, 0x00, 0x24, 0x81, 0x60, 0x82, 0x50, 0x59]
         event = core.transport.parse(bytes_array)
         self.assertEqual(RFXtrx.SensorEvent, type(event))
-        self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='WTGR800' id='2f:00'] values=[('Battery numeric', 9), ('Chill', -59.2), ('Rssi numeric', 5), ('Temperature', -35.2), ('Wind average speed', 3.2), ('Wind direction', 247), ('Wind gust', 3.6)]")
+        self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='WTGR800' id='2f:00'] values=[('Battery numeric', 9), ('Rssi numeric', 5), ('Wind average speed', 3.2), ('Wind direction', 247), ('Wind gust', 3.6)]")
 
         #uv
         bytes_array = [0x09, 0x57, 0x02, 0x02, 0x64, 0x00, 0x20, 0x02, 0x3c, 0x69]
