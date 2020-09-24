@@ -2349,7 +2349,8 @@ class Security1(SensorPacket):
         self.id_combined = (self.id1 << 16) + (self.id2 << 8) + self.id3
         self.security1_status = data[7]
         self.rssi_byte = data[8]
-        self.battery = self.rssi_byte & 0x0f
+        if self.subtype not in (0x03, 0x09, 0x0A):
+            self.battery = self.rssi_byte & 0x0f
         self.rssi = self.rssi_byte >> 4
         self._set_strings()
 
