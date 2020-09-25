@@ -22,85 +22,6 @@ This module provides low level packet parsing and generation code for the
 RFXtrx.
 """
 # pylint: disable=C0302,R0902,R0903,R0911,R0913
-# pylint: disable= too-many-lines, too-many-statements
-
-def get_packet(packettype):
-    """Return a packet based on the packet type."""
-    if packettype == 0x01:
-        pkt = Status()
-    elif packettype == 0x10:
-        pkt = Lighting1()
-    elif packettype == 0x11:
-        pkt = Lighting2()
-    elif packettype == 0x12:
-        pkt = Lighting3()
-    elif packettype == 0x13:
-        pkt = Lighting4()
-    elif packettype == 0x14:
-        pkt = Lighting5()
-    elif packettype == 0x15:
-        pkt = Lighting6()
-    elif packettype == 0x16:
-        pkt = Chime()
-    elif packettype == 0x19:
-        pkt = RollerTrol()
-    elif packettype == 0x1A:
-        pkt = Rfy()
-    elif packettype == 0x20:
-        pkt = Security1()
-    elif packettype == 0x50:
-        pkt = Temp()
-    elif packettype == 0x4E:
-        pkt = Bbq()
-    elif packettype == 0x4F:
-        pkt = TempRain()
-    elif packettype == 0x51:
-        pkt = Humid()
-    elif packettype == 0x52:
-        pkt = TempHumid()
-    elif packettype == 0x53:
-        pkt = Baro()
-    elif packettype == 0x54:
-        pkt = TempHumidBaro()
-    elif packettype == 0x55:
-        pkt = Rain()
-    elif packettype == 0x56:
-        pkt = Wind()
-    elif packettype == 0x57:
-        pkt = UV()
-    elif packettype == 0x59:
-        pkt = Energy1()
-    elif packettype == 0x5A:
-        pkt = Energy()
-    elif packettype == 0x5B:
-        pkt = Energy4()
-    elif packettype == 0x5C:
-        pkt = Energy5()
-    elif packettype == 0x71:
-        pkt = RfxMeter()
-    else:
-        pkt = None
-
-    return pkt
-
-def parse(data):
-    # pylint: disable=too-many-branches
-    """ Parse a packet from a bytearray """
-    if data[0] == 0 or len(data) < 2:
-        # null length packet - sometimes happens on initialization
-        return None
-
-    expected_length = data[0] + 1
-    if len(data) != expected_length:
-        return None
-
-    pkt = get_packet(data[1])
-    if pkt is None:
-        return None
-
-    pkt.load_receive(data)
-    return pkt
-
 
 ###############################################################################
 # Packet class
@@ -2611,3 +2532,58 @@ class RollerTrol(Packet):
                 self.cmnd_string = self.COMMANDS[self.cmnd]
             else:
                 self.cmnd_string = self._UNKNOWN_CMND.format(self.cmnd)
+
+
+PACKET_TYPES = {
+    0x01: Status,
+    0x10: Lighting1,    
+    0x11: Lighting2,
+    0x12: Lighting3,
+    0x13: Lighting4,
+    0x14: Lighting5,
+    0x15: Lighting6,
+    0x16: Chime,
+    0x19: RollerTrol,
+    0x1A: Rfy,
+    0x20: Security1,
+    0x50: Temp,
+    0x4E: Bbq,
+    0x4F: TempRain,
+    0x51: Humid,
+    0x52: TempHumid,
+    0x53: Baro,
+    0x54: TempHumidBaro,
+    0x55: Rain,
+    0x56: Wind,
+    0x57: UV,
+    0x59: Energy1,
+    0x5A: Energy,
+    0x5B: Energy4,
+    0x5C: Energy5,
+    0x71: RfxMeter,
+}
+
+def get_packet(packettype):
+    """Return a packet based on the packet type."""
+    cls = PACKET_TYPES.get(packettype)
+    if cls:
+        return cls()
+    return None
+
+def parse(data):
+    """ Parse a packet from a bytearray """
+    if data[0] == 0 or len(data) < 2:
+        # null length packet - sometimes happens on initialization
+        return None
+
+    expected_length = data[0] + 1
+    if len(data) != expected_length:
+        return None
+
+    pkt = get_packet(data[1])
+    if pkt is None:
+        return None
+
+    pkt.load_receive(data)
+    return pkt
+
