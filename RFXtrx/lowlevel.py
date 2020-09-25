@@ -28,6 +28,7 @@ RFXtrx.
 # Packet class
 ###############################################################################
 
+
 class Packet():
     """ Abstract superclass for all low level packets """
 
@@ -2537,7 +2538,7 @@ class RollerTrol(Packet):
 
 PACKET_TYPES = {
     0x01: Status,
-    0x10: Lighting1,    
+    0x10: Lighting1,
     0x11: Lighting2,
     0x12: Lighting3,
     0x13: Lighting4,
@@ -2574,6 +2575,7 @@ def get_packet(packettype):
 
 
 def get_packet_with_id(packettype, subtype, id_string):
+    """Return a packet based on the type and identifiers."""
     pkt = get_packet(packettype)
     if pkt is None or not hasattr(pkt, "parse_id"):
         return None
@@ -2597,4 +2599,3 @@ def parse(data):
 
     pkt.load_receive(data)
     return pkt
-
