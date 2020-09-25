@@ -375,18 +375,16 @@ def get_device_from_pkt(pkt):
 
 
 ###############################################################################
-# get_devide method
+# get_device method
 ###############################################################################
 
 
 def get_device(packettype, subtype, id_string):
     """ Return a device base on its identifying values """
-    pkt = lowlevel.get_packet(packettype)
-    if pkt is None or not hasattr(pkt, "parse_id"):
+    pkt = lowlevel.get_packet_with_id(packettype, subtype, id_string)
+    if pkt is None:
         raise ValueError("Unsupported packettype")
-    pkt.parse_id(subtype, id_string)
     return get_device_from_pkt(pkt)
-
 
 
 ###############################################################################

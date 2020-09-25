@@ -2564,12 +2564,22 @@ PACKET_TYPES = {
     0x71: RfxMeter,
 }
 
+
 def get_packet(packettype):
     """Return a packet based on the packet type."""
     cls = PACKET_TYPES.get(packettype)
-    if cls:
-        return cls()
-    return None
+    if cls is None:
+        return None
+    return cls()
+
+
+def get_packet_with_id(packettype, subtype, id_string):
+    pkt = get_packet(packettype)
+    if pkt is None or not hasattr(pkt, "parse_id"):
+        return None
+    pkt.parse_id(subtype, id_string)
+    return pkt
+
 
 def parse(data):
     """ Parse a packet from a bytearray """
