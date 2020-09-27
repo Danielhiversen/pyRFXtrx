@@ -1602,10 +1602,10 @@ class Rain(SensorPacket):
         self.id2 = data[5]
         self.rainrate1 = data[6]
         if self.subtype == 9:
-            self.rainrate1= data[9]
+            self.rainrate1 = data[9]
         self.rainrate2 = data[7]
         if self.subtype == 9:
-            self.rainrate2= data[10]
+            self.rainrate2 = data[10]
         self.rainrate = (self.rainrate1 << 8) + self.rainrate2
         if self.subtype == 2:
             self.rainrate = float(self.rainrate) / 100
@@ -1615,7 +1615,7 @@ class Rain(SensorPacket):
         self.raintotal = float((self.raintotal1 << 16) +
                                (self.raintotal2 << 8) +
                                self.raintotal3) / 10
-        if self.subtype == 9:                         
+        if self.subtype == 9:                    
             self.raintotal = self.raintotal * 2.54
         self.rssi_byte = data[11]
         self.battery = self.rssi_byte & 0x0f
