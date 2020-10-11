@@ -2121,9 +2121,9 @@ class Chime(Packet):
 
     def __str__(self):
         return ("Chime [subtype={0}, seqnbr={1}, id={2}, sound={3}, " +
-                "battery={6}, rssi={7}]") \
+                "rssi={5}]") \
             .format(self.type_string, self.seqnbr, self.id_string,
-                    self.sound, self.battery, self.rssi)
+                    self.sound, self.rssi)
 
     def __init__(self):
         """Constructor"""
@@ -2131,7 +2131,6 @@ class Chime(Packet):
         self.id1 = None
         self.id2 = None
         self.sound = None
-        self.battery = None
         self.rssi = None
         self.cmnd = None
         self.cmnd_string = None
@@ -2160,7 +2159,6 @@ class Chime(Packet):
         self.id2 = data[5]
         self.sound = data[6]
         self.rssi_byte = data[7]
-        self.battery = self.rssi_byte & 0x0f
         self.rssi = self.rssi_byte >> 4
         self._set_strings()
 
@@ -2173,9 +2171,8 @@ class Chime(Packet):
         self.id1 = id1
         self.id2 = id2
         self.sound = sound
-        self.battery = 0
         self.rssi = 0
-        self.rssi_byte = (self.rssi << 4) | self.battery
+        self.rssi_byte = (self.rssi << 4)
         self.data = bytearray([self.packetlength, self.packettype,
                                self.subtype, self.seqnbr,
                                self.id1, self.id2, self.sound,
