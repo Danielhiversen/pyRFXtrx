@@ -2121,9 +2121,9 @@ class Chime(Packet):
 
     def __str__(self):
         return ("Chime [subtype={0}, seqnbr={1}, id={2}, sound={3}, " +
-                "rssi={5}]") \
+                "rssi={5}, cmdn={6}]") \
             .format(self.type_string, self.seqnbr, self.id_string,
-                    self.sound, self.rssi)
+                    self.sound, self.rssi, self.cmnd_string)
 
     def __init__(self):
         """Constructor"""
