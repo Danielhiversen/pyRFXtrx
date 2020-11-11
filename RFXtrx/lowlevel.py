@@ -2101,6 +2101,99 @@ class Energy5(SensorPacket):
 
 
 ###############################################################################
+# Cartelectronic class Encoder et Linky (TIC not treated - old standard)
+###############################################################################
+
+
+class Cartelectronic(SensorPacket):
+    """
+    Data class for the Cartelectronic packet type
+    """
+
+    TYPES = {0x01: 'CARTELECTRONIC_TIC',
+             0x02: 'CARTELECTRONIC_ENCODER',
+             0x03: 'CARTELECTRONIC_LINKY'}
+    """
+    Mapping of numeric subtype values to strings, used in type_string
+    """
+
+    def __str__(self):
+        return ("Cartelectronic [subtype={0}, seqnbr={1}, id={2}, " +
+                "counter1={3}, counter2={4}, " +
+                "conswatthours={5}, prodwatthours={6}, tarif_num={7}, voltage={8}, " +
+                "currentwatt={9}, teleinfo_ok={10},"
+                "battery={11}, rssi={12}]") \
+            .format(self.type_string, self.seqnbr, self.id_string,
+                    self.counter1, self.counter2,
+                    self.conswatthours, self.prodwatthours, self.tarif_num, self.voltage,
+                    self.currentwatt, self.teleinfo_ok,
+                    self.battery, self.rssi)
+
+    def __init__(self):
+        """Constructor"""
+        super().__init__()
+        self.id1 = None
+        self.id2 = None
+        self.id3 = None
+        self.id4 = None
+        self.id_combined = None
+        self.counter1 = None
+        self.counter2 = None
+        self.conswatthours = None
+        self.prodwatthours = None
+        self.tarif_num = None
+        self.voltage = None
+        self.currentwatt = None
+        self.teleinfo_ok = None
+        self.battery = None
+        self.rssi = None
+
+    def load_receive(self, data):
+        """Load data from a bytearray"""
+        self.data = data
+        self.packetlength = data[0]
+        self.packettype = data[1]
+        self.subtype = data[2]
+        self.seqnbr = data[3]
+        self.id1 = data[4]
+        self.id2 = data[5]
+        self.id3 = data[6]
+        self.id4 = data[7]
+        self.id_combined = (self.id1 << 24) + (self.id2 << 16) \
+                           + (self.id3 << 8) + self.id4
+        if self.subtype == 0x02:
+            # Cartelectronic Encoder
+            self.counter1 = ((data[8] * pow(2, 24)) + (data[9] << 16) +
+                             (data[10] << 8) + data[11])
+            self.counter2 = ((data[12] * pow(2, 24)) + (data[13] << 16) +
+                             (data[14] << 8) + data[15])
+            self.rssi_byte = data[17]
+        elif self.subtype == 0x03:
+            # Cartelectronic Linky
+            self.conswatthours = ((data[8] * pow(2, 24)) + (data[9] << 16) +
+                                  (data[10] << 8) + data[11])
+            self.prodwatthours = ((data[12] * pow(2, 24)) + (data[13] << 16) +
+                                  (data[14] << 8) + data[15])
+            self.tarif_num = (data[16] & 0x0f)
+            self.voltage = data[17] + 200
+            self.currentwatt = (data[18] << 8) + data[19]
+            self.teleinfo_ok = not (data[20] & 0x04) == 0x04
+            self.rssi_byte = data[21]
+        self.battery = self.rssi_byte & 0x0f
+        self.rssi = self.rssi_byte >> 4
+        self._set_strings()
+
+    def _set_strings(self):
+        """Translate loaded numeric values into convenience strings"""
+        self.id_string = "{0:08x}".format(self.id_combined)
+        if self.subtype in self.TYPES:
+            self.type_string = self.TYPES[self.subtype]
+        else:
+            # Degrade nicely for yet unknown subtypes
+            self.type_string = self._UNKNOWN_TYPE.format(self.packettype,
+                                                         self.subtype)
+
+###############################################################################
 # Chime class
 ###############################################################################
 
@@ -2561,6 +2654,7 @@ PACKET_TYPES = {
     0x5A: Energy,
     0x5B: Energy4,
     0x5C: Energy5,
+    0x60: Cartelectronic,
     0x71: RfxMeter,
 }
 

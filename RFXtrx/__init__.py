@@ -453,6 +453,20 @@ class SensorEvent(RFXtrxEvent):
             self.values['Current'] = pkt.currentamps
             self.values['Energy usage'] = pkt.currentwatt
             self.values['Total usage'] = pkt.totalwatthours
+        if isinstance(pkt, lowlevel.Cartelectronic):
+            if pkt.type_string == 'CARTELECTRONIC_ENCODER':
+                self.values['Energy usage'] = pkt.counter1
+                self.values['Total usage'] = pkt.counter2
+            elif pkt.type_string == 'CARTELECTRONIC_LINKY':
+                # Index for current tarif if consummer
+                self.values['Total usage'] = pkt.conswatthours
+	            # Index for current tarif if production
+                self.values['Current'] = pkt.prodwatthours
+	            # Index of current tarif
+                self.values['Counter value'] = pkt.tarif_num
+                self.values['Voltage'] = pkt.voltage
+                self.values['Energy usage'] = pkt.currentwatt
+                self.values['Sensor Status'] = pkt.teleinfo_ok
         if isinstance(pkt, lowlevel.Security1):
             self.values['Sensor Status'] = pkt.security1_status_string
         if not isinstance(pkt, (lowlevel.Energy5, lowlevel.RfxMeter)):
