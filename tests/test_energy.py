@@ -95,3 +95,42 @@ class Elec5TestCase(TestCase):
         self.assertEqual(energy.powerfactor,0)
         self.assertEqual(energy.frequency,50)
         
+
+class CartelectronicTestCase(TestCase):
+
+    def setUp(self):
+        
+        self.data = ""
+        self.parser = RFXtrx.lowlevel.Cartelectronic()
+        
+    def test_parse_bytes(self):
+        
+        # Encoder
+        self.data = bytearray(b'\x11\x60\x02\xb3\x3f\xfe\x61\xa3'
+                              b'\x00\x00\x3c\x01'
+                              b'\x00\x00\x00\x00'
+                              b'\x00\x69')
+        energy = RFXtrx.lowlevel.parse(self.data)
+        self.assertEqual(energy.type_string, "CARTELECTRONIC_ENCODER")
+        self.assertEqual(energy.seqnbr, 179)
+        self.assertEqual(energy.id_string, "3ffe61a3")
+        self.assertEqual(energy.counter1, 15361)
+        self.assertEqual(energy.counter2, 0)
+        # Linky
+        self.data = bytearray(b'\x15\x60\x03\xb0\x2a\x29\xf2\x75'
+                              b'\x00\x17\x9d\x74'
+                              b'\x00\x00\x00\x00'
+                              b'\x00'
+                              b'\x23'
+                              b'\x02\xae'
+                              b'\x00\x69')
+        energy = RFXtrx.lowlevel.parse(self.data)
+        self.assertEqual(energy.type_string, "CARTELECTRONIC_LINKY")
+        self.assertEqual(energy.seqnbr, 176)
+        self.assertEqual(energy.id_string, "2a29f275")
+        self.assertEqual(energy.conswatthours, 1547636)
+        self.assertEqual(energy.prodwatthours, 0)
+        self.assertEqual(energy.tarif_num, 0)
+        self.assertEqual(energy.voltage, 235)
+        self.assertEqual(energy.currentwatt, 686)
+        self.assertEqual(energy.teleinfo_ok, True)
