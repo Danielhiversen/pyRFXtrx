@@ -2120,13 +2120,13 @@ class Cartelectronic(SensorPacket):
     def __str__(self):
         return ("Cartelectronic [subtype={0}, seqnbr={1}, id={2}, " +
                 "counter1={3}, counter2={4}, " +
-                "conswatthours={5}, prodwatthours={6}, tarif_num={7}, voltage={8}, " +
-                "currentwatt={9}, teleinfo_ok={10},"
+                "conswatthours={5}, prodwatthours={6}, tarif_num={7}, " +
+                "voltage={8}, currentwatt={9}, teleinfo_ok={10},"
                 "battery={11}, rssi={12}]") \
             .format(self.type_string, self.seqnbr, self.id_string,
                     self.counter1, self.counter2,
-                    self.conswatthours, self.prodwatthours, self.tarif_num, self.voltage,
-                    self.currentwatt, self.teleinfo_ok,
+                    self.conswatthours, self.prodwatthours, self.tarif_num,
+                    self.voltage, self.currentwatt, self.teleinfo_ok,
                     self.battery, self.rssi)
 
     def __init__(self):
@@ -2159,8 +2159,8 @@ class Cartelectronic(SensorPacket):
         self.id2 = data[5]
         self.id3 = data[6]
         self.id4 = data[7]
-        self.id_combined = (self.id1 << 24) + (self.id2 << 16) \
-                           + (self.id3 << 8) + self.id4
+        self.id_combined = ((self.id1 << 24) + (self.id2 << 16) +
+                            (self.id3 << 8) + self.id4)
         if self.subtype == 0x02:
             # Cartelectronic Encoder
             self.counter1 = ((data[8] * pow(2, 24)) + (data[9] << 16) +
