@@ -149,6 +149,22 @@ class RfyDevice(RFXtrxDevice):
         """ Send an 'Disable Sun Automation' command """
         self.send_command(transport, 0x14)
 
+    def send_up05sec(self, transport):
+        """ Send a '0.5 Seconds Up' command """
+        self.send_command(transport, 0x0F)
+
+    def send_down05sec(self, transport):
+        """ Send a '0.5 Seconds Down' command """
+        self.send_command(transport, 0x10)
+
+    def send_up2sec(self, transport):
+        """ Send a '2 Seconds Up' command """
+        self.send_command(transport, 0x11)
+
+    def send_down2sec(self, transport):
+        """ Send a '2 Seconds Down' command """
+        self.send_command(transport, 0x12)
+
 
 class LightingDevice(RFXtrxDevice):
     """ Concrete class for a control device """

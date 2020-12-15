@@ -222,6 +222,10 @@ class CoreTestCase(TestCase):
         event.device.send_open(core.transport)
         event.device.send_close(core.transport)
         event.device.send_stop(core.transport)
+        event.device.send_up05sec(core.transport)
+        event.device.send_down05sec(core.transport)
+        event.device.send_up2sec(core.transport)
+        event.device.send_down2sec(core.transport)
 
         #temphumid
         bytes_array = [0x0a, 0x52, 0x01, 0x2a, 0x96, 0x03, 0x81, 0x41, 0x60, 0x03, 0x79]
