@@ -229,7 +229,7 @@ class LightingDevice(RFXtrxDevice):
             pkt = lowlevel.Lighting4()
             code = self.cmd & ~1
             code |= command
-            pkt.set_transmit(self.subtype, 0, command, self.pulse)
+            pkt.set_transmit(self.subtype, 0, code, self.pulse)
             transport.send(pkt.data)
         elif self.packettype == 0x14:  # Lighting5
             pkt = lowlevel.Lighting5()
