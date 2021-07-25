@@ -2575,7 +2575,15 @@ class RollerTrol(Packet):
     """
     Data class for the RollerTrol packet type
     """
-    TYPES = {0x00: 'RollerTrol'}
+    TYPES = {0x00: 'RollerTrol',
+             0x01: 'BlindsT1 / Hasta old',
+             0x02: 'BlindsT2 / A-OK RF01',
+             0x03: 'BlindsT3 / A-OK AC114',
+             0x04: 'BlindsT4 / Raex YR1326',
+             0x05: 'BlindsT5 / Media Mount',
+             0x06: 'BlindsT6 / DC106/Rohrmotor24-RMF/Yooda',
+             0x07: 'BlindsT7 / Forest'
+    }
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
