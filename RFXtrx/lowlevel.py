@@ -2693,6 +2693,37 @@ class RollerTrol(Packet):
                 self.cmnd_string = self._UNKNOWN_CMND.format(self.cmnd)
 
 
+###############################################################################
+# DSMR class
+###############################################################################
+
+class Dsmr(Packet):
+    """
+    Data class for the Dsmr packet type
+    """
+    TYPES = {0x01: 'P1',
+             0x02: 'Teleinfo'}
+
+    def load_receive(self, data):
+        """Load data from a bytearray"""
+        self.data = data
+        self.packetlength = data[0]
+        self.packettype = data[1]
+        self.subtype = data[2]
+        self.seqnbr = data[3]
+        self.databytes = bytes(data[4:-2])
+        self._set_strings()
+
+    def _set_strings(self):
+        """Translate loaded numeric values into convenience strings"""
+        if self.subtype in self.TYPES:
+            self.type_string = self.TYPES[self.subtype]
+        else:
+            # Degrade nicely for yet unknown subtypes
+            self.type_string = self._UNKNOWN_TYPE.format(self.packettype,
+                                                         self.subtype)
+
+
 PACKET_TYPES = {
     0x01: Status,
     0x10: Lighting1,
@@ -2720,6 +2751,7 @@ PACKET_TYPES = {
     0x5B: Energy4,
     0x5C: Energy5,
     0x60: Cartelectronic,
+    0x62: Dsmr,
     0x71: RfxMeter,
 }
 
