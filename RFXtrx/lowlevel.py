@@ -2711,7 +2711,7 @@ class Dsmr(Packet):
         self.packettype = data[1]
         self.subtype = data[2]
         self.seqnbr = data[3]
-        self.databytes = bytes(data[4:-2])
+        self.dsmr_data = bytes(data[4:-2]).decode('ascii')
         self._set_strings()
 
     def _set_strings(self):
