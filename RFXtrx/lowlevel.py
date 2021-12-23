@@ -2716,6 +2716,8 @@ class Dsmr(Packet):
 
     def _set_strings(self):
         """Translate loaded numeric values into convenience strings"""
+        self.id_string = "dsmr:{0}".format(self.subtype)
+
         if self.subtype in self.TYPES:
             self.type_string = self.TYPES[self.subtype]
         else:

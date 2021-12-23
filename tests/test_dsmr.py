@@ -18,6 +18,7 @@ class DsmrTestCase(TestCase):
         self.assertEqual(packet.subtype, 1)
         self.assertEqual(packet.type_string, "P1")
         self.assertEqual(packet.seqnbr, 0)
+        self.assertEqual(packet.id_string, 'dsmr:1')
         self.assertEqual(packet.dsmr_data, '')
 
     def test_header_data(self):
