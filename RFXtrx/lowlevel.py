@@ -2697,7 +2697,7 @@ class RollerTrol(Packet):
 # DSMR class
 ###############################################################################
 
-class Dsmr(Packet):
+class Dsmr(SensorPacket):
     """
     Data class for the Dsmr packet type
     """

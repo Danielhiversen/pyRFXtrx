@@ -510,7 +510,7 @@ class SensorEvent(RFXtrxEvent):
                 self.values['Sensor Status'] = pkt.teleinfo_ok
         if isinstance(pkt, lowlevel.Security1):
             self.values['Sensor Status'] = pkt.security1_status_string
-        if not isinstance(pkt, (lowlevel.Energy5, lowlevel.RfxMeter)):
+        if not isinstance(pkt, (lowlevel.Energy5, lowlevel.RfxMeter, lowlevel.Dsmr)):
             self.values['Battery numeric'] = pkt.battery
         self.values['Rssi numeric'] = pkt.rssi
 
