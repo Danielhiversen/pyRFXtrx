@@ -312,6 +312,31 @@ class CoreTestCase(TestCase):
         self.assertEqual(RFXtrx.SensorEvent, type(event))
         self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='P1' id='None'] values=[('Rssi numeric', None)]")
 
+        bytes_array = bytearray(b'\x1E\x62\x01\x05\x31\x2D\x30\x3A\x31\x2E\x38\x2E\x31\x28\x30\x30\x30\x33\x31\x34\x2E\x39\x38\x33\x2A\x6B\x57\x68\x29\x0D\x0A')
+        event = core.transport.parse(bytes_array)
+        self.assertEqual(RFXtrx.SensorEvent, type(event))
+        self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='P1' id='dsmr:1'] values=[('Electricity used tariff 1', Decimal('314.983')), ('Electricity used tariff 1 unit', 'kWh'), ('Rssi numeric', None)]")
+
+        bytes_array = bytearray(b'\x1E\x62\x01\x06\x31\x2D\x30\x3A\x31\x2E\x38\x2E\x32\x28\x30\x30\x30\x32\x33\x32\x2E\x36\x38\x36\x2A\x6B\x57\x68\x29\x0D\x0A')
+        event = core.transport.parse(bytes_array)
+        self.assertEqual(RFXtrx.SensorEvent, type(event))
+        self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='P1' id='dsmr:1'] values=[('Electricity used tariff 2', Decimal('232.686')), ('Electricity used tariff 2 unit', 'kWh'), ('Rssi numeric', None)]")
+
+        bytes_array = bytearray(b'\x1E\x62\x01\x07\x31\x2D\x30\x3A\x32\x2E\x38\x2E\x31\x28\x30\x30\x30\x31\x38\x31\x2E\x35\x38\x34\x2A\x6B\x57\x68\x29\x0D\x0A')
+        event = core.transport.parse(bytes_array)
+        self.assertEqual(RFXtrx.SensorEvent, type(event))
+        self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='P1' id='dsmr:1'] values=[('Electricity delivered tariff 1', Decimal('181.584')), ('Electricity delivered tariff 1 unit', 'kWh'), ('Rssi numeric', None)]")
+
+        bytes_array = bytearray(b'\x1E\x62\x01\x08\x31\x2D\x30\x3A\x32\x2E\x38\x2E\x32\x28\x30\x30\x30\x34\x32\x33\x2E\x38\x34\x33\x2A\x6B\x57\x68\x29\x0D\x0A')
+        event = core.transport.parse(bytes_array)
+        self.assertEqual(RFXtrx.SensorEvent, type(event))
+        self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='P1' id='dsmr:1'] values=[('Electricity delivered tariff 2', Decimal('423.843')), ('Electricity delivered tariff 2 unit', 'kWh'), ('Rssi numeric', None)]")
+
+        bytes_array = bytearray(b'\x2C\x62\x01\x24\x30\x2D\x31\x3A\x32\x34\x2E\x32\x2E\x31\x28\x31\x38\x30\x38\x32\x38\x31\x36\x34\x35\x30\x34\x53\x29\x28\x30\x30\x30\x36\x35\x2E\x33\x32\x37\x2A\x6D\x33\x29\x0D\x0A')
+        event = core.transport.parse(bytes_array)
+        self.assertEqual(RFXtrx.SensorEvent, type(event))
+        self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='P1' id='dsmr:1'] values=[('Gas meter reading', Decimal('65.327')), ('Gas meter unit', 'm3'), ('Rssi numeric', None)]")
+
         core.close_connection()
 
 

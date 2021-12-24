@@ -2715,6 +2715,20 @@ class Dsmr(SensorPacket):
         obis.HOURLY_GAS_METER_READING
     ]
 
+    def __init__(self):
+        """Constructor"""
+        super().__init__()
+        self.electricity_used_tariff_1 = None
+        self.electricity_used_tariff_1_unit = None
+        self.electricity_used_tariff_2 = None
+        self.electricity_used_tariff_2_unit = None
+        self.electricity_delivered_tariff_1 = None
+        self.electricity_delivered_tariff_1_unit = None
+        self.electricity_delivered_tariff_2 = None
+        self.electricity_delivered_tariff_2_unit = None
+        self.hourly_gas_meter_reading = None
+        self.hourly_gas_meter_reading_unit = None
+
     def load_receive(self, data):
         """Load data from a bytearray"""
         self.data = data

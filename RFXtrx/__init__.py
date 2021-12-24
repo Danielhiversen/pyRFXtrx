@@ -510,6 +510,22 @@ class SensorEvent(RFXtrxEvent):
                 self.values['Sensor Status'] = pkt.teleinfo_ok
         if isinstance(pkt, lowlevel.Security1):
             self.values['Sensor Status'] = pkt.security1_status_string
+        if isinstance(pkt, lowlevel.Dsmr):
+            if pkt.electricity_used_tariff_1 is not None:
+                self.values['Electricity used tariff 1'] = pkt.electricity_used_tariff_1
+                self.values['Electricity used tariff 1 unit'] = pkt.electricity_used_tariff_1_unit
+            if pkt.electricity_used_tariff_2 is not None:
+                self.values['Electricity used tariff 2'] = pkt.electricity_used_tariff_2
+                self.values['Electricity used tariff 2 unit'] = pkt.electricity_used_tariff_2_unit
+            if pkt.electricity_delivered_tariff_1 is not None:
+                self.values['Electricity delivered tariff 1'] = pkt.electricity_delivered_tariff_1
+                self.values['Electricity delivered tariff 1 unit'] = pkt.electricity_delivered_tariff_1_unit
+            if pkt.electricity_delivered_tariff_2 is not None:
+                self.values['Electricity delivered tariff 2'] = pkt.electricity_delivered_tariff_2
+                self.values['Electricity delivered tariff 2 unit'] = pkt.electricity_delivered_tariff_2_unit
+            if pkt.hourly_gas_meter_reading is not None:
+                self.values['Gas meter reading'] = pkt.hourly_gas_meter_reading
+                self.values['Gas meter unit'] = pkt.hourly_gas_meter_reading_unit
         if not isinstance(pkt, (lowlevel.Energy5, lowlevel.RfxMeter, lowlevel.Dsmr)):
             self.values['Battery numeric'] = pkt.battery
         self.values['Rssi numeric'] = pkt.rssi
