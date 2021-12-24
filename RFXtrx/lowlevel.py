@@ -2712,6 +2712,7 @@ class Dsmr(SensorPacket):
         obis.ELECTRICITY_USED_TARIFF_2,
         obis.ELECTRICITY_DELIVERED_TARIFF_1,
         obis.ELECTRICITY_DELIVERED_TARIFF_2,
+        obis.HOURLY_GAS_METER_READING
     ]
 
     def load_receive(self, data):
