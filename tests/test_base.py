@@ -310,7 +310,7 @@ class CoreTestCase(TestCase):
         bytes_array = [0x05, 0x62, 0x01, 0x00, 0x0D, 0x0A]
         event = core.transport.parse(bytes_array)
         self.assertEqual(RFXtrx.SensorEvent, type(event))
-        self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='P1' id='dsmr:1'] values=[('Rssi numeric', None)]")
+        self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='P1' id='None'] values=[('Rssi numeric', None)]")
 
         core.close_connection()
 
