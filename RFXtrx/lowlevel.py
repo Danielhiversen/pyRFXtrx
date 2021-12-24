@@ -28,6 +28,9 @@ RFXtrx.
 # Packet class
 ###############################################################################
 
+from dsmr_parser import obis_references as obis, obis_name_mapping, telegram_specifications
+from dsmr_parser.parsers import TelegramParser
+
 
 class Packet():
     """ Abstract superclass for all low level packets """
@@ -2704,6 +2707,13 @@ class Dsmr(SensorPacket):
     TYPES = {0x01: 'P1',
              0x02: 'Teleinfo'}
 
+    VALUES_TO_PROCESS = [
+        obis.ELECTRICITY_USED_TARIFF_1,
+        obis.ELECTRICITY_USED_TARIFF_2,
+        obis.ELECTRICITY_DELIVERED_TARIFF_1,
+        obis.ELECTRICITY_DELIVERED_TARIFF_2,
+    ]
+
     def load_receive(self, data):
         """Load data from a bytearray"""
         self.data = data
@@ -2711,12 +2721,31 @@ class Dsmr(SensorPacket):
         self.packettype = data[1]
         self.subtype = data[2]
         self.seqnbr = data[3]
-        self.dsmr_data = bytes(data[4:-2]).decode('ascii')
+        telegram = self._parse_telegram_line(data)
+        self._save_telegram_as_attrs(telegram)
         self._set_strings()
+
+    def _parse_telegram_line(self, data):
+        dsmr_data = bytes(data[4:]).decode('ascii')
+        parser = TelegramParser(telegram_specifications.V5, False)
+        telegram = parser.parse(dsmr_data)
+        return telegram
+    
+    def _save_telegram_as_attrs(self, telegram):
+        for key in telegram:
+            if key in self.VALUES_TO_PROCESS:
+                name = obis_name_mapping.EN[key].lower()
+                obj = telegram[key]
+                setattr(self, name, obj.value)
+                if obj.unit is not None:
+                    setattr(self, f"{name}_unit", obj.unit)
+                self._set_id_string()
+
+    def _set_id_string(self):
+        self.id_string = "dsmr:{0}".format(self.subtype)
 
     def _set_strings(self):
         """Translate loaded numeric values into convenience strings"""
-        self.id_string = "dsmr:{0}".format(self.subtype)
 
         if self.subtype in self.TYPES:
             self.type_string = self.TYPES[self.subtype]
