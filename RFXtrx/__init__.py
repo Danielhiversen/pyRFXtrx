@@ -770,8 +770,8 @@ class PyNetworkTransport(RFXtrxTransport):
             if not data or data == '\x00':
                 continue
             pkt = bytearray(data)
-            while len(pkt) < pkt[0]:
-                data = self.sock.recv(pkt[0])
+            while len(pkt) < pkt[0]+1:
+                data = self.sock.recv(pkt[0]+1 - len(pkt))
                 pkt.extend(bytearray(data))
             _LOGGER.debug(
                 "Recv: %s",
