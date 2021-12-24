@@ -307,7 +307,7 @@ class CoreTestCase(TestCase):
         self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='TR1 - WS1200' id='ee:09'] values=[('Battery numeric', 9), ('Rain total', 0.3), ('Rssi numeric', 6), ('Temperature', 10.1)]")
 
         #dsmr
-        bytes_array = [0x05, 0x62, 0x01, 0x00, 0x0D, 0x0A]
+        bytes_array = bytearray(b'\x05\x62\x01\x00\x0d\x0a')
         event = core.transport.parse(bytes_array)
         self.assertEqual(RFXtrx.SensorEvent, type(event))
         self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='P1' id='None'] values=[('Rssi numeric', None)]")
