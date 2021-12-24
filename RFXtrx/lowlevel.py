@@ -2741,11 +2741,14 @@ class Dsmr(SensorPacket):
         self._set_strings()
 
     def _parse_telegram_line(self, data):
-        dsmr_data = bytes(data[4:]).decode('ascii')
+        try:
+            dsmr_data = bytes(data[4:]).decode('ascii')
+        except UnicodeDecodeError:
+            return {}
         parser = TelegramParser(telegram_specifications.V5, False)
         telegram = parser.parse(dsmr_data)
         return telegram
-    
+
     def _save_telegram_as_attrs(self, telegram):
         for key in telegram:
             if key in self.VALUES_TO_PROCESS:
