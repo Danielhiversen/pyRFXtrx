@@ -1622,7 +1622,8 @@ class Rain(SensorPacket):
             # cartridge can be 0.01 inch rather than 0.2mm
             self.raintotal = 0.2 * self.raintotal3
         elif self.subtype == 9:
-            self.raintotal = 0.254 * self.raintotal3
+            self.raintotal = 0.254 * float((self.raintotal2 << 8) + 
+                                            self.raintotal3)
 
         self.rssi_byte = data[11]
         self.battery = self.rssi_byte & 0x0f
