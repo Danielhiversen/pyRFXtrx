@@ -438,6 +438,8 @@ class SensorEvent(RFXtrxEvent):
 
         self.values = {}
         self.pkt = pkt
+        if isinstance(pkt, lowlevel.Undecoded):
+            self.values['Payload'] = pkt.payload
         if isinstance(pkt, lowlevel.RfxMeter):
             self.values['Counter value'] = pkt.value
         if isinstance(pkt, (lowlevel.Temp, lowlevel.TempHumid,
@@ -510,9 +512,10 @@ class SensorEvent(RFXtrxEvent):
                 self.values['Sensor Status'] = pkt.teleinfo_ok
         if isinstance(pkt, lowlevel.Security1):
             self.values['Sensor Status'] = pkt.security1_status_string
-        if not isinstance(pkt, (lowlevel.Energy5, lowlevel.RfxMeter)):
+        if not isinstance(pkt, (lowlevel.Energy5, lowlevel.RfxMeter, lowlevel.Undecoded)):
             self.values['Battery numeric'] = pkt.battery
-        self.values['Rssi numeric'] = pkt.rssi
+        if not isinstance(pkt, lowlevel.Undecoded):
+            self.values["Rssi numeric"] = pkt.rssi
 
     def __str__(self):
         return "{0} device=[{1}] values={2}".format(
@@ -598,6 +601,8 @@ class _dummySerial:
                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00]  # sensor1
         self._data[7] = [0x0a, 0x20, 0x00, 0x00, 0x00,
                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00]  # sensor2
+        self._data[8] = [0x09, 0x03, 0x01, 0x1e,
+                         0x28, 0x0a, 0xb7, 0x66, 0x04, 0x74] # undecoded
         self._close_event = threading.Event()
 
     def write(self, *args, **kwargs):

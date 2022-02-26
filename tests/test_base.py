@@ -20,10 +20,10 @@ class CoreTestCase(TestCase):
     def test_constructor(self):
         global num_calbacks
         core = RFXtrx.Core(self.path, event_callback=_callback, transport_protocol=RFXtrx.DummyTransport2)
-        while num_calbacks < 6:
+        while num_calbacks < 7:
             time.sleep(0.1)
 
-        self.assertEqual(len(core.sensors()),2)
+        self.assertEqual(len(core.sensors()),3)
         self.assertTrue(core._thread.is_alive())
         core.close_connection()
         self.assertFalse(core._thread.is_alive())
@@ -179,7 +179,7 @@ class CoreTestCase(TestCase):
         event = core.transport.parse(bytes_array)
         self.assertEqual(RFXtrx.SensorEvent, type(event))
         self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='BBQ1 - Maverick ET-732' id='fcd800:78'] values=[('Battery numeric', 9), ('Rssi numeric', 7), ('Temperature', 19), ('Temperature2', 19)]")
-        
+
         #baro
         bytes_array = [0x09, 0x53, 0x01, 0x2a, 0x96, 0x03, 0x04, 0x06, 0x00, 0x79]
         event = core.transport.parse(bytes_array)
@@ -209,7 +209,7 @@ class CoreTestCase(TestCase):
         event = core.transport.parse(bytes_array)
         self.assertEqual(RFXtrx.SensorEvent, type(event))
         self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='CARTELECTRONIC_ENCODER' id='3ffe61a3'] values=[('Battery numeric', 9), ('Count', 0), ('Counter value', 18388), ('Rssi numeric', 6)]")
-       
+
         #Cartelectronic Linky
         bytes_array = [0x15, 0x60, 0x03, 0x5c, 0x2a, 0x29, 0xf2, 0x75, 0x00, 0x19, 0x8d, 0x3a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x21, 0x02, 0xb9, 0x00, 0x69]
         event = core.transport.parse(bytes_array)
@@ -305,7 +305,7 @@ class CoreTestCase(TestCase):
         event = core.transport.parse(bytes_array)
         self.assertEqual(RFXtrx.SensorEvent, type(event))
         self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='TR1 - WS1200' id='ee:09'] values=[('Battery numeric', 9), ('Rain total', 0.3), ('Rssi numeric', 6), ('Temperature', 10.1)]")
-       
+
 
         core.close_connection()
 
@@ -409,7 +409,7 @@ class CoreTestCase(TestCase):
         core.close_connection()
 
     def test_set_recmodes(self):
-        core = RFXtrx.Connect(self.path, event_callback=_callback, 
+        core = RFXtrx.Connect(self.path, event_callback=_callback,
                               transport_protocol=RFXtrx.DummyTransport)
         time.sleep(0.2)
         self.assertEqual(None, core._modes)

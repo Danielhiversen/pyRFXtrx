@@ -1055,6 +1055,78 @@ class SensorPacket(Packet):
 
 
 ###############################################################################
+# Undecoded class
+###############################################################################
+
+class Undecoded(SensorPacket):
+    """
+    Data class for the Undecoded packet type
+    """
+
+    TYPES = {
+        0x00: 'ac',
+        0x01: 'arc',
+        0x02: 'ati',
+        0x03: 'hideki/upm',
+        0x04: 'lacrosse/viking',
+        0x05: 'ad',
+        0x06: 'mertik',
+        0x07: 'oregon1',
+        0x08: 'oregon2',
+        0x09: 'oregon3',
+        0x0A: 'proguard',
+        0x0B: 'visonic',
+        0x0C: 'nec',
+        0x0D: 'fs20',
+        0x0E: 'reserved',
+        0x0F: 'blinds',
+        0x10: 'rubicson',
+        0x11: 'ae',
+        0x12: 'fineoffset',
+        0x13: 'rgb',
+        0x14: 'rts',
+        0x15: 'selectplus',
+        0x16: 'homeconfort',
+        0x17: 'edisio',
+        0x18: 'honeywell',
+        0x19: 'funkbus',
+        0x1A: 'byronsx',
+    }
+    """
+    Mapping of numeric subtype values to strings, used in type_string
+    """
+
+    def __str__(self):
+        return ("Undecoded [subtype={0} payload={1}]").format(self.type_string,
+                                       self.payload)
+
+    def __init__(self):
+        """Constructor"""
+        super().__init__()
+        self.payload = None
+
+    def load_receive(self, data):
+        """Load data from a bytearray"""
+        self.data = data
+        self.packetlength = data[0]
+        self.packettype = data[1]
+
+        self.subtype = data[2]
+        self.payload = data[4:]
+
+        self._set_strings()
+
+    def _set_strings(self):
+        """Translate loaded numeric values into convenience strings"""
+        self.id_string = 'Undecoded'
+        if self.subtype in self.TYPES:
+            self.type_string = self.TYPES[self.subtype]
+        else:
+            # Degrade nicely for yet unknown subtypes
+            self.type_string = 'Unknown'
+
+
+###############################################################################
 # Temp class
 ###############################################################################
 
@@ -2695,6 +2767,7 @@ class RollerTrol(Packet):
 
 PACKET_TYPES = {
     0x01: Status,
+    0x03: Undecoded,
     0x10: Lighting1,
     0x11: Lighting2,
     0x12: Lighting3,
