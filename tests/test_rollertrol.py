@@ -42,5 +42,5 @@ class RollerTrolTestCase(TestCase):
 
         rollertrol = RFXtrx.lowlevel.parse(bytearray(b'\x09\x19\x02\x00\x00\x9b\xa8\x01\x05\x00'))
         self.assertEqual(rollertrol.cmnd_string, "Unknown command (0x05)")
-        self.assertEqual(rollertrol.type_string, "Unknown type (0x19/0x02)")
+        self.assertEqual(rollertrol.type_string, "BlindsT2 / A-OK RF01")
         
