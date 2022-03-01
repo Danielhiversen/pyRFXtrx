@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 import RFXtrx
+from RFXtrx.lowlevel import Cartelectronic
 
 class Elec1TestCase(TestCase):
 
@@ -134,3 +135,26 @@ class CartelectronicTestCase(TestCase):
         self.assertEqual(energy.voltage, 235)
         self.assertEqual(energy.currentwatt, 686)
         self.assertEqual(energy.teleinfo_ok, True)
+
+        self.data = bytearray([0x15, 0x60, 0x01, 0x03,
+                               0x07, 0x7d, 0x20, 0x06, 0x86,
+                               0x11,
+                               0x00, 0x3a, 0x92, 0xc9,
+                               0x00, 0x00, 0x00, 0x00,
+                               0x01, 0x4a,
+                               0x02,
+                               0x79])
+        energy = RFXtrx.lowlevel.parse(self.data)
+        assert isinstance(energy, Cartelectronic)
+        self.assertEqual(energy.type_string, "CARTELECTRONIC_TIC")
+        self.assertEqual(energy.seqnbr, 3)
+        self.assertEqual(energy.id_string, "77d200686")
+        self.assertEqual(energy.conswatthours, None)
+        self.assertEqual(energy.prodwatthours, None)
+        self.assertEqual(energy.tarif_num, None)
+        self.assertEqual(energy.voltage, None)
+        self.assertEqual(energy.counter1, 3838665)
+        self.assertEqual(energy.counter2, 0)
+        self.assertEqual(energy.currentwatt, 330)
+        self.assertEqual(energy.teleinfo_ok, True)
+        self.assertEqual(energy.contract_type, 17)

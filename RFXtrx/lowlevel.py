@@ -2159,8 +2159,10 @@ class Cartelectronic(SensorPacket):
         self.voltage = None
         self.currentwatt = None
         self.teleinfo_ok = None
+        self.state_byte = None
         self.battery = None
         self.rssi = None
+        self.contract_type = None
 
     def load_receive(self, data):
         """Load data from a bytearray"""
@@ -2175,7 +2177,18 @@ class Cartelectronic(SensorPacket):
         self.id4 = data[7]
         self.id_combined = ((self.id1 << 24) + (self.id2 << 16) +
                             (self.id3 << 8) + self.id4)
-        if self.subtype == 0x02:
+        if self.subtype == 0x01:
+            # TIC
+            self.id5 = data[8]
+            self.id_combined = (self.id_combined << 8) + self.id5
+            self.contract_type = data[9]
+            self.counter1 = int.from_bytes(data[10:14], 'big')
+            self.counter2 = int.from_bytes(data[14:18], 'big')
+            self.currentwatt = int.from_bytes(data[18:20], 'big')
+            self.state_byte = data[20]
+            self.teleinfo_ok = not (data[20] & 0x04) == 0x04
+            self.rssi_byte = data[17]
+        elif self.subtype == 0x02:
             # Cartelectronic Encoder
             self.counter1 = ((data[8] * pow(2, 24)) + (data[9] << 16) +
                              (data[10] << 8) + data[11])
@@ -2191,6 +2204,7 @@ class Cartelectronic(SensorPacket):
             self.tarif_num = (data[16] & 0x0f)
             self.voltage = data[17] + 200
             self.currentwatt = (data[18] << 8) + data[19]
+            self.state_byte = data[20]
             self.teleinfo_ok = not (data[20] & 0x04) == 0x04
             self.rssi_byte = data[21]
         self.battery = self.rssi_byte & 0x0f
