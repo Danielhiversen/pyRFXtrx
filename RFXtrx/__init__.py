@@ -946,8 +946,7 @@ class PySerialTransport(RFXtrxTransport):
     @transport_errors("reset")
     def reset(self):
         """ Reset the RFXtrx """
-        self.send(b'\x0D\x00\x00\x00\x00\x00\x00'
-                  b'\x00\x00\x00\x00\x00\x00\x00')
+        self.send(lowlevel.COMMAND_RESET)
         sleep(0.3)  # Should work with 0.05, but not for me
         self.serial.flushInput()
 
@@ -1020,8 +1019,7 @@ class PyNetworkTransport(RFXtrxTransport):
     def reset(self):
         """ Reset the RFXtrx """
         try:
-            self.send(b'\x0D\x00\x00\x00\x00\x00\x00'
-                      b'\x00\x00\x00\x00\x00\x00\x00')
+            self.send(lowlevel.COMMAND_RESET)
             sleep(0.3)
             self.sock.sendall(b'')
         except socket.error as exception:
@@ -1161,20 +1159,11 @@ class Connect:
 
     def set_recmodes(self, modenames):
         """ Sets the device modes (which protocols to decode) """
-        data = bytearray([0x0D, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
-
-        # Keep the values read during init.
-        data[5] = self._status.device.tranceiver_type
-        data[6] = self._status.device.output_power
-
-        # Build the mode data bytes from the mode names
-        for mode in modenames:
-            byteno, bitno = lowlevel.get_recmode_tuple(mode)
-            if byteno is None:
-                raise ValueError('Unknown mode name '+mode)
-
-            data[7 + byteno] |= 1 << bitno
+        data = lowlevel.set_mode_packet(
+            modenames,
+            self._status.pkt.tranceiver_type,
+            self._status.pkt.output_power
+        )
 
         self.transport.send(data)
         self._modes = modenames
@@ -1182,14 +1171,12 @@ class Connect:
 
     def send_start(self):
         """ Sends the Start RFXtrx transceiver command """
-        self.transport.send(b'\x0D\x00\x00\x03\x07\x00\x00'
-                            b'\x00\x00\x00\x00\x00\x00\x00')
+        self.transport.send(lowlevel.COMMAND_START)
         return self.transport.receive_blocking()
 
     def send_get_status(self):
         """ Sends the Get Status command """
-        self.transport.send(b'\x0D\x00\x00\x01\x02\x00\x00'
-                            b'\x00\x00\x00\x00\x00\x00\x00')
+        self.transport.send(lowlevel.COMMAND_GET_STATUS)
         return self.transport.receive_blocking()
 
 

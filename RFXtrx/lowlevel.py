@@ -24,6 +24,13 @@ RFXtrx.
 # pylint: disable=C0302,R0902,R0903,R0911,R0913
 # pylint: disable= too-many-lines, too-many-statements
 
+COMMAND_RESET = b'\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+COMMAND_START = b'\x0D\x00\x00\x03\x07\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+COMMAND_GET_STATUS = (
+    b'\x0D\x00\x00\x01\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+)
+
+
 ###############################################################################
 # Packet class
 ###############################################################################
@@ -3284,3 +3291,22 @@ def parse(data):
         return None
 
     return pkt
+
+
+def set_mode_packet(modenames, tranceiver_type, output_power):
+    """Construct a mode packet."""
+    data = bytearray([0x0D, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00,
+                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+
+    # Keep the values read during init.
+    data[5] = tranceiver_type
+    data[6] = output_power
+
+    # Build the mode data bytes from the mode names
+    for mode in modenames:
+        byteno, bitno = get_recmode_tuple(mode)
+        if byteno is None:
+            raise ValueError('Unknown mode name '+mode)
+
+        data[7 + byteno] |= 1 << bitno
+    return data
