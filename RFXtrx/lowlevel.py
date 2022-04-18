@@ -2780,7 +2780,7 @@ class RollerTrol(Packet):
                 self.cmnd_string = self._UNKNOWN_CMND.format(self.cmnd)
 
 ###############################################################################
-# Funk class
+# Funkbus class
 ###############################################################################
 
 
@@ -2789,10 +2789,10 @@ class Funkbus(Packet):
     Data class for the Funkbus packet type
     """
 
-    __UNKNOWN_TIME  = "Unknown time ({0:#02x})"
-    __UNKNOWN_GROUP = "Unknown group ({0:#02x})"
-    __UNKNOWN_CHANNEL = "Unknown scene ({0:#02x})"
-    __UNKNOWN_SCENE = "Unknown channel ({0:#02x})"
+    __UNKNOWN_TIME = "Unknown time ({0:#02x})"
+    __ALL = "All"
+    __MASTER = "Master"
+    __SCENE = "Scene {0}"
 
     TYPES = {0x00: 'Gira remote',
              0x01: 'Insta remote'}
@@ -2800,46 +2800,25 @@ class Funkbus(Packet):
     Mapping of numeric subtype values to strings, used in type_string
     """
 
-    COMMANDS = {0x00: 'Channel -',
-                0x01: 'Channel +',
-                0x02: 'All OFF',
-                0x03: 'All ON',
+    COMMANDS = {0x00: 'Ch -',
+                0x01: 'Ch +',
+                0x02: 'All Off',
+                0x03: 'All On',
                 0x04: 'Scene',
-                0x05: 'Master -',
-                0x06: 'Master +'}
+                0x05: '-',
+                0x06: '+'}
     """
     Mapping of command numeric values to strings, used for cmnd_string
     """
 
-    GROUPS   = {0x41: 'A',
-                0x42: 'B',
-                0x43: 'C'}
+    GROUPS = {0x41: 'A',
+              0x42: 'B',
+              0x43: 'C'}
     """
     Mapping of group code numeric values to strings, used for group_string
     """
 
-    CHANNELS = {0x01: 'Channel 1',
-                0x02: 'Channel 2',
-                0x03: 'Channel 3',
-                0x04: 'Channel 4',
-                0x05: 'Channel 5',
-                0x06: 'Channel 6',
-                0x07: 'Channel 7',
-                0x08: 'Channel 8'}
-    """
-    Mapping of channel numeric values to strings, used for target_string
-    """
-
-    SCENES = {0x01: 'Scene 1',
-              0x02: 'Scene 2',
-              0x03: 'Scene 3',
-              0x04: 'Scene 4',
-              0x05: 'Scene 5'}
-    """            
-    Mapping of scene numeric values to strings, used for target_string
-    """
-
-    KEYPRESS = {0x00: 'short',
+    DURATION = {0x00: 'short',
                 0x01: 'longer',
                 0x02: '1.25 sec',
                 0x03: '1.50 sec',
@@ -2886,14 +2865,15 @@ class Funkbus(Packet):
                 0x2C: '11.75 sec',
                 0x2D: '12.00 sec'}
     """
-    Mapping of keypress duration numeric values to strings, used for time_string
+    Mapping of keypress duration numeric values to strings
     """
 
     def __repr__(self):
         return self.__str__()
 
     def __str__(self):
-        return "Funkbus [subtype={0}, seqnbr={1}, id={2}, group={3}, target={4} cmnd={5} time={6}]" \
+        return ("Funkbus [subtype={0}, seqnbr={1}, id={2}, group={3}, " +
+                "target={4} cmnd={5} time={6}]")\
             .format(
                 self.subtype,
                 self.seqnbr,
@@ -2910,17 +2890,17 @@ class Funkbus(Packet):
         self.id1 = None
         self.id2 = None
         self.id_combined = None
-        self.groupcode = None,
-        self.group_string = None,
-        self:target = None,
-        self:target_string = None,
+        self.groupcode = None
+        self.group_string = None
+        self.target = None
+        self.target_string = None
         self.cmnd = None
-        self.cmnd_string = None,
-        self.time = None,
+        self.cmnd_string = None
+        self.time = None
         self.time_string = None
 
     def parse_id(self, subtype, id_string):
-        """( a string id into individual components"""
+        """Parse a string id into individual components"""
         try:
             self.packettype = 0x1e
             self.subtype = subtype
@@ -2944,16 +2924,15 @@ class Funkbus(Packet):
         self.seqnbr = data[3]
         self.id1 = data[4]
         self.id2 = data[5]
-        self.id_combined = (self.id1 << 8) + self.id3
+        self.id_combined = (self.id1 << 8) + self.id2
         self.groupcode = data[6]
         self.target = data[7]
-        if self.packetlength > 7:
-            self.cmnd = data[8]
-        if self.packetlength > 8:
-            self.time = time[9]
+        self.cmnd = data[8]
+        self.time = data[9]
         self._set_strings()
 
-    def set_transmit(self, subtype, seqnbr, id_combined, groupcode, target, cmnd, time):
+    def set_transmit(self, subtype, seqnbr, id_combined, groupcode, target,
+                     cmnd, time):
         """Load data from individual data fields"""
         self.packetlength = 0x0B
         self.packettype = 0x1E
@@ -2966,7 +2945,7 @@ class Funkbus(Packet):
         self.target = target
         self.cmnd = cmnd
         self.time = time
-        self.data = bytearray([self.packetlength, 
+        self.data = bytearray([self.packetlength,
                                self.packettype, self.subtype, self.seqnbr,
                                self.id1, self.id2, self.groupcode, self.target,
                                self.cmnd, self.time, 0x00, 0x09])
@@ -2974,7 +2953,10 @@ class Funkbus(Packet):
 
     def _set_strings(self):
         """Translate loaded numeric values into convenience strings"""
-        self.id_string = "{0:#04x}:{1:#02x}{2:#02x}".format(self.id_combined, self.groupcode, self.target)
+        self.id_string = "{0:04x}:{1:02x}{2:02x}" \
+            .format(self.id_combined,
+                    self.groupcode,
+                    self.target)
 
         if self.subtype in self.TYPES:
             self.type_string = self.TYPES[self.subtype]
@@ -2995,27 +2977,18 @@ class Funkbus(Packet):
             else:
                 self.group_string = self.__UNKNOWN_GROUP.format(self.groupcode)
 
-        if self.target is not None:
-            if self.cmnd is not None:
-                if self.cmnd in self.COMMANDS:
-                    if self.cmnd <= 3: 
-                        if self.target in self.CHANNELS:
-                            self.target_string = self.CHANNELS[self.target]
-                        else:
-                            self.target_string = self.__UNKNOWN_CHANNEL.format(self.target)
-                    elif self.cmnd <= 6:
-                        if self.target in self.SCENES:
-                            self.target_string = self.SCENES[self.target]
-                        else:
-                            self.target_string = self.__UNKNOWN_SCENE.format(self.target)
-
+        if self.target is not None and self.cmnd in self.COMMANDS:
+            self.target_string = \
+                'Ch {0}'.format(self.target) if self.cmnd in [0x00, 0x01] \
+                else self.__ALL if self.cmnd in [0x02, 0x03] \
+                else self.__SCENE.format(self.target) if self.cmnd in [0x04] \
+                else self.__MASTER
 
         if self.time is not None:
-            if self.time in self.KEYPRESS:
-                self.time_string = self.COMMANDS[self.time]
+            if self.time in self.DURATION:
+                self.time_string = self.DURATION[self.time]
             else:
                 self.time_string = self._UNKNOWN_TIME.format(self.time)
-
 
 
 PACKET_TYPES = {

@@ -21,6 +21,7 @@
 This module provides the base implementation for pyRFXtrx
 """
 # pylint: disable=R0903, invalid-name
+# pylint: disable= too-many-lines
 
 import glob
 import socket
@@ -165,6 +166,7 @@ class RfyDevice(RFXtrxDevice):
         """ Send a '2 Seconds Down' command """
         self.send_command(transport, 0x12)
 
+
 class FunkDevice(RFXtrxDevice):
     """ Concrete class for a control device """
 
@@ -176,15 +178,24 @@ class FunkDevice(RFXtrxDevice):
             self.target = pkt.target
             self.COMMANDS = lowlevel.Funkbus.COMMANDS
 
-    def send_command(self, transport, command, time):
+    def send_command(self, transport, command, param, duration):
         """ Send a command using the given transport """
         pkt = lowlevel.Funkbus()
-        pkt.set_transmit(self.subtype, 0, self.id_combined, self.groupcode,
-                         self.target, command, time)
+        pkt.set_transmit(self.subtype,
+                         0,
+                         self.id_combined,
+                         self.groupcode,
+                         param if command in [0x00, 0x01, 0x04] else 0x00,
+                         command,
+                         duration)
         transport.send(pkt.data)
 
     def send_onoff(self, transport, turn_on):
-        self.send_command(transport, self.groupcode, self.target, 0x01 if turn_on else 0x00, 0x00)
+        """ Send on 'On' or 'Off' command using the given transport """
+        self.send_command(transport,
+                          0x01 if turn_on else 0x00,
+                          self.target,
+                          0x00)
 
     def send_on(self, transport):
         """ Send an 'On' command using the given transport """
@@ -196,23 +207,53 @@ class FunkDevice(RFXtrxDevice):
 
     def send_dim(self, transport, duration):
         """ Send a 'Dim' command using the given transport """
-        self.send_command(transport, 0x00, duration + 1)
+        self.send_command(transport,
+                          0x00,
+                          self.target,
+                          duration + 1)
 
     def send_bright(self, transport, duration):
         """ Send a 'Bright' command using the given transport """
-        self.send_command(transport, 0x01, duration + 1)
+        self.send_command(transport,
+                          0x01,
+                          self.target,
+                          duration + 1)
 
     def send_alloff(self, transport):
         """ Send an 'All OFF' command using the given transport """
-        self.send_command(transport, 0x02, 0x03)
+        self.send_command(transport,
+                          0x02,
+                          0x00,
+                          0x03)
 
     def send_allon(self, transport):
         """ Send a 'All ON' command using the given transport """
-        self.send_command(transport, 0x03, 0x03)
+        self.send_command(transport,
+                          0x03,
+                          0x00,
+                          0x03)
 
-    def send_setscene(self, transport, target):
+    def send_setscene(self, transport, scene):
         """ Send a 'Scene' command using the given transport """
-        self.send_command(transport, 0x04, 0x01)
+        self.send_command(transport,
+                          0x04,
+                          scene,
+                          0x01)
+
+    def send_masterdim(self, transport, duration):
+        """ Send a 'Master Dim' command using the given transport """
+        self.send_command(transport,
+                          0x05,
+                          0x00,
+                          duration + 1)
+
+    def send_masterbright(self, transport, duration):
+        """ Send a 'Bright' command using the given transport """
+        self.send_command(transport,
+                          0x06,
+                          0x00,
+                          duration + 1)
+
 
 class LightingDevice(RFXtrxDevice):
     """ Concrete class for a control device """
@@ -423,6 +464,8 @@ def get_device_from_pkt(pkt):
         device = ChimeDevice(pkt)
     elif isinstance(pkt, lowlevel.Security1):
         device = SecurityDevice(pkt)
+    elif isinstance(pkt, lowlevel.Funkbus):
+        device = FunkDevice(pkt)
     else:
         device = RFXtrxDevice(pkt)
     return device
@@ -606,6 +649,9 @@ class ControlEvent(RFXtrxEvent):
 
         if pkt.rssi is not None:
             self.values['Rssi numeric'] = pkt.rssi
+
+        if isinstance(pkt, lowlevel.Funkbus):
+            self.values['Keypress'] = pkt.value('time_string')
 
     def __str__(self):
         return "{0} device=[{1}] values={2}".format(

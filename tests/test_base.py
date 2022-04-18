@@ -247,6 +247,21 @@ class CoreTestCase(TestCase):
         event.device.send_on(core.transport)
         event.device.send_off(core.transport)
 
+        #Funkbus
+        bytes_array = [0x09, 0x1E, 0x00, 0x00, 0x3F, 0xCC, 0x42, 0x01, 0x00, 0x00]
+        event= core.transport.receive(bytes_array)
+        self.assertEqual(RFXtrx.ControlEvent, type(event))
+        self.assertEqual(event.__str__(),"<class 'RFXtrx.ControlEvent'> device=[<class 'RFXtrx.FunkDevice'> type='Gira remote' id='3fcc:4201'] values=[('Command', 'Ch -'), ('Keypress', 'short')]")
+        event.device.send_on(core.transport)
+        event.device.send_off(core.transport)
+        event.device.send_dim(core.transport, 0x02)
+        event.device.send_bright(core.transport, 0x02)
+        event.device.send_allon(core.transport)
+        event.device.send_alloff(core.transport)
+        event.device.send_setscene(core.transport, 0x03)
+        event.device.send_masterdim(core.transport, 0x02)
+        event.device.send_masterbright(core.transport, 0x02)
+
         #temphumid
         bytes_array = [0x0a, 0x52, 0x01, 0x2a, 0x96, 0x03, 0x81, 0x41, 0x60, 0x03, 0x79]
         event = core.transport.parse(bytes_array)
