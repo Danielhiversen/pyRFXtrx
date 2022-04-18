@@ -165,6 +165,54 @@ class RfyDevice(RFXtrxDevice):
         """ Send a '2 Seconds Down' command """
         self.send_command(transport, 0x12)
 
+class FunkDevice(RFXtrxDevice):
+    """ Concrete class for a control device """
+
+    def __init__(self, pkt):
+        super().__init__(pkt)
+        if isinstance(pkt, lowlevel.Funkbus):
+            self.id_combined = pkt.id_combined
+            self.groupcode = pkt.groupcode
+            self.target = pkt.target
+            self.COMMANDS = lowlevel.Funkbus.COMMANDS
+
+    def send_command(self, transport, command, time):
+        """ Send a command using the given transport """
+        pkt = lowlevel.Funkbus()
+        pkt.set_transmit(self.subtype, 0, self.id_combined, self.groupcode,
+                         self.target, command, time)
+        transport.send(pkt.data)
+
+    def send_onoff(self, transport, turn_on):
+        self.send_command(transport, self.groupcode, self.target, 0x01 if turn_on else 0x00, 0x00)
+
+    def send_on(self, transport):
+        """ Send an 'On' command using the given transport """
+        self.send_onoff(transport, True)
+
+    def send_off(self, transport):
+        """ Send an 'Off' command using the given transport """
+        self.send_onoff(transport, False)
+
+    def send_dim(self, transport, duration):
+        """ Send a 'Dim' command using the given transport """
+        self.send_command(transport, 0x00, duration + 1)
+
+    def send_bright(self, transport, duration):
+        """ Send a 'Bright' command using the given transport """
+        self.send_command(transport, 0x01, duration + 1)
+
+    def send_alloff(self, transport):
+        """ Send an 'All OFF' command using the given transport """
+        self.send_command(transport, 0x02, 0x03)
+
+    def send_allon(self, transport):
+        """ Send a 'All ON' command using the given transport """
+        self.send_command(transport, 0x03, 0x03)
+
+    def send_setscene(self, transport, target):
+        """ Send a 'Scene' command using the given transport """
+        self.send_command(transport, 0x04, 0x01)
 
 class LightingDevice(RFXtrxDevice):
     """ Concrete class for a control device """
@@ -335,6 +383,8 @@ class LightingDevice(RFXtrxDevice):
                 transport.send(pkt.data)
         elif self.packettype == 0x15:  # Lighting6
             raise ValueError("Dim level unsupported for Lighting6")
+        elif self.packettype == 0x1e:  # Funkbus
+            raise ValueError("Dim level unsupported for Funkbus")
         else:
             raise ValueError("Unsupported packettype")
 
