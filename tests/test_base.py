@@ -264,7 +264,7 @@ class CoreTestCase(TestCase):
         bytes_array = [0x09, 0x1E, 0x00, 0x00, 0x3F, 0xCC, 0x42, 0x01, 0x00, 0x00]
         event= core.transport.receive(bytes_array)
         self.assertEqual(RFXtrx.ControlEvent, type(event))
-        self.assertEqual(event.__str__(),"<class 'RFXtrx.ControlEvent'> device=[<class 'RFXtrx.FunkDevice'> type='Gira remote' id='3fcc:4201'] values=[('Command', 'Ch -'), ('Keypress', 'short')]")
+        self.assertEqual(event.__str__(),"<class 'RFXtrx.ControlEvent'> device=[<class 'RFXtrx.FunkDevice'> type='Gira remote' id='3fcc:4201'] values=[('Command', 'Down'), ('Keypress', 'short')]")
         event.device.send_on(core.transport)
         event.device.send_off(core.transport)
         event.device.send_dim(core.transport, 0x02)

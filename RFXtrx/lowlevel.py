@@ -2803,13 +2803,13 @@ class Funkbus(Packet):
     Mapping of numeric subtype values to strings, used in type_string
     """
 
-    COMMANDS = {0x00: 'Ch -',
-                0x01: 'Ch +',
+    COMMANDS = {0x00: 'Down',
+                0x01: 'Up',
                 0x02: 'All Off',
                 0x03: 'All On',
                 0x04: 'Scene',
-                0x05: '-',
-                0x06: '+'}
+                0x05: 'Down*',
+                0x06: 'Up*'}
     """
     Mapping of command numeric values to strings, used for cmnd_string
     """
@@ -2822,7 +2822,7 @@ class Funkbus(Packet):
     """
 
     DURATION = {0x00: 'short',
-                0x01: 'longer',
+                0x01: '1 sec',
                 0x02: '1.25 sec',
                 0x03: '1.50 sec',
                 0x04: '1.75 sec',
@@ -2876,7 +2876,7 @@ class Funkbus(Packet):
 
     def __str__(self):
         return ("Funkbus [subtype={0}, seqnbr={1}, id={2}, group={3}, " +
-                "target={4} cmnd={5} time={6}]")\
+                "target={4}, cmnd={5}, time={6}]")\
             .format(
                 self.subtype,
                 self.seqnbr,
@@ -2982,7 +2982,7 @@ class Funkbus(Packet):
 
         if self.target is not None and self.cmnd in self.COMMANDS:
             self.target_string = \
-                'Ch {0}'.format(self.target) if self.cmnd in [0x00, 0x01] \
+                '{0}'.format(self.target) if self.cmnd in [0x00, 0x01] \
                 else self.__ALL if self.cmnd in [0x02, 0x03] \
                 else self.__SCENE.format(self.target) if self.cmnd in [0x04] \
                 else self.__MASTER
@@ -2991,7 +2991,7 @@ class Funkbus(Packet):
             if self.time in self.DURATION:
                 self.time_string = self.DURATION[self.time]
             else:
-                self.time_string = self._UNKNOWN_TIME.format(self.time)
+                self.time_string = self.__UNKNOWN_TIME.format(self.time)
 
 
 PACKET_TYPES = {
