@@ -2258,7 +2258,10 @@ class Cartelectronic(SensorPacket):
             self.contract_type = data[9]
             self.counter1 = int.from_bytes(data[10:14], 'big')
             self.counter2 = int.from_bytes(data[14:18], 'big')
-            self.currentwatt = int.from_bytes(data[18:20], 'big')
+            if data[20] & 0x02:
+                self.currentwatt = int.from_bytes(data[18:20], 'big')
+            else:
+                self.currentwatt = None
             self.state_byte = data[20]
             self.teleinfo_ok = not (data[20] & 0x04) == 0x04
             self.rssi_byte = data[17]
