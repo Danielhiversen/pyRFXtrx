@@ -246,10 +246,10 @@ class CoreTestCase(TestCase):
         event.device.send_stop(core.transport)
 
         #Rfy
-        bytes_array = bytearray(b'\x08\x1A\x00\x00\x0A\x00\x01\x01\x03')
+        bytes_array = bytearray(b'\x0C\x1A\x00\x00\x0A\x00\x01\x01\x03\x00\x00\x00\x03')
         event= core.transport.receive(bytes_array)
         self.assertEqual(RFXtrx.ControlEvent, type(event))
-        self.assertEqual(event.__str__(),"<class 'RFXtrx.ControlEvent'> device=[<class 'RFXtrx.RfyDevice'> type='Rfy' id='0a0001:1'] values=[('Command', 'Down')]")
+        self.assertEqual(event.__str__(),"<class 'RFXtrx.ControlEvent'> device=[<class 'RFXtrx.RfyDevice'> type='Rfy' id='0a0001:1'] values=[('Command', 'Down'), ('Rssi numeric', 0)]")
         event.device.send_open(core.transport)
         event.device.send_close(core.transport)
         event.device.send_stop(core.transport)
