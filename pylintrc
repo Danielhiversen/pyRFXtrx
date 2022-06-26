@@ -7,7 +7,6 @@ reports=no
 
 disable=
   locally-disabled,
-  redefined-variable-type
 
 
 [MESSAGES CONTROL]
