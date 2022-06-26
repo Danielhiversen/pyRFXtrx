@@ -215,7 +215,7 @@ class CoreTestCase(TestCase):
                        0x79]
         event = core.transport.parse(bytes_array)
         self.assertEqual(RFXtrx.SensorEvent, type(event))
-        self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='CARTELECTRONIC_TIC' id='77d200686'] values=[('Battery numeric', 0), ('Contract type', 17), ('Count', 0), ('Counter value', 3838665), ('Energy usage', 330), ('Rssi numeric', 0), ('Sensor Status', True)]")
+        self.assertEqual(event.__str__(),"<class 'RFXtrx.SensorEvent'> device=[<class 'RFXtrx.RFXtrxDevice'> type='CARTELECTRONIC_TIC' id='77d200686'] values=[('Battery numeric', 9), ('Contract type', 17), ('Count', 0), ('Counter value', 3838665), ('Energy usage', 330), ('Rssi numeric', 7), ('Sensor Status', True)]")
 
         #Cartelectronic Encoder
         bytes_array = [0x11, 0x60, 0x02, 0x5f, 0x3f, 0xfe, 0x61, 0xa3, 0x00, 0x00, 0x47, 0xd4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x69]

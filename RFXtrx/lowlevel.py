@@ -2264,7 +2264,7 @@ class Cartelectronic(SensorPacket):
                 self.currentwatt = None
             self.state_byte = data[20]
             self.teleinfo_ok = not (data[20] & 0x04) == 0x04
-            self.rssi_byte = data[17]
+            self.rssi_byte = data[21]
         elif self.subtype == 0x02:
             # Cartelectronic Encoder
             self.counter1 = ((data[8] * pow(2, 24)) + (data[9] << 16) +
