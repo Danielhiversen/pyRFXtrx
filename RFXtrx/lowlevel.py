@@ -2618,15 +2618,21 @@ class Rfy(Packet):
         self.id1 = data[4]
         self.id2 = data[5]
         self.id3 = data[6]
-        self.unitcode = data[7]
-        self.cmnd = data[8]
-        self.rfu1 = data[9]
-        self.rfu2 = data[10]
-        self.rfu3 = data[11]
-        self.rssi_byte = data[12]
-        self.rssi = self.rssi_byte >> 4
-
         self.id_combined = (self.id1 << 16) + (self.id2 << 8) + self.id3
+        self.unitcode = data[7]
+
+        # Packet without command has been used in home assistant
+        if self.packetlength >= 8:
+            self.cmnd = data[8]
+
+        # Packet was extended in 9.17
+        if self.packetlength >= 12:
+            self.rfu1 = data[9]
+            self.rfu2 = data[10]
+            self.rfu3 = data[11]
+            self.rssi_byte = data[12]
+            self.rssi = self.rssi_byte >> 4
+
         self._set_strings()
 
     def set_transmit(self, subtype, seqnbr, id_combined, unitcode, cmnd):

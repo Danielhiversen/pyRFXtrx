@@ -4,8 +4,28 @@ import RFXtrx
 
 
 class RfyTestCase(TestCase):
-    def test_parse_bytes(self):
+    def test_parse_bytes_legacy_format(self):
+        ### Tests with legacy formats used by home assistant.
+        rfy = RFXtrx.lowlevel.parse(bytearray(b'\x08\x1A\x00\x00\x0A\x00\x01\x01\x03'))
+        self.assertEqual(rfy.__repr__(), "Rfy [subtype=0, seqnbr=0, id=0a0001:1, cmnd=Down, rssi=None]")
+        self.assertEqual(rfy.packetlength, 8)
+        self.assertEqual(rfy.subtype, 0)
+        self.assertEqual(rfy.type_string, "Rfy")
+        self.assertEqual(rfy.seqnbr, 0)
+        self.assertEqual(rfy.id_string, "0a0001:1")
+        self.assertEqual(rfy.cmnd, 3)
+        self.assertEqual(rfy.cmnd_string, "Down")
 
+        rfy = RFXtrx.lowlevel.parse(bytearray(b'\x07\x1A\x00\x00\x0A\x00\x01\x01'))
+        self.assertEqual(rfy.__repr__(), "Rfy [subtype=0, seqnbr=0, id=0a0001:1, cmnd=None, rssi=None]")
+        self.assertEqual(rfy.packetlength, 7)
+        self.assertEqual(rfy.subtype, 0)
+        self.assertEqual(rfy.type_string, "Rfy")
+        self.assertEqual(rfy.seqnbr, 0)
+        self.assertEqual(rfy.id_string, "0a0001:1")
+
+
+    def test_parse_bytes(self):
         rfy = RFXtrx.lowlevel.parse(bytearray(b'\x0C\x1A\x00\x00\x0A\x00\x01\x01\x03\x00\x00\x00\x30'))
         self.assertEqual(rfy.__repr__(), "Rfy [subtype=0, seqnbr=0, id=0a0001:1, cmnd=Down, rssi=3]")
         self.assertEqual(rfy.packetlength, 12)
