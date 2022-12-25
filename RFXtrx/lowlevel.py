@@ -3035,6 +3035,11 @@ class Fan(Packet):
                 0x09: 'Join',
                 0x0A: 'Leave'}
 
+    def __str__(self):
+        return ("Fan [subtype={0}, seqnbr={1}, id={2}, cmnd={3}]") \
+            .format(self.type_string, self.seqnbr, self.id_string,
+                    self.cmnd_string)
+
     def __init__(self):
         """Constructor"""
         super().__init__()

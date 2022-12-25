@@ -15,3 +15,4 @@ class FanTestCase(TestCase):
         self.assertEqual(fan.id_string,'123456')
         self.assertEqual(fan.cmnd, 0x01)
         self.assertEqual(fan.cmnd_string, 'Low')
+        self.assertEqual(str(fan), 'Fan [subtype=Itho HRU400, seqnbr=0, id=123456, cmnd=Low]')
