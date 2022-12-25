@@ -140,7 +140,13 @@ class Status(Packet):
         ],
         [
             "keeloq",
-            "homeconfort"
+            "homeconfort",
+            "undecoded",
+            "undecoded",
+            "itho hru400", # 868Mhz
+            "undecoded", # Orcon 868MHz
+            "undecoded", # Itho CVE, HRU ECO 868MHz
+            "undecoded"  # Itho_CVE RFT 868MHz
         ]
     ]
     """
