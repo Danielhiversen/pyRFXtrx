@@ -3014,6 +3014,68 @@ class Funkbus(Packet):
             else:
                 self.time_string = self.__UNKNOWN_TIME.format(self.time)
 
+###############################################################################
+# Funkbus class
+###############################################################################
+
+
+class Fan(Packet):
+    """
+    Data class for the Fan packet type
+    """
+
+    TYPES = {0x0D: 'Itho HRU400'}
+
+    COMMANDS = {0x01: 'Low',
+                0x02: 'Medium',
+                0x03: 'High',
+                0x04: 'Timer 15min',
+                0x05: 'Timer 30min',
+                0x06: 'Timer 60min',
+                0x09: 'Join',
+                0x0A: 'Leave'}
+
+    def __init__(self):
+        """Constructor"""
+        super().__init__()
+        self.id1 = None
+        self.id2 = None
+        self.id3 = None
+        self.id_combined = None
+        self.cmnd = None
+        self.cmnd_string = None
+
+    def load_receive(self, data):
+        """Load data from a bytearray"""
+        self.data = data
+        self.packetlength = data[0]
+        self.packettype = data[1]
+        self.subtype = data[2]
+        self.seqnbr = data[3]
+        self.id1 = data[4]
+        self.id2 = data[5]
+        self.id3 = data[6]
+        self.id_combined = (self.id1 << 16) + (self.id2 << 8) + self.id3
+        self.cmnd = data[7]
+        self._set_strings()
+
+    def _set_strings(self):
+        self.id_string = "{0:06x}".format(self.id_combined)
+        if self.subtype in self.TYPES:
+            self.type_string = self.TYPES[self.subtype]
+        else:
+            # Degrade nicely for yet unknown subtypes
+            self.type_string = self._UNKNOWN_TYPE.format(self.packettype,
+                                                         self.subtype)
+
+        if self.cmnd is not None:
+            if self.subtype == 0x0D and self.cmnd in self.COMMANDS:
+                self.cmnd_string = self.COMMANDS[self.cmnd]
+        else:
+            self.cmnd_string = self._UNKNOWN_CMND.format(self.cmnd)
+
+
+###############################################################################
 
 PACKET_TYPES = {
     0x01: Status,
@@ -3025,6 +3087,7 @@ PACKET_TYPES = {
     0x14: Lighting5,
     0x15: Lighting6,
     0x16: Chime,
+    0x17: Fan,
     0x19: RollerTrol,
     0x1A: Rfy,
     0x1E: Funkbus,
