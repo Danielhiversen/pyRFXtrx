@@ -24,6 +24,8 @@ RFXtrx.
 # pylint: disable=C0302,R0902,R0903,R0911,R0913
 # pylint: disable= too-many-lines, too-many-statements
 
+from enum import Enum
+
 ###############################################################################
 # Packet class
 ###############################################################################
@@ -143,10 +145,10 @@ class Status(Packet):
             "homeconfort",
             "undecoded",
             "undecoded",
-            "itho hru400", # 868Mhz
-            "undecoded", # Orcon 868MHz
-            "undecoded", # Itho CVE, HRU ECO 868MHz
-            "undecoded"  # Itho_CVE RFT 868MHz
+            "itho hru400",  # 868Mhz
+            "undecoded",    # Orcon 868MHz
+            "undecoded",    # Itho CVE, HRU ECO 868MHz
+            "undecoded"     # Itho_CVE RFT 868MHz
         ]
     ]
     """
@@ -3030,6 +3032,21 @@ class Fan(Packet):
     Data class for the Fan packet type
     """
 
+    class Types(Enum):
+        """ Type constants """
+        ITHO_HRU400 = 0x0D
+
+    class Commands(Enum):
+        """ Command constants """
+        LOW = 0x01
+        MEDIUM = 0x02
+        HIGH = 0x03
+        TIMER15 = 0x04
+        TIMER30 = 0x05
+        TIMER60 = 0x06
+        JOIN = 0x09
+        LEAVE = 0x0A
+
     TYPES = {0x0D: 'Itho HRU400'}
 
     COMMANDS = {0x01: 'Low',
@@ -3070,6 +3087,27 @@ class Fan(Packet):
         self.cmnd = data[7]
         self._set_strings()
 
+    def set_transmit(self, subtype, id_combined, cmnd):
+        """Load data from individual data fields"""
+        self.packetlength = 0x08
+        self.packettype = 0x17
+        self.subtype = subtype
+        self.seqnbr = 0
+        self.id_combined = id_combined
+        self.id1 = id_combined >> 16 & 0xff
+        self.id2 = id_combined >> 8 & 0xff
+        self.id3 = id_combined & 0xff
+        self.cmnd = cmnd
+        self.data = bytearray([self.packetlength,
+                               self.packettype,
+                               self.subtype,
+                               self.seqnbr,
+                               self.id1, self.id2, self.id3,
+                               self.cmnd,
+                               0x00, 0x00, 0x00, 0x00, 0x00,
+                               0x00, 0x00, 0x00, 0x00, 0x00])
+        self._set_strings()
+
     def _set_strings(self):
         self.id_string = "{0:06x}".format(self.id_combined)
         if self.subtype in self.TYPES:
@@ -3080,7 +3118,8 @@ class Fan(Packet):
                                                          self.subtype)
 
         if self.cmnd is not None:
-            if self.subtype == 0x0D and self.cmnd in self.COMMANDS:
+            if (self.subtype == self.Types.ITHO_HRU400.value
+                    and self.cmnd in self.COMMANDS):
                 self.cmnd_string = self.COMMANDS[self.cmnd]
         else:
             self.cmnd_string = self._UNKNOWN_CMND.format(self.cmnd)
