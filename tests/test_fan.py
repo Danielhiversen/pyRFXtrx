@@ -16,7 +16,7 @@ class packetTestCase(TestCase):
         self.assertEqual(packet.id_string,'123456')
         self.assertEqual(packet.cmnd, 0x01)
         self.assertEqual(packet.cmnd_string, 'Low')
-        self.assertEqual(str(packet), 'Fan [subtype=Itho HRU400, seqnbr=0, id=123456, cmnd=Low]')
+        self.assertEqual(str(packet), 'Fan [subtype=Itho RFT, seqnbr=0, id=123456, cmnd=Low]')
 
 
     def test_set_transmit(self):

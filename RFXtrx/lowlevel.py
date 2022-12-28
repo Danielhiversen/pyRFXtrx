@@ -145,10 +145,10 @@ class Status(Packet):
             "homeconfort",
             "undecoded",
             "undecoded",
-            "itho hru400",  # 868Mhz
-            "undecoded",    # Orcon 868MHz
-            "undecoded",    # Itho CVE, HRU ECO 868MHz
-            "undecoded"     # Itho_CVE RFT 868MHz
+            "itho rft",   # 868Mhz
+            "undecoded",  # Orcon 868MHz
+            "undecoded",  # Itho CVE, HRU ECO 868MHz
+            "undecoded"   # Itho_CVE RFT 868MHz
         ]
     ]
     """
@@ -3034,27 +3034,27 @@ class Fan(Packet):
 
     class Types(Enum):
         """ Type constants """
-        ITHO_HRU400 = 0x0D
+        ITHO_RFT = 0x0D
 
     class Commands(Enum):
         """ Command constants """
         LOW = 0x01
         MEDIUM = 0x02
         HIGH = 0x03
-        TIMER15 = 0x04
-        TIMER30 = 0x05
-        TIMER60 = 0x06
+        TIMER10 = 0x04
+        TIMER20 = 0x05
+        TIMER30 = 0x06
         JOIN = 0x09
         LEAVE = 0x0A
 
-    TYPES = {0x0D: 'Itho HRU400'}
+    TYPES = {0x0D: 'Itho RFT'}
 
     COMMANDS = {0x01: 'Low',
                 0x02: 'Medium',
                 0x03: 'High',
-                0x04: 'Timer 15min',
-                0x05: 'Timer 30min',
-                0x06: 'Timer 60min',
+                0x04: 'Timer 10 min',
+                0x05: 'Timer 20 min',
+                0x06: 'Timer 30 min',
                 0x09: 'Join',
                 0x0A: 'Leave'}
 
@@ -3118,7 +3118,7 @@ class Fan(Packet):
                                                          self.subtype)
 
         if self.cmnd is not None:
-            if (self.subtype == self.Types.ITHO_HRU400.value
+            if (self.subtype == self.Types.ITHO_RFT.value
                     and self.cmnd in self.COMMANDS):
                 self.cmnd_string = self.COMMANDS[self.cmnd]
         else:

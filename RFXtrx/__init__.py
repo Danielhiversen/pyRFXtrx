@@ -465,17 +465,17 @@ class FanDevice(RFXtrxDevice):
         """ Send a 'High' command using the given transport """
         self.send_command(transport, lowlevel.Fan.Commands.HIGH.value)
 
-    def send_timer15(self, transport):
-        """ Send a 'Timer 15 min' command using the given transport """
-        self.send_command(transport, lowlevel.Fan.Commands.TIMER15.value)
+    def send_timer10(self, transport):
+        """ Send a 'Timer 10 min' command using the given transport """
+        self.send_command(transport, lowlevel.Fan.Commands.TIMER10.value)
+
+    def send_timer20(self, transport):
+        """ Send a 'Timer 20 min' command using the given transport """
+        self.send_command(transport, lowlevel.Fan.Commands.TIMER20.value)
 
     def send_timer30(self, transport):
         """ Send a 'Timer 30 min' command using the given transport """
         self.send_command(transport, lowlevel.Fan.Commands.TIMER30.value)
-
-    def send_timer60(self, transport):
-        """ Send a 'Timer 60 min' command using the given transport """
-        self.send_command(transport, lowlevel.Fan.Commands.TIMER60.value)
 
     def send_command(self, transport, command):
         """ Send a command using the given transport """
@@ -958,6 +958,7 @@ class PyNetworkTransport(RFXtrxTransport):
     def close(self):
         """ close connection to rfxtrx device """
         self._run_event.clear()
+        self.sock.shutdown(socket.SHUT_RDWR)
         self.sock.close()
 
 
