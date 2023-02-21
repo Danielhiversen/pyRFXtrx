@@ -35,10 +35,12 @@ def main():
         rfxcom_device = sys.argv[1]
     else:
         rfxcom_device = '/dev/serial/by-id/usb-RFXCOM_RFXtrx433_A1Y0NJGR-if00-port0'
+    rfxcom_device = ('192.168.2.169', 10001)
+    rfxcom_device = ('192.168.2.247', 10001)
 
     modes_list = sys.argv[2].split() if len(sys.argv) > 2 else None
     print ("modes: ", modes_list)
-    core = RFXtrx.Core(rfxcom_device, print_callback, modes=modes_list)
+    core = RFXtrx.Connect(rfxcom_device, print_callback, transport_protocol=RFXtrx.PyNetworkTransport, modes=modes_list)
 
     print (core)
     while True:

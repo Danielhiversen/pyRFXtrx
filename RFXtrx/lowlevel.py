@@ -24,6 +24,8 @@ RFXtrx.
 # pylint: disable=C0302,R0902,R0903,R0911,R0913
 # pylint: disable= too-many-lines, too-many-statements
 
+from enum import Enum
+
 ###############################################################################
 # Packet class
 ###############################################################################
@@ -140,7 +142,13 @@ class Status(Packet):
         ],
         [
             "keeloq",
-            "homeconfort"
+            "homeconfort",
+            "undecoded",
+            "undecoded",
+            "itho rft",   # 868Mhz
+            "undecoded",  # Orcon 868MHz
+            "undecoded",  # Itho CVE, HRU ECO 868MHz
+            "undecoded"   # Itho_CVE RFT 868MHz
         ]
     ]
     """
@@ -3014,6 +3022,110 @@ class Funkbus(Packet):
             else:
                 self.time_string = self.__UNKNOWN_TIME.format(self.time)
 
+###############################################################################
+# Fan class
+###############################################################################
+
+
+class Fan(Packet):
+    """
+    Data class for the Fan packet type
+    """
+
+    class Types(Enum):
+        """ Type constants """
+        ITHO_RFT = 0x0D
+
+    class Commands(Enum):
+        """ Command constants """
+        LOW = 0x01
+        MEDIUM = 0x02
+        HIGH = 0x03
+        TIMER10 = 0x04
+        TIMER20 = 0x05
+        TIMER30 = 0x06
+        JOIN = 0x09
+        LEAVE = 0x0A
+
+    TYPES = {0x0D: 'Itho RFT'}
+
+    COMMANDS = {0x01: 'Low',
+                0x02: 'Medium',
+                0x03: 'High',
+                0x04: 'Timer 10 min',
+                0x05: 'Timer 20 min',
+                0x06: 'Timer 30 min',
+                0x09: 'Join',
+                0x0A: 'Leave'}
+
+    def __str__(self):
+        return ("Fan [subtype={0}, seqnbr={1}, id={2}, cmnd={3}]") \
+            .format(self.type_string, self.seqnbr, self.id_string,
+                    self.cmnd_string)
+
+    def __init__(self):
+        """Constructor"""
+        super().__init__()
+        self.id1 = None
+        self.id2 = None
+        self.id3 = None
+        self.id_combined = None
+        self.cmnd = None
+        self.cmnd_string = None
+
+    def load_receive(self, data):
+        """Load data from a bytearray"""
+        self.data = data
+        self.packetlength = data[0]
+        self.packettype = data[1]
+        self.subtype = data[2]
+        self.seqnbr = data[3]
+        self.id1 = data[4]
+        self.id2 = data[5]
+        self.id3 = data[6]
+        self.id_combined = (self.id1 << 16) + (self.id2 << 8) + self.id3
+        self.cmnd = data[7]
+        self._set_strings()
+
+    def set_transmit(self, subtype, id_combined, cmnd):
+        """Load data from individual data fields"""
+        self.packetlength = 0x08
+        self.packettype = 0x17
+        self.subtype = subtype
+        self.seqnbr = 0
+        self.id_combined = id_combined
+        self.id1 = id_combined >> 16 & 0xff
+        self.id2 = id_combined >> 8 & 0xff
+        self.id3 = id_combined & 0xff
+        self.cmnd = cmnd
+        self.data = bytearray([self.packetlength,
+                               self.packettype,
+                               self.subtype,
+                               self.seqnbr,
+                               self.id1, self.id2, self.id3,
+                               self.cmnd,
+                               0x00, 0x00, 0x00, 0x00, 0x00,
+                               0x00, 0x00, 0x00, 0x00, 0x00])
+        self._set_strings()
+
+    def _set_strings(self):
+        self.id_string = "{0:06x}".format(self.id_combined)
+        if self.subtype in self.TYPES:
+            self.type_string = self.TYPES[self.subtype]
+        else:
+            # Degrade nicely for yet unknown subtypes
+            self.type_string = self._UNKNOWN_TYPE.format(self.packettype,
+                                                         self.subtype)
+
+        if self.cmnd is not None:
+            if (self.subtype == self.Types.ITHO_RFT.value
+                    and self.cmnd in self.COMMANDS):
+                self.cmnd_string = self.COMMANDS[self.cmnd]
+        else:
+            self.cmnd_string = self._UNKNOWN_CMND.format(self.cmnd)
+
+
+###############################################################################
 
 PACKET_TYPES = {
     0x01: Status,
@@ -3025,6 +3137,7 @@ PACKET_TYPES = {
     0x14: Lighting5,
     0x15: Lighting6,
     0x16: Chime,
+    0x17: Fan,
     0x19: RollerTrol,
     0x1A: Rfy,
     0x1E: Funkbus,

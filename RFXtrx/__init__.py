@@ -444,6 +444,49 @@ class ChimeDevice(RFXtrxDevice):
         pkt.set_transmit(self.subtype, 0, self.id1, self.id2, sound)
         transport.send(pkt.data)
 
+
+class FanDevice(RFXtrxDevice):
+    """ Concrete class for a Fan control device """
+    def __init__(self, pkt):
+        super().__init__(pkt)
+        self.subtype = pkt.subtype
+        self.id_combined = pkt.id_combined
+
+    def send_low(self, transport):
+        """ Send a 'Low' command using the given transport """
+        self.send_command(transport, lowlevel.Fan.Commands.LOW.value)
+
+    def send_medium(self, transport):
+        """ Send a 'Medium' command using the given transport """
+        self.send_command(transport, lowlevel.Fan.Commands.MEDIUM.value)
+
+    def send_high(self, transport):
+        """ Send a 'High' command using the given transport """
+        self.send_command(transport, lowlevel.Fan.Commands.HIGH.value)
+
+    def send_timer10(self, transport):
+        """ Send a 'Timer 10 min' command using the given transport """
+        self.send_command(transport, lowlevel.Fan.Commands.TIMER10.value)
+
+    def send_timer20(self, transport):
+        """ Send a 'Timer 20 min' command using the given transport """
+        self.send_command(transport, lowlevel.Fan.Commands.TIMER20.value)
+
+    def send_timer30(self, transport):
+        """ Send a 'Timer 30 min' command using the given transport """
+        self.send_command(transport, lowlevel.Fan.Commands.TIMER30.value)
+
+    def send_command(self, transport, command):
+        """ Send a command using the given transport """
+        pkt = lowlevel.Fan()
+        pkt.set_transmit(
+            self.subtype,
+            self.id_combined,
+            command
+        )
+        transport.send(pkt.data)
+
+
 ###############################################################################
 # get_device_from_pkt method
 ###############################################################################
@@ -466,6 +509,8 @@ def get_device_from_pkt(pkt):
         device = SecurityDevice(pkt)
     elif isinstance(pkt, lowlevel.Funkbus):
         device = FunkDevice(pkt)
+    elif isinstance(pkt, lowlevel.Fan):
+        device = FanDevice(pkt)
     else:
         device = RFXtrxDevice(pkt)
     return device
