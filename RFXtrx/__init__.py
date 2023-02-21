@@ -451,7 +451,6 @@ class FanDevice(RFXtrxDevice):
         super().__init__(pkt)
         self.subtype = pkt.subtype
         self.id_combined = pkt.id_combined
-        self.cmndseqnbr = 0
 
     def send_low(self, transport):
         """ Send a 'Low' command using the given transport """
@@ -485,7 +484,6 @@ class FanDevice(RFXtrxDevice):
             self.id_combined,
             command
         )
-        self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
         transport.send(pkt.data)
 
 

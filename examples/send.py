@@ -18,20 +18,37 @@
 # along with pyRFXtrx.  See the file COPYING.txt in the distribution.
 # If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+import sys
+sys.path.append("../")
 
-NOT TESTED
-
-
-from RFXtrx.pyserial import PySerialTransport
-from RFXtrx import LightingDevice
+from RFXtrx import PySerialTransport, PyNetworkTransport
+from RFXtrx import FanDevice
 from time import sleep
 
+logging.basicConfig(level=logging.DEBUG)
+
 transport = PySerialTransport('/dev/cu.usbserial-05VN8GHS')
+transport = PyNetworkTransport(('192.168.2.247', 10001))
 transport.reset()
+
+transport.send(b'\x0D\x00\x00\x01\x02\x00\x00'
+               b'\x00\x00\x00\x00\x00\x00\x00')
+event = transport.receive_blocking()
+print(event)
+
+#transport.send(b'\x0D\x00\x00\x03\x07\x00\x00'
+#               b'\x00\x00\x00\x00\x00\x00\x00')
+#event = transport.receive_blocking()
+#print(event)
 
 while True:
     event = transport.receive_blocking()
-    if isinstance(event.device, LightingDevice):
+    print(event)
+    if hasattr(event, 'device') and isinstance(event.device, FanDevice):
         sleep(5)
-        event.device.send_off(transport)
-        ack = transport.receive_blocking()
+        print(f"Sending high command")
+        event.device.send_high(transport)
+
+#        transport.close()
+
