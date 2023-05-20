@@ -293,6 +293,8 @@ class Status(Packet):
         else:
             self.firmware_type_string = 'Unknown ' + str(self.firmware_type)
 
+        self.id_string = "-"
+
 
 ###############################################################################
 # ReceiverTransmitter class

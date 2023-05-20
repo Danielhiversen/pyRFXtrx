@@ -29,7 +29,7 @@ import threading
 import time
 import logging
 import asyncio
-from typing import Callable, Optional, Dict, List
+from typing import Callable, Optional, Dict, List, Union
 
 
 from time import sleep
@@ -1116,49 +1116,34 @@ class AsyncConnectBase(asyncio.protocols.BufferedProtocol,
 
     def __init__(self) -> None:
         super().__init__()
-        self._buffer = bytearray(256)
-        self._view = memoryview(self._buffer)
+        self._buffer = bytearray()
         self._transport: 'asyncio.Future[asyncio.Transport]' = asyncio.Future()
         self._pos = 0
         self._len = 1
 
     def data_received(self, data: bytes) -> None:
         """Wrapper for non buffer protocol transports."""
-        idx = 0
-        while idx < len(data):
-            cnt = len(data)-idx
-            buffer = self.get_buffer(cnt)
-            cnt = min(len(buffer), cnt)
-            assert cnt
-            buffer[0:cnt] = bytes(data[idx:idx+cnt])
-            self.buffer_updated(cnt)
-            idx += cnt
+        self._buffer.extend(data)
 
-    def get_buffer(self, _: int) -> memoryview:
-        """Return view of buffer for next needed data."""
-        return self._view[self._pos:self._len]
+        while len(self._buffer) >= self._len:
+            if self._len == 1:
+                self._len = self._buffer[0] + 1
+            else:
+                try:
+                    self._packet_received(self._buffer[:self._len])
+                finally:
+                    self._packet_flush(self._len)
 
     def _packet_received(self, data: bytes):
         """ Packet received. """
 
-    def _packet_flush(self):
+    def _packet_flush(self, skip: Union[int, None] = None):
         """ Flush any received data so far. """
-        self._pos = 0
         self._len = 1
-
-    def buffer_updated(self, nbytes):
-        """ New data received. """
-        self._pos += nbytes
-        assert self._pos <= self._len
-
-        if self._len == 1:
-            self._len = self._buffer[0] + 1
-
-        if self._len == self._pos:
-            try:
-                self._packet_received(self._buffer[:self._pos])
-            finally:
-                self._packet_flush()
+        if skip is None:
+            self._buffer.clear()
+        else:
+            self._buffer = self._buffer[skip:]
 
     def connection_made(self, transport: asyncio.BaseTransport) -> None:
         """ Connection to server was made. """
