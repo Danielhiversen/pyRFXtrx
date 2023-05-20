@@ -28,6 +28,9 @@ import socket
 import threading
 import time
 import logging
+import asyncio
+from typing import Callable, Optional, Dict, List, Union
+
 
 from time import sleep
 
@@ -36,6 +39,25 @@ import serial
 from . import lowlevel
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def parse(data):
+    """ Parse the given data and return an RFXtrxEvent """
+    if data is None:
+        return None
+    pkt = lowlevel.parse(data)
+    if pkt is not None:
+        if isinstance(pkt, lowlevel.SensorPacket):
+            obj = SensorEvent(pkt)
+        elif isinstance(pkt, lowlevel.Status):
+            obj = StatusEvent(pkt)
+        elif isinstance(pkt, (lowlevel.InterfaceResponse,
+                              lowlevel.ReceiverTransmitter)):
+            obj = ResponseEvent(pkt)
+        else:
+            obj = ControlEvent(pkt)
+        return obj
+    return None
 
 
 ###############################################################################
@@ -63,6 +85,26 @@ class RFXtrxDevice:
     def __str__(self):
         return "{0} type='{1}' id='{2}'".format(
             type(self), self.type_string, self.id_string)
+
+
+class TransceiverDevice(RFXtrxDevice):
+    """ Concrete class for the rfxtrx transceiver """
+    def __init__(self, pkt: lowlevel.Status):
+        super().__init__(pkt)
+        self.firmware_version = pkt.firmware_version
+        self.firmware_type_string = pkt.firmware_type_string
+
+    def __str__(self):
+        return (
+            "{0} type='{1}' id='{2}' firmware_version='{3}'"
+            " firmware_type='{4}'".format(
+                type(self),
+                self.type_string,
+                self.id_string,
+                self.firmware_version,
+                self.firmware_type_string,
+            )
+        )
 
 
 ###############################################################################
@@ -466,6 +508,11 @@ def get_device_from_pkt(pkt):
         device = SecurityDevice(pkt)
     elif isinstance(pkt, lowlevel.Funkbus):
         device = FunkDevice(pkt)
+    elif isinstance(pkt, lowlevel.Status):
+        device = TransceiverDevice(pkt)
+    elif isinstance(pkt, (lowlevel.InterfaceResponse,
+                          lowlevel.ReceiverTransmitter)):
+        device = None
     else:
         device = RFXtrxDevice(pkt)
     return device
@@ -513,8 +560,9 @@ def get_device(packettype, subtype, id_string):
 class RFXtrxEvent:
     """ Abstract superclass for all events """
 
-    def __init__(self, device):
-        self.device = device
+    def __init__(self, pkt: lowlevel.Packet):
+        self.device = get_device_from_pkt(pkt)
+        self.pkt = pkt
 
 
 ###############################################################################
@@ -526,11 +574,9 @@ class SensorEvent(RFXtrxEvent):
 
     def __init__(self, pkt):
         #  pylint: disable=too-many-branches, too-many-statements
-        device = get_device_from_pkt(pkt)
-        super().__init__(device)
+        super().__init__(pkt)
 
         self.values = {}
-        self.pkt = pkt
         if isinstance(pkt, lowlevel.Undecoded):
             self.values['Payload'] = pkt.payload
         if isinstance(pkt, lowlevel.RfxMeter):
@@ -631,8 +677,7 @@ class ControlEvent(RFXtrxEvent):
     """ Concrete class for control events """
 
     def __init__(self, pkt):
-        device = get_device_from_pkt(pkt)
-        super().__init__(device)
+        super().__init__(pkt)
 
         self.values = {}
         self.values['Command'] = pkt.value('cmnd_string')
@@ -663,21 +708,52 @@ class ControlEvent(RFXtrxEvent):
         return "{0} device=[{1}] values={2}".format(
             type(self), self.device, sorted(self.values.items()))
 
+
+###############################################################################
+# Response class
+###############################################################################
+
+class ResponseEvent(RFXtrxEvent):
+    """ Concrete class for command responses """
+    def __init__(self, pkt):
+        super().__init__(pkt)
+        self.values = {}
+
+        if isinstance(pkt, lowlevel.ReceiverTransmitter):
+            self.values["Successful"] = pkt.msg in (0, 1)
+        elif isinstance(pkt, lowlevel.InterfaceResponse):
+            self.values["Successful"] = pkt.subtype != 0xff
+
+    def __str__(self):
+        return "{0} values={1}".format(
+            type(self), sorted(self.values.items()))
+
+
 ###############################################################################
 # Status class
 ###############################################################################
 
-
-class StatusEvent(RFXtrxEvent):
+class StatusEvent(ResponseEvent):
     """ Concrete class for status """
+    def __init__(self, pkt):
+        super().__init__(pkt)
+        self.values = {}
+
+        if isinstance(pkt, lowlevel.Status):
+            self.values["Devices"] = pkt.devices
+            self.values["Firmware Version"] = pkt.firmware_version
+            self.values["Firmware Type"] = pkt.firmware_type
+            self.values["Hardware Version"] = "{}.{}".format(
+                pkt.hardware_major, pkt.hardware_minor)
+
     def __str__(self):
-        return "{0} device=[{1}]".format(
-            type(self), self.device)
+        return "{0} device=[{1}] values={2}".format(
+            type(self), self.device, sorted(self.values.items()))
+
 
 ###############################################################################
 # DummySerial class
 ###############################################################################
-
 
 class _dummySerial:
     """ Dummy class for testing"""
@@ -741,21 +817,7 @@ class RFXtrxTransport:
     @staticmethod
     def parse(data):
         """ Parse the given data and return an RFXtrxEvent """
-        if data is None:
-            return None
-        pkt = lowlevel.parse(data)
-        if pkt is not None:
-            if isinstance(pkt, lowlevel.SensorPacket):
-                obj = SensorEvent(pkt)
-            elif isinstance(pkt, lowlevel.Status):
-                obj = StatusEvent(pkt)
-            else:
-                obj = ControlEvent(pkt)
-
-            # Store the latest RF signal data
-            obj.data = data
-            return obj
-        return None
+        return parse(data)
 
     def reset(self):
         """ reset the rfxtrx device """
@@ -812,6 +874,7 @@ class PySerialTransport(RFXtrxTransport):
                 " ".join("0x{0:02x}".format(x) for x in pkt)
             )
             return self.parse(pkt)
+        return None
 
     def send(self, data):
         """ Send the given packet """
@@ -829,7 +892,7 @@ class PySerialTransport(RFXtrxTransport):
 
     def reset(self):
         """ Reset the RFXtrx """
-        self.send(b'\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        self.send(lowlevel.COMMAND_RESET)
         sleep(0.3)  # Should work with 0.05, but not for me
         self.serial.flushInput()
 
@@ -887,6 +950,7 @@ class PyNetworkTransport(RFXtrxTransport):
                 " ".join("0x{0:02x}".format(x) for x in pkt)
             )
             return self.parse(pkt)
+        return None
 
     def send(self, data):
         """ Send the given packet """
@@ -904,7 +968,7 @@ class PyNetworkTransport(RFXtrxTransport):
 
     def reset(self):
         """ Reset the RFXtrx """
-        self.send(b'\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        self.send(lowlevel.COMMAND_RESET)
         sleep(0.3)
         self.sock.sendall(b'')
 
@@ -1021,20 +1085,11 @@ class Connect:
 
     def set_recmodes(self, modenames):
         """ Sets the device modes (which protocols to decode) """
-        data = bytearray([0x0D, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
-
-        # Keep the values read during init.
-        data[5] = self._status.device.tranceiver_type
-        data[6] = self._status.device.output_power
-
-        # Build the mode data bytes from the mode names
-        for mode in modenames:
-            byteno, bitno = lowlevel.get_recmode_tuple(mode)
-            if byteno is None:
-                raise ValueError('Unknown mode name '+mode)
-
-            data[7 + byteno] |= 1 << bitno
+        data = lowlevel.set_mode_packet(
+            modenames,
+            self._status.pkt.tranceiver_type,
+            self._status.pkt.output_power
+        )
 
         self.transport.send(data)
         self._modes = modenames
@@ -1042,16 +1097,165 @@ class Connect:
 
     def send_start(self):
         """ Sends the Start RFXtrx transceiver command """
-        self.transport.send(b'\x0D\x00\x00\x03\x07\x00\x00'
-                            b'\x00\x00\x00\x00\x00\x00\x00')
+        self.transport.send(lowlevel.COMMAND_START)
         return self.transport.receive_blocking()
 
     def send_get_status(self):
         """ Sends the Get Status command """
-        self.transport.send(b'\x0D\x00\x00\x01\x02\x00\x00'
-                            b'\x00\x00\x00\x00\x00\x00\x00')
+        self.transport.send(lowlevel.COMMAND_GET_STATUS)
         return self.transport.receive_blocking()
 
 
 class Core(Connect):
     """ The main class for rfxcom-py. Has changed name to Connect """
+
+
+class AsyncConnectBase(asyncio.protocols.BufferedProtocol,
+                       asyncio.protocols.Protocol):
+    """ Async protocol for parsing data from rfxtrx device """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._buffer = bytearray()
+        self._transport: 'asyncio.Future[asyncio.Transport]' = asyncio.Future()
+        self._pos = 0
+        self._len = 1
+
+    def data_received(self, data: bytes) -> None:
+        """Wrapper for non buffer protocol transports."""
+        self._buffer.extend(data)
+
+        while len(self._buffer) >= self._len:
+            if self._len == 1:
+                self._len = self._buffer[0] + 1
+            else:
+                try:
+                    self._packet_received(self._buffer[:self._len])
+                finally:
+                    self._packet_flush(self._len)
+
+    def _packet_received(self, data: bytes):
+        """ Packet received. """
+
+    def _packet_flush(self, skip: Union[int, None] = None):
+        """ Flush any received data so far. """
+        self._len = 1
+        if skip is None:
+            self._buffer.clear()
+        else:
+            self._buffer = self._buffer[skip:]
+
+    def connection_made(self, transport: asyncio.BaseTransport) -> None:
+        """ Connection to server was made. """
+        try:
+            assert isinstance(transport, asyncio.Transport)
+            self._transport.set_result(transport)
+        except Exception as exception:
+            self._transport.set_exception(exception)
+            raise
+
+        self._packet_flush()
+
+    def connection_lost(self, exc: Optional[Exception]) -> None:
+        """ Connection to server was lost. """
+        if exc:
+            _LOGGER.error("Unexpected disconnection: %s", exc)
+        self._transport = asyncio.Future()
+
+    def close(self):
+        """ Close down protocol. """
+        if self._transport.done():
+            transport = self._transport.result()
+            assert isinstance(transport, asyncio.Transport)
+            transport.close()
+
+
+class AsyncConnect(AsyncConnectBase):
+    """ Async protocol for parsing data from rfxtrx device """
+
+    def __init__(
+        self,
+        callback: Optional[Callable[[RFXtrxEvent], None]]
+    ) -> None:
+        super().__init__()
+        self._callback = callback
+        self._seq = 0
+        self._seq_future: Dict[int, 'asyncio.Future[ResponseEvent]'] = {}
+
+    def _packet_received(self, data: bytes):
+        """ Packet received. """
+        _LOGGER.debug(
+            "Recv: %s",
+            " ".join("0x{0:02x}".format(x) for x in data)
+        )
+
+        obj = parse(data)
+        if not obj:
+            return
+
+        _LOGGER.debug("Event: %s", obj)
+
+        if isinstance(obj, ResponseEvent):
+            fut = self._seq_future.get(obj.pkt.seqnbr)
+            if fut:
+                fut.set_result(obj)
+
+        self._call_callback(obj)
+
+    def _call_callback(self, obj: RFXtrxEvent):
+        try:
+            if self._callback:
+                self._callback(obj)
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.exception("Unexpected callback error: %s", obj)
+
+    def send(self, data: bytes) -> int:
+        """ Send a set of data to server. """
+        transport = self._transport.result()
+        assert isinstance(transport, asyncio.Transport)
+        seq = self._seq
+        data = bytes([*data[:3], seq, *data[4:]])
+        self._seq = (self._seq + 1) % 256
+        transport.write(data)
+        return seq
+
+    async def wait(self, seq) -> ResponseEvent:
+        """ Wait for a sequence number reply. """
+        assert seq not in self._seq_future
+        fut: 'asyncio.Future[ResponseEvent]' = (
+            asyncio.get_event_loop().create_future()
+        )
+        self._seq_future[seq] = fut
+        try:
+            return await fut
+        finally:
+            self._seq_future.pop(seq)
+
+    async def read(self, data: bytes) -> ResponseEvent:
+        """ Send a packet and wait for response """
+        seq = self.send(data)
+        return await self.wait(seq)
+
+    async def setup(self, modes: Optional[List[str]]):
+        """ Sends the Get Status command """
+        await self._transport
+        self.send(lowlevel.COMMAND_RESET)
+        await asyncio.sleep(0.5)
+
+        self._seq = 0
+        self._packet_flush()
+
+        status = await self.read(lowlevel.COMMAND_GET_STATUS)
+        assert isinstance(status, StatusEvent)
+        assert isinstance(status.pkt, lowlevel.Status)
+
+        if modes:
+            await self.read(
+                lowlevel.set_mode_packet(
+                    modes,
+                    status.pkt.tranceiver_type,
+                    status.pkt.output_power
+                )
+            )
+
+        await self.read(lowlevel.COMMAND_START)
