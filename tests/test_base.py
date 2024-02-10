@@ -20,6 +20,7 @@ class CoreTestCase(TestCase):
     def test_constructor(self):
         global num_calbacks
         core = RFXtrx.Core(self.path, event_callback=_callback, transport_protocol=RFXtrx.DummyTransport2)
+        core.connect()
         while num_calbacks < 7:
             time.sleep(0.1)
 
@@ -31,12 +32,14 @@ class CoreTestCase(TestCase):
     def test_invalid_packet(self):
         bytes_array = bytearray([0x09, 0x11, 0xd7, 0x00, 0x01, 0x1d, 0x14, 0x02, 0x79, 0x0a])
         core = RFXtrx.Connect(self.path, event_callback=_callback, transport_protocol=RFXtrx.DummyTransport)
+        core.connect()
         event = core.transport.parse(bytes_array)
         self.assertIsNone(event)
 
     def test_format_packet(self):
         # Lighting1
         core = RFXtrx.Connect(self.path, event_callback=_callback, transport_protocol=RFXtrx.DummyTransport)
+        core.connect()
         bytes_array = bytearray([0x07, 0x10, 0x00, 0x2a, 0x45, 0x05, 0x01, 0x70])
         event = core.transport.parse(bytes_array)
         self.assertEqual(RFXtrx.ControlEvent, type(event))
@@ -359,6 +362,7 @@ class CoreTestCase(TestCase):
 
     def test_equal_device_check(self):
         core = RFXtrx.Connect(self.path, event_callback=_callback, transport_protocol=RFXtrx.DummyTransport)
+        core.connect()
         data1 = bytearray(b'\x11\x5A\x01\x00\x2E\xB2\x03\x00\x00'
                           b'\x02\xB4\x00\x00\x0C\x46\xA8\x11\x69')
         energy = core.transport.receive(data1)
@@ -392,6 +396,7 @@ class CoreTestCase(TestCase):
 
     def test_get_device(self):
         core = RFXtrx.Connect(self.path, event_callback=_callback, transport_protocol=RFXtrx.DummyTransport)
+        core.connect()
         # Lighting1
         bytes_array = bytearray([0x07, 0x10, 0x00, 0x2a, 0x45, 0x05, 0x01, 0x70])
         event = core.transport.parse(bytes_array)
@@ -439,6 +444,7 @@ class CoreTestCase(TestCase):
     def test_set_recmodes(self):
         core = RFXtrx.Connect(self.path, event_callback=_callback,
                               transport_protocol=RFXtrx.DummyTransport)
+        core.connect()
         time.sleep(0.2)
         self.assertEqual(None, core._modes)
 
@@ -460,6 +466,7 @@ class CoreTestCase(TestCase):
 
     def test_receive(self):
         core = RFXtrx.Connect(self.path, event_callback=_callback, transport_protocol=RFXtrx.DummyTransport)
+        core.connect()
         time.sleep(0.2)
         # Lighting1
         bytes_array = bytearray([0x07, 0x10, 0x00, 0x2a, 0x45, 0x05, 0x01, 0x70])

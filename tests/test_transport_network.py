@@ -53,6 +53,7 @@ def connected_transport(server: Server):
     server.event.clear()
     transport = RFXtrx.PyNetworkTransport(server.address)
     transport.sock.settimeout(10)
+    transport.connect()
     assert server.event.wait(10)
     return transport, server.connections[-1]
 

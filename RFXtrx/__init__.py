@@ -777,6 +777,9 @@ class RFXtrxTransport:
             return obj
         return None
 
+    def connect(self):
+        """ connect to device """
+
     def reset(self):
         """ reset the rfxtrx device """
 
@@ -801,7 +804,6 @@ class PySerialTransport(RFXtrxTransport):
     def __init__(self, port):
         self.port = port
         self.serial = None
-        self.connect()
 
     def connect(self):
         """ Open a serial connexion """
@@ -874,7 +876,6 @@ class PyNetworkTransport(RFXtrxTransport):
     def __init__(self, hostport):
         self.hostport = hostport    # must be a (host, port) tuple
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connect()
 
     def connect(self):
         """ Open a socket connection """
@@ -943,6 +944,9 @@ class DummyTransport(RFXtrxTransport):
         self.device = device
         self._close_event = threading.Event()
 
+    def connect(self):
+        pass
+
     def receive(self, data=None):
         """ Emulate a receive by parsing the given data """
         if data is None:
@@ -979,6 +983,8 @@ class DummyTransport2(PySerialTransport):
     def __init__(self, device=""):
         self.serial = _dummySerial(device, 38400, timeout=0.1)
         self._run_event = threading.Event()
+
+    def connect(self):
         self._run_event.set()
 
 
@@ -995,10 +1001,11 @@ class Connect:
         self._status = None
         self._modes = modes
         self.event_callback = event_callback
-
         self.transport: RFXtrxTransport = transport_protocol(device)
-        self._thread = threading.Thread(target=self._connect)
-        self._thread.daemon = True
+
+    def connect(self):
+        self.transport.connect()
+        self._thread = threading.Thread(target=self._connect, daemon=True)
         self._thread.start()
         self._run_event.wait()
 
