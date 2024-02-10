@@ -5,7 +5,7 @@ import RFXtrx
 import socket
 import dataclasses
 import threading
-
+from typing import Tuple, List
 
 @pytest.fixture(name="server_socket")
 def fixture_server_socket():
@@ -19,8 +19,8 @@ def fixture_server_socket():
 
 @dataclasses.dataclass
 class Server:
-    address: tuple
-    connections: list[socket.socket]
+    address: Tuple
+    connections: List[socket.socket]
     event = threading.Event()
 
 @pytest.fixture(name="server")
