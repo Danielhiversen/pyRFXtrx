@@ -1010,7 +1010,7 @@ class Connect:
         except Exception:
             _LOGGER.exception("Unexpected exception from transport")
         finally:
-            if self.event_callback:
+            if self.event_callback and self._run_event.is_set():
                 self.event_callback(ConnectionLost())
 
     def _connect_internal(self):
