@@ -11,6 +11,7 @@ from typing import Tuple, List
 def fixture_server_socket():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
     sock.bind(('127.0.0.1', 0))
+    sock.settimeout(1)
     sock.listen(1)
     try:
         yield sock
@@ -34,6 +35,8 @@ def fixture_server(server_socket: socket.socket):
                 connection, address = server_socket.accept()
                 server.connections.append(connection)
                 server.event.set()
+            except socket.timeout:
+                continue
             except socket.error:
                 return
     thread = threading.Thread(target=runner, daemon=True)
