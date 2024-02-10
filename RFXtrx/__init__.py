@@ -1011,6 +1011,7 @@ class Connect:
         self._thread.start()
         if not self._run_event.wait(timeout):
             self.close_connection()
+            raise TimeoutError()
 
     def _connect(self):
         try:
