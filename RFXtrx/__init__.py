@@ -777,7 +777,7 @@ class RFXtrxTransport:
             return obj
         return None
 
-    def connect(self):
+    def connect(self, timeout=None):
         """ connect to device """
 
     def reset(self):
@@ -805,7 +805,7 @@ class PySerialTransport(RFXtrxTransport):
         self.port = port
         self.serial = None
 
-    def connect(self):
+    def connect(self, timeout=None):
         """ Open a serial connexion """
         try:
             try:
@@ -877,10 +877,12 @@ class PyNetworkTransport(RFXtrxTransport):
         self.hostport = hostport    # must be a (host, port) tuple
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def connect(self):
+    def connect(self, timeout=None):
         """ Open a socket connection """
         try:
+            self.sock.settimeout(timeout)
             self.sock.connect(self.hostport)
+            self.sock.settimeout(None)
             _LOGGER.debug("Connected to network socket")
         except socket.error as exception:
             raise RFXtrxTransportError("Connection failed: {0}".format(exception)) from exception
@@ -944,7 +946,7 @@ class DummyTransport(RFXtrxTransport):
         self.device = device
         self._close_event = threading.Event()
 
-    def connect(self):
+    def connect(self, timeout=None):
         pass
 
     def receive(self, data=None):
@@ -984,7 +986,7 @@ class DummyTransport2(PySerialTransport):
         self.serial = _dummySerial(device, 38400, timeout=0.1)
         self._run_event = threading.Event()
 
-    def connect(self):
+    def connect(self, timeout=None):
         self._run_event.set()
 
 
@@ -1003,11 +1005,12 @@ class Connect:
         self.event_callback = event_callback
         self.transport: RFXtrxTransport = transport_protocol(device)
 
-    def connect(self):
-        self.transport.connect()
+    def connect(self, timeout=None):
+        self.transport.connect(timeout)
         self._thread = threading.Thread(target=self._connect, daemon=True)
         self._thread.start()
-        self._run_event.wait()
+        if not self._run_event.wait(timeout):
+            self.close_connection()
 
     def _connect(self):
         try:
