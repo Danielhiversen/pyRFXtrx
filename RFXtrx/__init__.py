@@ -1027,8 +1027,7 @@ class Connect:
     Has methods for sensors.
     """
     #  pylint: disable=too-many-instance-attributes, too-many-arguments
-    def __init__(self, event_callback=None,
-                 transport=None,
+    def __init__(self, transport, event_callback=None,
                  modes=None):
         self._run_event = threading.Event()
         self._sensors = {}
