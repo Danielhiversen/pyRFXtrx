@@ -1034,12 +1034,13 @@ class Connect:
         self._sensors = {}
         self._status = None
         self._modes = modes
+        self._thread = threading.Thread(target=self._connect, daemon=True)
         self.event_callback = event_callback
         self.transport: RFXtrxTransport = transport_protocol(device)
 
     def connect(self, timeout=None):
+        """Connect to device."""
         self.transport.connect(timeout)
-        self._thread = threading.Thread(target=self._connect, daemon=True)
         self._thread.start()
         if not self._run_event.wait(timeout):
             self.close_connection()
@@ -1052,6 +1053,7 @@ class Connect:
             _LOGGER.info("Connection lost %s", exception)
         except Exception:
             _LOGGER.exception("Unexpected exception from transport")
+            raise
         finally:
             if self.event_callback and self._run_event.is_set():
                 self.event_callback(ConnectionLost())
