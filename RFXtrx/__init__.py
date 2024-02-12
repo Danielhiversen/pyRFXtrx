@@ -26,7 +26,6 @@ This module provides the base implementation for pyRFXtrx
 import glob
 import socket
 import threading
-import time
 import logging
 
 from time import sleep
@@ -680,8 +679,10 @@ class ConnectionEvent(RFXtrxEvent):
     def __init__(self):
         super().__init__(None)
 
+
 class ConnectionLost(ConnectionEvent):
     """ Connection lost """
+
 
 class ConnectionDone(ConnectionEvent):
     """ Connection lost """
