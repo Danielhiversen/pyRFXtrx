@@ -852,18 +852,26 @@ class PySerialTransport(RFXtrxTransport):
             "Send: %s",
             " ".join("0x{0:02x}".format(x) for x in pkt)
         )
-        self.serial.write(pkt)
+        try:
+            self.serial.write(pkt)
+        except serial.SerialException as exception:
+            raise RFXtrxTransportError("Connection was lost: {0}".format(exception)) from exception
 
     def reset(self):
         """ Reset the RFXtrx """
-        self.send(b'\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
-        sleep(0.3)  # Should work with 0.05, but not for me
-        self.serial.flushInput()
+        try:
+            self.send(b'\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+            sleep(0.3)  # Should work with 0.05, but not for me
+            self.serial.flushInput()
+        except serial.SerialException as exception:
+            raise RFXtrxTransportError("Connection was lost: {0}".format(exception)) from exception
 
     def close(self):
         """ close connection to rfxtrx device """
-        self.serial.close()
-
+        try:
+            self.serial.close()
+        except serial.SerialException as exception:
+            raise RFXtrxTransportError("Connection was lost: {0}".format(exception)) from exception
 
 ###############################################################################
 # PyNetworkTransport class
@@ -925,18 +933,27 @@ class PyNetworkTransport(RFXtrxTransport):
             "Send: %s",
             " ".join("0x{0:02x}".format(x) for x in pkt)
         )
-        self.sock.send(pkt)
+        try:
+            self.sock.send(pkt)
+        except socket.error as exception:
+            raise RFXtrxTransportError("Send failed: {0}".format(exception)) from exception
 
     def reset(self):
         """ Reset the RFXtrx """
-        self.send(b'\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
-        sleep(0.3)
-        self.sock.sendall(b'')
+        try:
+            self.send(b'\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+            sleep(0.3)
+            self.sock.sendall(b'')
+        except socket.error as exception:
+            raise RFXtrxTransportError("Reset failed: {0}".format(exception)) from exception
 
     def close(self):
         """ close connection to rfxtrx device """
-        self.sock.shutdown(socket.SHUT_RDWR)
-        self.sock.close()
+        try:
+            self.sock.shutdown(socket.SHUT_RDWR)
+            self.sock.close()
+        except socket.error as exception:
+            raise RFXtrxTransportError("Close failed: {0}".format(exception)) from exception
 
 
 class DummyTransport(RFXtrxTransport):
