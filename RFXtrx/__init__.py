@@ -861,17 +861,18 @@ class PySerialTransport(RFXtrxTransport):
             self.serial.write(pkt)
         except serial.SerialException as exception:
             raise RFXtrxTransportError(
-                "Connection was lost: {0}".format(exception)) from exception
+                "Send failed: {0}".format(exception)) from exception
 
     def reset(self):
         """ Reset the RFXtrx """
         try:
-            self.send(b'\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+            self.send(b'\x0D\x00\x00\x00\x00\x00\x00'
+                      b'\x00\x00\x00\x00\x00\x00\x00')
             sleep(0.3)  # Should work with 0.05, but not for me
             self.serial.flushInput()
         except serial.SerialException as exception:
             raise RFXtrxTransportError(
-                "Connection was lost: {0}".format(exception)) from exception
+                "Reset failed: {0}".format(exception)) from exception
 
     def close(self):
         """ close connection to rfxtrx device """
@@ -879,7 +880,7 @@ class PySerialTransport(RFXtrxTransport):
             self.serial.close()
         except serial.SerialException as exception:
             raise RFXtrxTransportError(
-                "Connection was lost: {0}".format(exception)) from exception
+                "Close failed: {0}".format(exception)) from exception
 
 ###############################################################################
 # PyNetworkTransport class
@@ -901,7 +902,8 @@ class PyNetworkTransport(RFXtrxTransport):
             self.sock.settimeout(None)
             _LOGGER.debug("Connected to network socket")
         except socket.error as exception:
-            raise RFXtrxTransportError("Connection failed: {0}".format(exception)) from exception
+            raise RFXtrxTransportError(
+                "Connection failed: {0}".format(exception)) from exception
 
     def receive_blocking(self):
         """ Wait until a packet is received and return with an RFXtrxEvent """
@@ -951,7 +953,8 @@ class PyNetworkTransport(RFXtrxTransport):
     def reset(self):
         """ Reset the RFXtrx """
         try:
-            self.send(b'\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+            self.send(b'\x0D\x00\x00\x00\x00\x00\x00'
+                      b'\x00\x00\x00\x00\x00\x00\x00')
             sleep(0.3)
             self.sock.sendall(b'')
         except socket.error as exception:
