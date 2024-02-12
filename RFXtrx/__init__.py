@@ -1027,8 +1027,8 @@ class Connect:
     Has methods for sensors.
     """
     #  pylint: disable=too-many-instance-attributes, too-many-arguments
-    def __init__(self, device, event_callback=None,
-                 transport_protocol=PySerialTransport,
+    def __init__(self, event_callback=None,
+                 transport=None,
                  modes=None):
         self._run_event = threading.Event()
         self._sensors = {}
@@ -1036,7 +1036,7 @@ class Connect:
         self._modes = modes
         self._thread = threading.Thread(target=self._connect, daemon=True)
         self.event_callback = event_callback
-        self.transport: RFXtrxTransport = transport_protocol(device)
+        self.transport: RFXtrxTransport = transport
 
     def connect(self, timeout=None):
         """Connect to device."""

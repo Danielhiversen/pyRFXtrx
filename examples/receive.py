@@ -38,7 +38,7 @@ def main():
 
     modes_list = sys.argv[2].split() if len(sys.argv) > 2 else None
     print ("modes: ", modes_list)
-    core = RFXtrx.Core(rfxcom_device, print_callback, modes=modes_list)
+    core = RFXtrx.Connect(print_callback, modes=modes_list, transport=RFXtrx.PySerialTransport(rfxcom_device))
     core.connect()
 
     print (core)
