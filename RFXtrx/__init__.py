@@ -797,6 +797,23 @@ class RFXtrxTransport:
         """ Send the given packet """
 
 
+def transport_errors(message):
+    """ Decorator to wrap low level errors in known error. """
+    def _errors(func):
+        @functools.wraps(func)
+        def __errors(instance: RFXtrxTransport, *args, **kargs):
+            try:
+                return func(instance, *args, **kargs)
+            except (socket.error,
+                    serial.SerialException,
+                    OSError) as exception:
+                _LOGGER.debug("%s failed: %s", message, str(exception), exc_info=True)
+                raise RFXtrxTransportError(
+                    "{0} failed: {1}".format(message, exception)
+                ) from exception
+        return __errors
+    return _errors
+
 ###############################################################################
 # PySerialTransport class
 ###############################################################################
@@ -805,24 +822,11 @@ class RFXtrxTransport:
 class PySerialTransport(RFXtrxTransport):
     """ Implementation of a transport using PySerial """
 
-    @staticmethod
-    def errors(message):
-        def _errors(func):
-            @functools.wraps(func)
-            def __errors(*args, **kargs):
-                try:
-                    return func(*args, **kargs)
-                except (serial.SerialException, OSError) as exception:
-                    raise RFXtrxTransportError(
-                    "{0} failed: {1}".format(message, exception)) from exception
-            return __errors
-        return _errors
-
     def __init__(self, port):
         self.port = port
         self.serial = None
 
-    @errors("connect")
+    @transport_errors("connect")
     def connect(self, timeout=None):
         """ Open a serial connexion """
         try:
@@ -834,7 +838,7 @@ class PySerialTransport(RFXtrxTransport):
             _LOGGER.debug("Attempting connection by name %s", port)
             self.serial = serial.Serial(port[0], 38400)
 
-    @errors("receive")
+    @transport_errors("receive")
     def receive_blocking(self):
         return self._receive_packet()
 
@@ -853,7 +857,7 @@ class PySerialTransport(RFXtrxTransport):
         )
         return self.parse(pkt)
 
-    @errors("send")
+    @transport_errors("send")
     def send(self, data):
         """ Send the given packet """
         if isinstance(data, bytearray):
@@ -868,15 +872,15 @@ class PySerialTransport(RFXtrxTransport):
         )
         self.serial.write(pkt)
 
-    @errors("reset")
+    @transport_errors("reset")
     def reset(self):
         """ Reset the RFXtrx """
         self.send(b'\x0D\x00\x00\x00\x00\x00\x00'
-                    b'\x00\x00\x00\x00\x00\x00\x00')
+                  b'\x00\x00\x00\x00\x00\x00\x00')
         sleep(0.3)  # Should work with 0.05, but not for me
         self.serial.flushInput()
 
-    @errors("close")
+    @transport_errors("close")
     def close(self):
         """ close connection to rfxtrx device """
         self.serial.close()
@@ -889,24 +893,11 @@ class PySerialTransport(RFXtrxTransport):
 class PyNetworkTransport(RFXtrxTransport):
     """ Implementation of a transport using sockets """
 
-    @staticmethod
-    def errors(message):
-        def _errors(func):
-            @functools.wraps(func)
-            def __errors(*args, **kargs):
-                try:
-                    return func(*args, **kargs)
-                except socket.error as exception:
-                    raise RFXtrxTransportError(
-                    "{0} failed: {1}".format(message, exception)) from exception
-            return __errors
-        return _errors
-
     def __init__(self, hostport):
         self.hostport = hostport    # must be a (host, port) tuple
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    @errors("connect")
+    @transport_errors("connect")
     def connect(self, timeout=None):
         """ Open a socket connection """
         self.sock.settimeout(timeout)
@@ -914,7 +905,7 @@ class PyNetworkTransport(RFXtrxTransport):
         self.sock.settimeout(None)
         _LOGGER.debug("Connected to network socket")
 
-    @errors("receive")
+    @transport_errors("receive")
     def receive_blocking(self):
         """ Wait until a packet is received and return with an RFXtrxEvent """
         return self._receive_packet()
@@ -938,7 +929,7 @@ class PyNetworkTransport(RFXtrxTransport):
         )
         return self.parse(pkt)
 
-    @errors("send")
+    @transport_errors("send")
     def send(self, data):
         """ Send the given packet """
         if isinstance(data, bytearray):
@@ -953,7 +944,7 @@ class PyNetworkTransport(RFXtrxTransport):
         )
         self.sock.send(pkt)
 
-    @errors("reset")
+    @transport_errors("reset")
     def reset(self):
         """ Reset the RFXtrx """
         try:
@@ -965,7 +956,7 @@ class PyNetworkTransport(RFXtrxTransport):
             raise RFXtrxTransportError(
                 "Reset failed: {0}".format(exception)) from exception
 
-    @errors("reset")
+    @transport_errors("reset")
     def close(self):
         """ close connection to rfxtrx device """
         self.sock.shutdown(socket.SHUT_RDWR)
