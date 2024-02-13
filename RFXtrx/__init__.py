@@ -807,7 +807,8 @@ def transport_errors(message):
             except (socket.error,
                     serial.SerialException,
                     OSError) as exception:
-                _LOGGER.debug("%s failed: %s", message, str(exception), exc_info=True)
+                _LOGGER.debug("%s failed: %s", message,
+                              str(exception), exc_info=True)
                 raise RFXtrxTransportError(
                     "{0} failed: {1}".format(message, exception)
                 ) from exception
