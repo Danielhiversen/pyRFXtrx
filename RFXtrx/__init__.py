@@ -28,6 +28,7 @@ import glob
 import socket
 import threading
 import logging
+from contextlib import suppress
 
 from time import sleep
 
@@ -884,7 +885,8 @@ class PySerialTransport(RFXtrxTransport):
     @transport_errors("close")
     def close(self):
         """ close connection to rfxtrx device """
-        self.serial.close()
+        with suppress(serial.SerialException):
+            self.serial.close()
 
 ###############################################################################
 # PyNetworkTransport class
@@ -957,11 +959,11 @@ class PyNetworkTransport(RFXtrxTransport):
             raise RFXtrxTransportError(
                 "Reset failed: {0}".format(exception)) from exception
 
-    @transport_errors("reset")
+    @transport_errors("close")
     def close(self):
         """ close connection to rfxtrx device """
-        self.sock.shutdown(socket.SHUT_RDWR)
-        self.sock.close()
+        with suppress(socket.error):
+            self.sock.close()
 
 
 class DummyTransport(RFXtrxTransport):
