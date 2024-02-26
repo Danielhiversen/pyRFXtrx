@@ -533,7 +533,7 @@ class SensorEvent(RFXtrxEvent):
         self.values = {}
         self.pkt = pkt
         if isinstance(pkt, lowlevel.Undecoded):
-            self.values['Payload'] = pkt.payload
+            self.values['Payload'] = pkt.payload.hex()
         if isinstance(pkt, lowlevel.RfxMeter):
             self.values['Counter value'] = pkt.value
         if isinstance(pkt, (lowlevel.Temp, lowlevel.TempHumid,
