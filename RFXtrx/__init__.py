@@ -919,12 +919,13 @@ class PySerialTransport(RFXtrxTransport):
         while len(pkt) < pkt[0]+1:
             data = self.serial.read(pkt[0]+1 - len(pkt))
             pkt.extend(bytearray(data))
+        obj = self.parse(pkt)
         _LOGGER.debug(
-            "Recv: %s",
+            "Raw: %s",
             " ".join("0x{0:02x}".format(x) for x in pkt)
         )
-        return self.parse(pkt)
-
+        _LOGGER.debug("Pkt: %s", obj)
+        return obj
     @transport_errors("send")
     def send(self, data):
         """ Send the given packet """
@@ -991,11 +992,14 @@ class PyNetworkTransport(RFXtrxTransport):
             if data == b'':
                 raise RFXtrxTransportError("Server was shutdown")
             pkt.extend(bytearray(data))
+        obj = self.parse(pkt)
         _LOGGER.debug(
-            "Recv: %s",
+            "Raw: %s",
             " ".join("0x{0:02x}".format(x) for x in pkt)
         )
-        return self.parse(pkt)
+        _LOGGER.debug("Pkt: %s", obj)
+        return obj
+
 
     @transport_errors("send")
     def send(self, data):
