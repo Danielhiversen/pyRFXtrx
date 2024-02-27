@@ -87,8 +87,6 @@ class RFXtrxDevice:
 
 class TransceiverDevice(RFXtrxDevice):
     """ Concrete class for the rfxtrx transceiver """
-    def __init__(self, pkt: lowlevel.Status):
-        super().__init__(pkt)
 
 
 ###############################################################################
