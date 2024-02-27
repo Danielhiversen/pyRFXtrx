@@ -958,6 +958,7 @@ class PySerialTransport(RFXtrxTransport):
 # PyNetworkTransport class
 ###############################################################################
 
+
 class PyNetworkTransport(RFXtrxTransport):
     """ Implementation of a transport using sockets """
 
@@ -998,7 +999,6 @@ class PyNetworkTransport(RFXtrxTransport):
         )
         _LOGGER.debug("Pkt: %s", obj)
         return obj
-
 
     @transport_errors("send")
     def send(self, data):
@@ -1143,6 +1143,10 @@ class Connect:
                     self.event_callback(event)
                 if isinstance(event, SensorEvent):
                     self._sensors[event.device.id_string] = event.device
+
+    def status(self):
+        """ Return the status field we got on startup."""
+        return self._status
 
     def sensors(self):
         """ Return all found sensors.
