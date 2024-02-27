@@ -89,20 +89,6 @@ class TransceiverDevice(RFXtrxDevice):
     """ Concrete class for the rfxtrx transceiver """
     def __init__(self, pkt: lowlevel.Status):
         super().__init__(pkt)
-        self.firmware_version = pkt.firmware_version
-        self.firmware_type_string = pkt.firmware_type_string
-
-    def __str__(self):
-        return (
-            "{0} type='{1}' id='{2}' firmware_version='{3}'"
-            " firmware_type='{4}'".format(
-                type(self),
-                self.type_string,
-                self.id_string,
-                self.firmware_version,
-                self.firmware_type_string,
-            )
-        )
 
 
 ###############################################################################
