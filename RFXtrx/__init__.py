@@ -758,7 +758,6 @@ class StatusEvent(PacketEvent):
             type(self), self.device, sorted(self.values.items()))
 
 
-
 class ConnectionEvent(RFXtrxEvent):
     """ Connection event """
 
@@ -926,6 +925,7 @@ class PySerialTransport(RFXtrxTransport):
         )
         _LOGGER.debug("Pkt: %s", obj)
         return obj
+
     @transport_errors("send")
     def send(self, data):
         """ Send the given packet """
@@ -957,7 +957,6 @@ class PySerialTransport(RFXtrxTransport):
 ###############################################################################
 # PyNetworkTransport class
 ###############################################################################
-
 
 class PyNetworkTransport(RFXtrxTransport):
     """ Implementation of a transport using sockets """
