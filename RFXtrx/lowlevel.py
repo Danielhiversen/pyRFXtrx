@@ -2278,7 +2278,7 @@ class Cartelectronic(SensorPacket):
                                   (data[10] << 8) + data[11])
             self.prodwatthours = ((data[12] * pow(2, 24)) + (data[13] << 16) +
                                   (data[14] << 8) + data[15])
-            self.tarif_num = (data[16] & 0x0f)
+            self.tarif_num = data[16] & 0x0f
             self.voltage = data[17] + 200
             self.currentwatt = (data[18] << 8) + data[19]
             self.state_byte = data[20]
@@ -2378,7 +2378,7 @@ class Chime(Packet):
         self.id2 = id2
         self.sound = sound
         self.rssi = 0
-        self.rssi_byte = (self.rssi << 4)
+        self.rssi_byte = self.rssi << 4
         self.data = bytearray([self.packetlength, self.packettype,
                                self.subtype, self.seqnbr,
                                self.id1, self.id2, self.sound,

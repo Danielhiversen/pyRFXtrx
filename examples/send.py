@@ -27,6 +27,7 @@ from RFXtrx import LightingDevice
 from time import sleep
 
 transport = PySerialTransport('/dev/cu.usbserial-05VN8GHS')
+transport.connect()
 transport.reset()
 
 while True:
