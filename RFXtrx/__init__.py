@@ -963,6 +963,7 @@ class PyNetworkTransport(RFXtrxTransport):
     def close(self):
         """ close connection to rfxtrx device """
         with suppress(socket.error):
+            self.sock.shutdown(socket.SHUT_RDWR)
             self.sock.close()
 
 
