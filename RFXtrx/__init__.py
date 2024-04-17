@@ -490,11 +490,10 @@ def get_device_from_pkt(pkt):
         device = SecurityDevice(pkt)
     elif isinstance(pkt, lowlevel.Funkbus):
         device = FunkDevice(pkt)
-    elif isinstance(pkt, lowlevel.Status):
-        device = TransceiverDevice(pkt)
-    elif isinstance(pkt, (lowlevel.InterfaceResponse,
+    elif isinstance(pkt, (lowlevel.Status,
+                          lowlevel.InterfaceResponse,
                           lowlevel.ReceiverTransmitter)):
-        device = None
+        device = TransceiverDevice(pkt)
     else:
         device = RFXtrxDevice(pkt)
     return device
