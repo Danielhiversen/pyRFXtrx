@@ -484,5 +484,5 @@ class CoreTestCase(TestCase):
                                )
         event= core.transport.receive(bytes_array)
         self.assertEqual(RFXtrx.StatusEvent, type(event))
-        self.assertEqual(event.__str__(),"<class 'RFXtrx.StatusEvent'> device=[Status [subtype=433.92MHz, firmware=69, output_power=0, devices=['ac', 'arc', 'hideki', 'homeeasy', 'keeloq', 'lacrosse', 'oregon', 'rsl', 'x10']]]")
+        self.assertEqual(event.__str__(),"<class 'RFXtrx.StatusEvent'> device=[<class 'RFXtrx.TransceiverDevice'> type='433.92MHz' id='None'] values=[('Devices', ['ac', 'arc', 'hideki', 'homeeasy', 'keeloq', 'lacrosse', 'oregon', 'rsl', 'x10']), ('Firmware Type', None), ('Firmware Version', 69), ('Hardware Version', '1.0')]")
         core.close_connection()
