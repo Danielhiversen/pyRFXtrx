@@ -30,7 +30,7 @@ import threading
 import logging
 from contextlib import suppress
 
-from time import sleep
+from time import sleep, time
 
 import serial
 
@@ -795,22 +795,23 @@ class _dummySerial:
     def write(self, *args, **kwargs):
         """ Dummy function for writing"""
 
-    # pylint: disable=invalid-name
-    def flushInput(self, *args, **kwargs):
-        """ Called by PySerialTransport"""
-
-    def read(self, data=None):
+    def read(self):
         """ Dummy function for reading"""
-        if data is not None or self._read_num >= len(self._data):
-            self._close_event.wait(0.1)
-            return []
+        if self._read_num >= len(self._data):
+            self._close_event.wait()
+            raise serial.PortNotOpenError()
         res = self._data[self._read_num]
         self._read_num = self._read_num + 1
-        return res
+        return bytes(res)
 
     def close(self):
         """ close connection to rfxtrx device """
         self._close_event.set()
+    
+    def open(self):
+        """ open connection to rfxtrx device """
+        self._close_event.clear()
+
 
 
 ###############################################################################
@@ -890,22 +891,35 @@ def transport_errors(message):
 
 class PySerialTransport(RFXtrxTransport):
     """ Implementation of a transport using PySerial """
+    CONNECTION_RETRY_INTERVAL = 0.2
+    CONNECTION_RESET_TIMEOUT = 0.6
 
-    def __init__(self, port):
-        self.port = port
-        self.serial = None
+    def __init__(self, port, serial_object=None):
+        if serial_object:
+            self.serial = serial_object
+        else:
+            self.serial = serial.Serial(baudrate=38400)
+        self.serial.port = port
 
     @transport_errors("connect")
     def connect(self, timeout=None):
         """ Open a serial connexion """
-        try:
-            self.serial = serial.Serial(self.port, 38400)
-        except serial.SerialException:
-            port = glob.glob('/dev/serial/by-id/usb-RFXCOM_*-port0')
-            if len(port) < 1:
-                raise
-            _LOGGER.debug("Attempting connection by name %s", port)
-            self.serial = serial.Serial(port[0], 38400)
+
+        if timeout:
+            timeout += time() - self.CONNECTION_RETRY_INTERVAL
+
+        while True:
+            try:
+                self.serial.open()
+                return
+
+            except serial.SerialException:
+                if timeout is None or time() >= timeout:
+                    raise
+                _LOGGER.debug("Retrying connection", exc_info=True)
+    
+            sleep(self.CONNECTION_RETRY_INTERVAL)
+
 
     @transport_errors("receive")
     def receive_blocking(self):
@@ -914,8 +928,6 @@ class PySerialTransport(RFXtrxTransport):
     def _receive_packet(self):
         """ Wait until a packet is received and return with an RFXtrxEvent """
         data = self.serial.read()
-        if data == '\x00':
-            return None
         pkt = bytearray(data)
         while len(pkt) < pkt[0]+1:
             data = self.serial.read(pkt[0]+1 - len(pkt))
@@ -946,8 +958,9 @@ class PySerialTransport(RFXtrxTransport):
         """ Reset the RFXtrx """
         self.send(b'\x0D\x00\x00\x00\x00\x00\x00'
                   b'\x00\x00\x00\x00\x00\x00\x00')
+        self.close()
         sleep(0.3)  # Should work with 0.05, but not for me
-        self.serial.flushInput()
+        self.connect(timeout=self.CONNECTION_RESET_TIMEOUT)
 
     @transport_errors("close")
     def close(self):
@@ -985,8 +998,6 @@ class PyNetworkTransport(RFXtrxTransport):
         data = self.sock.recv(1)
         if data == b'':
             raise RFXtrxTransportError("Server was shutdown")
-        if data == '\x00':
-            return None
         pkt = bytearray(data)
         while len(pkt) < pkt[0]+1:
             data = self.sock.recv(pkt[0]+1 - len(pkt))
@@ -1077,13 +1088,8 @@ class DummyTransport(RFXtrxTransport):
 class DummyTransport2(PySerialTransport):
     """ Dummy transport for testing purposes """
     #  pylint: disable=super-init-not-called
-    def __init__(self, device=""):
-        self.serial = _dummySerial(device, 38400, timeout=0.1)
-        self._run_event = threading.Event()
-
-    def connect(self, timeout=None):
-        self._run_event.set()
-
+    def __init__(self, port=""):
+        super().__init__(port, _dummySerial())
 
 class Connect:
     """ The main class for rfxcom-py.
