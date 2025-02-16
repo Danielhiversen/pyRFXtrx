@@ -830,6 +830,10 @@ class RFXtrxTransportError(Exception):
 class RFXtrxTransport:
     """ Abstract superclass for all transport mechanisms """
 
+
+    RESET_SLEEP_TIME = 0.3
+    """ Time delay efter reset to ensure it finished. Reported to not be enough with documented 0.05s """
+
     # pylint: disable=attribute-defined-outside-init
     @staticmethod
     def parse(data):
@@ -959,7 +963,7 @@ class PySerialTransport(RFXtrxTransport):
         self.send(b'\x0D\x00\x00\x00\x00\x00\x00'
                   b'\x00\x00\x00\x00\x00\x00\x00')
         self.close()
-        sleep(0.3)  # Should work with 0.05, but not for me
+        sleep(self.RESET_SLEEP_TIME)
         self.connect(timeout=self.CONNECTION_RESET_TIMEOUT)
 
     @transport_errors("close")
@@ -1025,17 +1029,24 @@ class PyNetworkTransport(RFXtrxTransport):
         )
         self.sock.sendall(pkt)
 
+    def _flush_receive(self):
+        self.sock.settimeout(0.0)
+        while True:
+            try:
+                if self.sock.recv(100) == b"":
+                    raise RFXtrxTransportError("Server was shutdown")
+            except (socket.timeout, BlockingIOError):
+                break
+        self.sock.settimeout(None)
+
     @transport_errors("reset")
     def reset(self):
         """ Reset the RFXtrx """
-        try:
-            self.send(b'\x0D\x00\x00\x00\x00\x00\x00'
-                      b'\x00\x00\x00\x00\x00\x00\x00')
-            sleep(0.3)
-            self.sock.sendall(b'')
-        except socket.error as exception:
-            raise RFXtrxTransportError(
-                "Reset failed: {0}".format(exception)) from exception
+        self.send(b'\x0D\x00\x00\x00\x00\x00\x00'
+                  b'\x00\x00\x00\x00\x00\x00\x00')
+
+        sleep(self.RESET_SLEEP_TIME)
+        self._flush_receive()
 
     @transport_errors("close")
     def close(self):

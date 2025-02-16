@@ -62,6 +62,20 @@ def connected_transport(server: Server):
     return transport, server.connections[-1]
 
 
+def test_transport_flush_reset(server: Server):
+    transport, connection = connected_transport(server)
+    connection.sendall(bytes([0x09, 0x00, 0x00, 0x00, 0x00,
+                              0x00, 0x00, 0x00, 0x00, 0x00]))
+
+    transport.reset()
+
+    connection.sendall(bytes([0x09, 0x03, 0x01, 0x04, 0x28,
+                              0x0a, 0xb7, 0x66, 0x04, 0x70]))
+
+    pkt = transport.receive_blocking()
+    assert isinstance(pkt, RFXtrx.SensorEvent)
+
+
 def test_transport_shutdown_between_packet(server: Server):
     transport, connection = connected_transport(server)
     connection.sendall(bytes([0x09, 0x03, 0x01, 0x04, 0x28,
