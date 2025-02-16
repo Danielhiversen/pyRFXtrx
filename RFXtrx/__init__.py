@@ -1023,7 +1023,7 @@ class PyNetworkTransport(RFXtrxTransport):
             "Send: %s",
             " ".join("0x{0:02x}".format(x) for x in pkt)
         )
-        self.sock.send(pkt)
+        self.sock.sendall(pkt)
 
     @transport_errors("reset")
     def reset(self):
