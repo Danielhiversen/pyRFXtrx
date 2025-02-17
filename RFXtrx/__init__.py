@@ -333,8 +333,6 @@ class LightingDevice(RFXtrxDevice):
                              command, self.cmndseqnbr)
             self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
             transport.send(pkt.data)
-        else:
-            return
 
     def send_onoff(self, transport, turn_on):
         """ Send an 'On' or 'Off' command using the given transport """
@@ -350,8 +348,6 @@ class LightingDevice(RFXtrxDevice):
             self.send_command(transport, turn_on and 0x01 or 0x00)
         elif self.packettype == 0x15:  # Lighting6
             self.send_command(transport, not turn_on and 0x01 or 0x00)
-        else:
-            return
 
     def send_on(self, transport):
         """ Send an 'On' command using the given transport """
