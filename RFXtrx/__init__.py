@@ -24,7 +24,6 @@ This module provides the base implementation for pyRFXtrx
 # pylint: disable= too-many-lines
 
 import functools
-import glob
 import socket
 import threading
 import logging
@@ -807,11 +806,10 @@ class _dummySerial:
     def close(self):
         """ close connection to rfxtrx device """
         self._close_event.set()
-    
+
     def open(self):
         """ open connection to rfxtrx device """
         self._close_event.clear()
-
 
 
 ###############################################################################
@@ -822,6 +820,7 @@ class _dummySerial:
 class RFXtrxTransportError(Exception):
     """ Connection error """
 
+
 ###############################################################################
 # RFXtrxTransport class
 ###############################################################################
@@ -830,9 +829,9 @@ class RFXtrxTransportError(Exception):
 class RFXtrxTransport:
     """ Abstract superclass for all transport mechanisms """
 
-
     RESET_SLEEP_TIME = 0.3
-    """ Time delay efter reset to ensure it finished. Reported to not be enough with documented 0.05s """
+    """ Time delay efter reset to ensure it finished.
+        Reported to not be enough with documented 0.05s """
 
     # pylint: disable=attribute-defined-outside-init
     @staticmethod
@@ -921,9 +920,8 @@ class PySerialTransport(RFXtrxTransport):
                 if timeout is None or time() >= timeout:
                     raise
                 _LOGGER.debug("Retrying connection", exc_info=True)
-    
-            sleep(self.CONNECTION_RETRY_INTERVAL)
 
+            sleep(self.CONNECTION_RETRY_INTERVAL)
 
     @transport_errors("receive")
     def receive_blocking(self):
@@ -1101,6 +1099,7 @@ class DummyTransport2(PySerialTransport):
     #  pylint: disable=super-init-not-called
     def __init__(self, port=""):
         super().__init__(port, _dummySerial())
+
 
 class Connect:
     """ The main class for rfxcom-py.
