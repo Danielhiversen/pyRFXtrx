@@ -107,6 +107,61 @@ class RollerTrolDevice(RFXtrxDevice):
         self.send_command(transport, 0x02)
 
 
+class DDxxxxDevice(RFXtrxDevice):
+    """ Concrete class for a DDxxxx device """
+    def __init__(self, pkt):
+        super().__init__(pkt)
+        if isinstance(pkt, lowlevel.DDxxxx):
+            self.known_to_be_rollershutter = True
+            self.id_combined = pkt.id_combined
+            self.unitcode = pkt.unitcode
+            self.cmndseqnbr = 0
+            self.COMMANDS = lowlevel.DDxxxx.COMMANDS
+
+    def send_command(self, transport, command, percent: int = 0, angle: int = 0):
+        """ Send a command using the given transport """
+        pkt = lowlevel.DDxxxx()
+        pkt.set_transmit(
+            self.subtype,
+            self.cmndseqnbr,
+            self.id_combined,
+            self.unitcode,
+            command,
+            percent,
+            angle
+        )
+        self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
+        transport.send(pkt.data)
+
+    def send_up(self, transport):
+        """ Send an 'Open' command using the given transport """
+        self.send_command(transport, lowlevel.DDxxxx.CMD_UP)
+
+    def send_down(self, transport):
+        """ Send a 'Close' command using the given transport """
+        self.send_command(transport, lowlevel.DDxxxx.CMD_DOWN)
+
+    def send_stop(self, transport):
+        """ Send a 'Stop' command using the given transport """
+        self.send_command(transport, lowlevel.DDxxxx.CMD_STOP)
+
+    def send_p2(self, transport):
+        """ Send a 'P2' command using the given transport """
+        self.send_command(transport, lowlevel.DDxxxx.CMD_P2)
+
+    def send_percent(self, transport, percent: int):
+        """ Send a 'Percent' command using the given transport """
+        self.send_command(transport, lowlevel.DDxxxx.CMD_PERCENT, percent=percent)
+
+    def send_angle(self, transport, angle: int):
+        """ Send a 'Angle' command using the given transport """
+        self.send_command(transport, lowlevel.DDxxxx.CMD_ANGLE, angle=angle)
+
+    def send_percent_angle(self, transport, percent: int, angle: int):
+        """ Send a 'Angle' command using the given transport """
+        self.send_command(transport, lowlevel.DDxxxx.CMD_PERCENT_ANGLE, percent=percent, angle=angle)
+
+
 class RfyDevice(RFXtrxDevice):
     """ Concrete class for a roller device """
     def __init__(self, pkt):
@@ -333,6 +388,8 @@ class LightingDevice(RFXtrxDevice):
                              command, self.cmndseqnbr)
             self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
             transport.send(pkt.data)
+        else:
+            return
 
     def send_onoff(self, transport, turn_on):
         """ Send an 'On' or 'Off' command using the given transport """
@@ -348,6 +405,8 @@ class LightingDevice(RFXtrxDevice):
             self.send_command(transport, turn_on and 0x01 or 0x00)
         elif self.packettype == 0x15:  # Lighting6
             self.send_command(transport, not turn_on and 0x01 or 0x00)
+        else:
+            return
 
     def send_on(self, transport):
         """ Send an 'On' command using the given transport """
@@ -455,6 +514,8 @@ def get_device_from_pkt(pkt):
         device = LightingDevice(pkt)
     elif isinstance(pkt, lowlevel.RollerTrol):
         device = RollerTrolDevice(pkt)
+    elif isinstance(pkt, lowlevel.DDxxxx):
+        device = DDxxxxDevice(pkt)
     elif isinstance(pkt, lowlevel.Rfy):
         device = RfyDevice(pkt)
     elif isinstance(pkt, lowlevel.Chime):

@@ -2803,6 +2803,200 @@ class RollerTrol(Packet):
             else:
                 self.cmnd_string = self._UNKNOWN_CMND.format(self.cmnd)
 
+
+###############################################################################
+# DDxxxx class
+###############################################################################
+
+
+class DDxxxx(Packet):
+    """
+    Data class for the DDXxxx packet type
+    """
+
+    PACKET_TYPE = 0x31
+    """
+    Packet type for DDXxxx packets
+    """
+
+    TYPES = {0x00: 'Brel/Dooya DDxxxx'}
+    """
+    Mapping of numeric subtype values to strings, used in type_string
+    """
+
+    CMD_UP = 0x00
+    CMD_DOWN = 0x01
+    CMD_STOP = 0x02
+    CMD_P2 = 0x03
+    CMD_PERCENT = 0x04
+    CMD_ANGLE = 0x05
+    CMD_PERCENT_ANGLE = 0x06
+    CMD_HOLD_UP = 0x07
+    CMD_HOLD_STOP = 0x08
+    CMD_HOLD_UP_DOWN = 0x09
+    CMD_HOLD_STOP_UP = 0x0A
+    CMD_HOLD_STOP_DOWN = 0x0B
+
+
+    COMMANDS = {CMD_STOP: 'Stop',
+                CMD_UP: 'Up',
+                CMD_DOWN: 'Down',
+                CMD_P2: 'P2',
+                CMD_PERCENT: 'Percent',
+                CMD_ANGLE: 'Angle',
+                CMD_PERCENT_ANGLE: 'Percent+Angle',
+                CMD_HOLD_UP: 'Hold Up',
+                CMD_HOLD_STOP: 'Hold Stop',
+                CMD_HOLD_UP_DOWN: 'Hold Up+Down',
+                CMD_HOLD_STOP_UP: 'Hold Stop+Up',
+                CMD_HOLD_STOP_DOWN: 'Hold Stop+Down'}
+    """
+    Mapping of command numeric values to strings, used for cmnd_string
+    """
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return ("DDxxxx [subtype={0}, seqnbr={1}, id={2}, cmnd={3}, " +
+                "percent={4}], angle={5}, battery_level={6}, rssi={7}") \
+            .format(
+                self.subtype,
+                self.seqnbr,
+                self.id_string,
+                self.cmnd_string,
+                self.percent,
+                self.angle,
+                self.battery_level,
+                self.rssi
+            )
+
+    def __init__(self):
+        """Constructor"""
+        super().__init__()
+        self.id1 = None
+        self.id2 = None
+        self.id3 = None
+        self.id_combined = None
+        self.unitcode = None
+        self.cmnd = None
+        self.cmnd_string = None
+        self.percent = None
+        self.angle = None
+        self.battery_level = None
+
+    def parse_id(self, subtype, id_string):
+        """Parse a string id into individual components"""
+        try:
+            self.packettype = self.PACKET_TYPE
+            self.subtype = subtype
+
+            # Ensure id_string is long enough
+            if len(id_string) < 8:
+                raise ValueError("Invalid id_string length")
+
+            # Extract full 4-byte (8 hex character) ID
+            self.id_combined = int(id_string[:8], 16)
+
+            # Extract individual bytes (big-endian order)
+            self.id1 = (self.id_combined >> 24) & 0xFF
+            self.id2 = (self.id_combined >> 16) & 0xFF
+            self.id3 = (self.id_combined >> 8) & 0xFF
+            self.id4 = self.id_combined & 0xFF
+
+            # Extract unitcode from the remaining string
+            self.unitcode = int(id_string[8:])
+
+            self._set_strings()
+
+        except ValueError as exc:
+            raise ValueError("Invalid id_string format") from exc
+        if self.id_string != id_string:
+            raise ValueError("Invalid id_string")
+
+    def load_receive(self, data):
+        """Load data from a bytearray"""
+        self.data = data
+
+        self.packetlength = data[0]
+        self.packettype = data[1]
+        self.subtype = data[2]
+        self.seqnbr = data[3]
+        
+        # Correctly extracting 4-byte ID
+        self.id1 = data[4]
+        self.id2 = data[5]
+        self.id3 = data[6]
+        self.id4 = data[7]
+        self.id_combined = (self.id1 << 24) + (self.id2 << 16) + (self.id3 << 8) + self.id4  # Big-endian
+
+        # Corrected: unitcode should be from data[8], not data[7]
+        self.unitcode = data[8]
+        
+        self.cmnd = data[9]
+        self.percent = data[10]
+        self.angle = data[11]
+
+        # Extract battery_level and RSSI from last byte (data[12])
+        self.battery_level = data[12] & 0x0F  # Lower 4 bits
+        self.rssi = data[12] >> 4  # Upper 4 bits
+
+        self._set_strings()
+
+    def set_transmit(self, subtype, seqnbr, id_combined, unitcode, cmnd, percent=0, angle=0, battery_level=0, rssi=0):
+        """Load data from individual data fields and construct the bytearray for transmission"""
+
+        self.packetlength = 0x0C
+        self.packettype = self.PACKET_TYPE
+        self.subtype = subtype
+        self.seqnbr = seqnbr
+        self.id_combined = id_combined
+
+        # Extract bytes from id_combined (big-endian format)
+        self.id1 = (id_combined >> 24) & 0xFF
+        self.id2 = (id_combined >> 16) & 0xFF
+        self.id3 = (id_combined >> 8) & 0xFF
+        self.id4 = id_combined & 0xFF
+
+        self.unitcode = unitcode
+        self.cmnd = cmnd
+        self.percent = percent
+        self.angle = angle
+
+        # Store battery level and RSSI in a single byte (4 bits each)
+        self.battery_level = battery_level & 0x0F  # Lower 4 bits
+        self.rssi = (rssi & 0x0F) << 4  # Upper 4 bits
+        battery_rssi_byte = self.rssi | self.battery_level  # Combine into one byte
+
+        # Construct the bytearray for transmission
+        self.data = bytearray([
+            self.packetlength, self.packettype, self.subtype, self.seqnbr,
+            self.id1, self.id2, self.id3, self.id4,  # 4-byte ID
+            self.unitcode, self.cmnd, self.percent, self.angle,
+            battery_rssi_byte  # Battery Level & RSSI packed into last byte
+        ])
+
+        self._set_strings()
+
+    def _set_strings(self):
+        """Translate loaded numeric values into convenience strings"""
+        self.id_string = "{0:06x}:{1}".format(self.id_combined,
+                                              self.unitcode)
+
+        if self.subtype in self.TYPES:
+            self.type_string = self.TYPES[self.subtype]
+        else:
+            # Degrade nicely for yet unknown subtypes
+            self.type_string = self._UNKNOWN_TYPE.format(self.packettype,
+                                                         self.subtype)
+
+        if self.cmnd is not None:
+            if self.cmnd in self.COMMANDS:
+                self.cmnd_string = self.COMMANDS[self.cmnd]
+            else:
+                self.cmnd_string = self._UNKNOWN_CMND.format(self.cmnd)
+
+
 ###############################################################################
 # Funkbus class
 ###############################################################################
@@ -3029,6 +3223,7 @@ PACKET_TYPES = {
     0x1A: Rfy,
     0x1E: Funkbus,
     0x20: Security1,
+    0x31: DDxxxx,
     0x50: Temp,
     0x4E: Bbq,
     0x4F: TempRain,
