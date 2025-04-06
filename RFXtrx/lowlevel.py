@@ -2837,7 +2837,6 @@ class DDxxxx(Packet):
     CMD_HOLD_STOP_UP = 0x0A
     CMD_HOLD_STOP_DOWN = 0x0B
 
-
     COMMANDS = {CMD_STOP: 'Stop',
                 CMD_UP: 'Up',
                 CMD_DOWN: 'Down',
@@ -2877,6 +2876,7 @@ class DDxxxx(Packet):
         self.id1 = None
         self.id2 = None
         self.id3 = None
+        self.id4 = None
         self.id_combined = None
         self.unitcode = None
         self.cmnd = None
@@ -2922,17 +2922,18 @@ class DDxxxx(Packet):
         self.packettype = data[1]
         self.subtype = data[2]
         self.seqnbr = data[3]
-        
+
         # Correctly extracting 4-byte ID
         self.id1 = data[4]
         self.id2 = data[5]
         self.id3 = data[6]
         self.id4 = data[7]
-        self.id_combined = (self.id1 << 24) + (self.id2 << 16) + (self.id3 << 8) + self.id4  # Big-endian
-
-        # Corrected: unitcode should be from data[8], not data[7]
+        self.id_combined = \
+            (self.id1 << 24) + \
+            (self.id2 << 16) + \
+            (self.id3 << 8) + \
+            self.id4  # Big-endian
         self.unitcode = data[8]
-        
         self.cmnd = data[9]
         self.percent = data[10]
         self.angle = data[11]
@@ -2943,8 +2944,9 @@ class DDxxxx(Packet):
 
         self._set_strings()
 
-    def set_transmit(self, subtype, seqnbr, id_combined, unitcode, cmnd, percent=0, angle=0, battery_level=0, rssi=0):
-        """Load data from individual data fields and construct the bytearray for transmission"""
+    def set_transmit(self, subtype, seqnbr, id_combined, unitcode,
+                     cmnd, percent=0, angle=0, battery_level=0, rssi=0):
+        """Load data and construct the bytearray for transmission"""
 
         self.packetlength = 0x0C
         self.packettype = self.PACKET_TYPE
@@ -2966,7 +2968,7 @@ class DDxxxx(Packet):
         # Store battery level and RSSI in a single byte (4 bits each)
         self.battery_level = battery_level & 0x0F  # Lower 4 bits
         self.rssi = (rssi & 0x0F) << 4  # Upper 4 bits
-        battery_rssi_byte = self.rssi | self.battery_level  # Combine into one byte
+        battery_rssi_byte = self.rssi | self.battery_level  # Into 1 byte
 
         # Construct the bytearray for transmission
         self.data = bytearray([

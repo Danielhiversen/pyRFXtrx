@@ -118,7 +118,12 @@ class DDxxxxDevice(RFXtrxDevice):
             self.cmndseqnbr = 0
             self.COMMANDS = lowlevel.DDxxxx.COMMANDS
 
-    def send_command(self, transport, command, percent: int = 0, angle: int = 0):
+    def send_command(
+            self,
+            transport,
+            command,
+            percent: int = 0,
+            angle: int = 0):
         """ Send a command using the given transport """
         pkt = lowlevel.DDxxxx()
         pkt.set_transmit(
@@ -151,7 +156,11 @@ class DDxxxxDevice(RFXtrxDevice):
 
     def send_percent(self, transport, percent: int):
         """ Send a 'Percent' command using the given transport """
-        self.send_command(transport, lowlevel.DDxxxx.CMD_PERCENT, percent=percent)
+        self.send_command(
+            transport,
+            lowlevel.DDxxxx.CMD_PERCENT,
+            percent=percent
+        )
 
     def send_angle(self, transport, angle: int):
         """ Send a 'Angle' command using the given transport """
@@ -159,7 +168,12 @@ class DDxxxxDevice(RFXtrxDevice):
 
     def send_percent_angle(self, transport, percent: int, angle: int):
         """ Send a 'Angle' command using the given transport """
-        self.send_command(transport, lowlevel.DDxxxx.CMD_PERCENT_ANGLE, percent=percent, angle=angle)
+        self.send_command(
+            transport,
+            lowlevel.DDxxxx.CMD_PERCENT_ANGLE,
+            percent=percent,
+            angle=angle
+        )
 
 
 class RfyDevice(RFXtrxDevice):
@@ -388,8 +402,6 @@ class LightingDevice(RFXtrxDevice):
                              command, self.cmndseqnbr)
             self.cmndseqnbr = (self.cmndseqnbr + 1) % 5
             transport.send(pkt.data)
-        else:
-            return
 
     def send_onoff(self, transport, turn_on):
         """ Send an 'On' or 'Off' command using the given transport """
@@ -405,8 +417,6 @@ class LightingDevice(RFXtrxDevice):
             self.send_command(transport, turn_on and 0x01 or 0x00)
         elif self.packettype == 0x15:  # Lighting6
             self.send_command(transport, not turn_on and 0x01 or 0x00)
-        else:
-            return
 
     def send_on(self, transport):
         """ Send an 'On' command using the given transport """
