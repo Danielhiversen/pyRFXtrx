@@ -1,0 +1,30 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=77.0"]
+
+[project]
+name = "pyRFXtrx"
+version = "0.31.1"
+license = "LGPL-3.0-or-later"
+description = "A library to communicate with the RFXtrx family of devices"
+readme = "README.rst"
+authors = [{ name = "Edwin Woudt", email = "edwin@woudt.nl" }]
+requires-python = ">=3.9"
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Other Environment",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Topic :: Home Automation",
+  "Topic :: Software Development :: Libraries :: Python Modules"
+]
+dependencies = [
+  "pyserial>=2.7"
+]
+
+[project.urls]
+"Source code" = "https://github.com/Danielhiversen/pyRFXtrx"
+
+[tool.setuptools.packages.find]
+include = ["RFXtrx*"]
