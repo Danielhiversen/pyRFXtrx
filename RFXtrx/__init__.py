@@ -803,7 +803,7 @@ class _dummySerial:
         """ Dummy function for reading"""
         if data is not None or self._read_num >= len(self._data):
             self._close_event.wait(0.1)
-            return []
+            return [0x00]
         res = self._data[self._read_num]
         self._read_num = self._read_num + 1
         return res
