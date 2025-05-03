@@ -4,7 +4,7 @@ requires = ["setuptools>=77.0"]
 
 [project]
 name = "pyRFXtrx"
-version = "0.31.1"
+version = "0.32.0"
 license = "LGPL-3.0-or-later"
 description = "A library to communicate with the RFXtrx family of devices"
 readme = "README.rst"
