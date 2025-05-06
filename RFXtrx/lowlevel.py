@@ -1538,6 +1538,65 @@ class RfxMeter(SensorPacket):
             self.type_string = self._UNKNOWN_TYPE.format(self.packettype,
                                                          self.subtype)
 
+###############################################################################
+# RFXSensor class
+###############################################################################
+
+
+class RfxSensor(SensorPacket):
+    """
+    Data class for the RFXSensor packet type
+    """
+
+    TYPES = {
+        0x00: {'label': 'RfxSensor Temperature',
+               'field': 'Temperature',
+               'decoder': lambda hi, lo: (-1 if hi & 0x80 else 1) * float(((hi & 0x7f) << 8) + lo) / 100},
+        0x01: {'label': 'RfxSensor A/D',
+               'field': 'Analog',
+               'decoder': lambda hi, lo: ((hi << 8) + lo) * 10},
+        0x02: {'label': 'RfxSensor Voltage',
+               'field': 'Voltage',
+               'decoder': lambda hi, lo: ((hi << 8) + lo) * 10},
+        0x03: {'label': 'RfxSensor Message',
+               'field': 'Message',
+               'decoder': lambda hi, lo: (hi << 8) + lo}
+    }
+
+    def __str__(self):
+        return ("RFXSensor [subtype={0}, seqnbr={1}, id={2}, " +
+                "value={3}, rssi={4}]") \
+            .format(self.type_string, self.seqnbr, self.id_string,
+                    self.value, self.rssi)
+
+    def __init__(self):
+        """Constructor"""
+        super().__init__()
+        self.idbyte = None
+        self.value = None
+        self.type_string = None
+
+    def load_receive(self, data):
+        """Load data from a bytearray"""
+        self.data = data
+        self.packetlength = data[0]
+        self.packettype = data[1]
+        self.subtype = data[2]
+        self.seqnbr = data[3]
+        self.idbyte = data[4]
+        self.id_string = "{0:02x}".format(self.idbyte)
+
+        field = self.TYPES.get(self.subtype)
+        if field:
+            self.value = field['decoder'](data[5], data[6])
+            self.type_string = field['label']
+            self.field = field['field']
+        else:
+            # Degrade nicely for yet unknown subtypes
+            self.type_string = self._UNKNOWN_TYPE.format(self.packettype,
+                                                         self.subtype)
+        self.rssi_byte = data[7]
+        self.rssi = self.rssi_byte >> 4
 
 ###############################################################################
 # TempHumidBaro class
@@ -3241,6 +3300,7 @@ PACKET_TYPES = {
     0x5B: Energy4,
     0x5C: Energy5,
     0x60: Cartelectronic,
+    0x70: RfxSensor,
     0x71: RfxMeter,
 }
 

@@ -603,6 +603,8 @@ class SensorEvent(RFXtrxEvent):
             self.values['Payload'] = pkt.payload.hex()
         if isinstance(pkt, lowlevel.RfxMeter):
             self.values['Counter value'] = pkt.value
+        if isinstance(pkt, lowlevel.RfxSensor):
+            self.values[pkt.field] = pkt.value
         if isinstance(pkt, (lowlevel.Temp, lowlevel.TempHumid,
                             lowlevel.TempHumidBaro, lowlevel.TempRain)):
             self.values['Temperature'] = pkt.temp
@@ -681,6 +683,7 @@ class SensorEvent(RFXtrxEvent):
             self.values['Sensor Status'] = pkt.security1_status_string
         if not isinstance(pkt, (lowlevel.Energy5,
                                 lowlevel.RfxMeter,
+                                lowlevel.RfxSensor,
                                 lowlevel.Undecoded)):
             self.values['Battery numeric'] = pkt.battery
         if not isinstance(pkt, lowlevel.Undecoded):
