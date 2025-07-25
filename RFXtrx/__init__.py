@@ -679,6 +679,7 @@ class SensorEvent(RFXtrxEvent):
                 self.values['Contract type'] = pkt.contract_type
         if isinstance(pkt, lowlevel.Security1):
             self.values['Sensor Status'] = pkt.security1_status_string
+            self.values['Tamper'] = pkt.tamper
         if not isinstance(pkt, (lowlevel.Energy5,
                                 lowlevel.RfxMeter,
                                 lowlevel.Undecoded)):

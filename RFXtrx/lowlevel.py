@@ -2419,6 +2419,7 @@ class Security1(SensorPacket):
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
+
     STATUS = {0x00: 'Normal',
               0x01: 'Normal Delayed',
               0x02: 'Alarm',
@@ -2440,22 +2441,17 @@ class Security1(SensorPacket):
               0x14: 'Dark Detected',
               0x15: 'Light Detected',
               0x16: 'Battery low',
-              0x17: 'Pairing KD101',
-              0x80: 'Normal Tamper',
-              0x81: 'Normal Delayed Tamper',
-              0x82: 'Alarm Tamper',
-              0x83: 'Alarm Delayed Tamper',
-              0x84: 'Motion Tamper',
-              0x85: 'No Motion Tamper'}
+              0x17: 'Pairing KD101'}
     """
     Mapping of numeric status values to strings, used in type_string
     """
 
     def __str__(self):
         return ("Security1 [subtype={0}, seqnbr={1}, id={2}, status={3}, " +
-                "battery={4}, rssi={5}]") \
+                "tamper={4} battery={5}, rssi={6}]") \
             .format(self.type_string, self.seqnbr, self.id_string,
-                    self.security1_status_string, self.battery, self.rssi)
+                    self.security1_status_string,
+                    self.tamper, self.battery, self.rssi)
 
     def __init__(self):
         """Constructor"""
@@ -2465,6 +2461,7 @@ class Security1(SensorPacket):
         self.id3 = None
         self.id_combined = None
         self.security1_status = None
+        self.tamper = None
         self.battery = None
         self.rssi = None
         self.security1_status_string = 'unknown'
@@ -2495,14 +2492,15 @@ class Security1(SensorPacket):
         self.id2 = data[5]
         self.id3 = data[6]
         self.id_combined = (self.id1 << 16) + (self.id2 << 8) + self.id3
-        self.security1_status = data[7]
+        self.security1_status = data[7] & 0x7f
+        self.tamper = (data[7] & 0x80) != 0
         self.rssi_byte = data[8]
         if self.subtype not in (0x03, 0x09, 0x0A):
             self.battery = self.rssi_byte & 0x0f
         self.rssi = self.rssi_byte >> 4
         self._set_strings()
 
-    def set_transmit(self, subtype, seqnbr, id_combined, status):
+    def set_transmit(self, subtype, seqnbr, id_combined, status, tamper=False):
         """Load data from individual data fields"""
         self.packetlength = 0x08
         self.packettype = 0x20
@@ -2513,13 +2511,16 @@ class Security1(SensorPacket):
         self.id2 = id_combined >> 8 & 0xff
         self.id3 = id_combined & 0xff
         self.security1_status = status
+        self.tamper = tamper
         self.rssi_byte = 0
         self.battery = 0
         self.rssi = 0
+        if tamper:
+            status |= 0x80
         self.data = bytearray([self.packetlength, self.packettype,
                                self.subtype, self.seqnbr,
                                self.id1, self.id2, self.id3,
-                               self.security1_status, self.rssi_byte])
+                               status, self.rssi_byte])
         self._set_strings()
 
     def _set_strings(self):
