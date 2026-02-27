@@ -875,7 +875,8 @@ def transport_errors(message):
                 return func(instance, *args, **kargs)
             except (socket.error,
                     serial.SerialException,
-                    OSError) as exception:
+                    OSError,
+                    TypeError) as exception:
                 _LOGGER.debug("%s failed: %s", message,
                               str(exception), exc_info=True)
                 raise RFXtrxTransportError(
