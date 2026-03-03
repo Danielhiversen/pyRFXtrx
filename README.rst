@@ -9,10 +9,11 @@ from http://www.rfxcom.com/. Works with http://www.home-assistant.io
 Using
 =====
 
-Instally via pip
+Install via pip
 
-::
-   $ pip install -U pyRFXtrx
+..  code-block:: bash
+
+   pip install -U pyRFXtrx
 
 After that, see the examples in the examples directory
 
