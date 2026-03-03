@@ -1,6 +1,6 @@
-==========
+===========================================
  pyRFXtrx  |Build Status| |Coverage Status|
-==========
+===========================================
 
 A Python library to communicate with the RFXtrx family of devices
 from http://www.rfxcom.com/. Works with http://www.home-assistant.io
@@ -35,8 +35,8 @@ along with pyRFXtrx.  See the file COPYING.txt in the distribution.
 If not, see <http://www.gnu.org/licenses/>.
 
 
-.. |Build Status| image:: https://travis-ci.org/Danielhiversen/pyRFXtrx.svg?branch=master
-   :target: https://travis-ci.org/Danielhiversen/pyRFXtrx
+.. |Build Status| image:: https://github.com/Danielhiversen/pyRFXtrx/actions/workflows/test-and-lint.yml/badge.svg
+   :target: https://github.com/Danielhiversen/pyRFXtrx
 .. |Coverage Status| image:: https://img.shields.io/coveralls/Danielhiversen/pyRFXtrx.svg
    :target: https://coveralls.io/r/Danielhiversen/pyRFXtrx?branch=master
 
