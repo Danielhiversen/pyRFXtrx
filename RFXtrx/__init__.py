@@ -896,6 +896,8 @@ class PySerialTransport(RFXtrxTransport):
     def __init__(self, port):
         self.port = port
         self.serial = None
+        self._send_lock = threading.Lock()
+        self._ack_event = threading.Event()
 
     @transport_errors("connect")
     def connect(self, timeout=None):
@@ -916,12 +918,21 @@ class PySerialTransport(RFXtrxTransport):
     def _receive_packet(self):
         """ Wait until a packet is received and return with an RFXtrxEvent """
         data = self.serial.read()
-        if data == '\x00':
+        if not data:
+            raise RFXtrxTransportError("EOF on serial port")
+
+        if data == b"\x00":
             return None
         pkt = bytearray(data)
         while len(pkt) < pkt[0]+1:
             data = self.serial.read(pkt[0]+1 - len(pkt))
+            if not data:
+                raise RFXtrxTransportError("EOF on serial port")
             pkt.extend(bytearray(data))
+
+        if len(pkt) >= 2 and pkt[1] in [0x01, 0x02]:
+            self._ack_event.set()
+
         _LOGGER.debug(
             "Recv: %s",
             " ".join("0x{0:02x}".format(x) for x in pkt)
@@ -937,11 +948,24 @@ class PySerialTransport(RFXtrxTransport):
             pkt = bytearray(data)
         else:
             raise ValueError("Invalid type")
-        _LOGGER.debug(
-            "Send: %s",
-            " ".join("0x{0:02x}".format(x) for x in pkt)
-        )
-        self.serial.write(pkt)
+
+        with self._send_lock:
+            _LOGGER.debug(
+                "Send: %s",
+                " ".join("0x{0:02x}".format(x) for x in pkt)
+            )
+            self._ack_event.clear()
+            self.serial.write(pkt)
+
+            # Only wait for an ACK for device commands (packettype >= 0x10)
+            if len(pkt) > 1 and pkt[1] >= 0x10:
+                if not self._ack_event.wait(timeout=5.0):
+                    # Close the port to unblock the read thread and
+                    # force a clean reload
+                    self.serial.close()
+                    raise RFXtrxTransportError(
+                        "No ACK received after 5 seconds"
+                    )
 
     @transport_errors("reset")
     def reset(self):
@@ -1082,6 +1106,8 @@ class DummyTransport2(PySerialTransport):
     def __init__(self, device=""):
         self.serial = _dummySerial(device, 38400, timeout=0.1)
         self._run_event = threading.Event()
+        self._send_lock = threading.Lock()
+        self._ack_event = threading.Event()
 
     def connect(self, timeout=None):
         self._run_event.set()
