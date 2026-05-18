@@ -38,6 +38,8 @@ from . import lowlevel
 
 _LOGGER = logging.getLogger(__name__)
 
+_ACK_TIMEOUT_SECONDS = 5.0
+
 
 ###############################################################################
 # RFXtrxDevice class
@@ -930,7 +932,7 @@ class PySerialTransport(RFXtrxTransport):
                 raise RFXtrxTransportError("EOF on serial port")
             pkt.extend(bytearray(data))
 
-        if len(pkt) >= 2 and pkt[1] in [0x01, 0x02]:
+        if len(pkt) >= 2 and pkt[1] in lowlevel.ACK_PACKETTYPES:
             self._ack_event.set()
 
         _LOGGER.debug(
@@ -957,14 +959,16 @@ class PySerialTransport(RFXtrxTransport):
             self._ack_event.clear()
             self.serial.write(pkt)
 
-            # Only wait for an ACK for device commands (packettype >= 0x10)
-            if len(pkt) > 1 and pkt[1] >= 0x10:
-                if not self._ack_event.wait(timeout=5.0):
+            # Only wait for an ACK for device commands
+            if len(pkt) > 1 \
+                    and pkt[1] >= lowlevel.PACKETTYPE_DEVICE_COMMAND_MIN:
+                if not self._ack_event.wait(timeout=_ACK_TIMEOUT_SECONDS):
                     # Close the port to unblock the read thread and
                     # force a clean reload
                     self.serial.close()
                     raise RFXtrxTransportError(
-                        "No ACK received after 5 seconds"
+                        "No ACK received after "
+                        f"{_ACK_TIMEOUT_SECONDS} seconds"
                     )
 
     @transport_errors("reset")

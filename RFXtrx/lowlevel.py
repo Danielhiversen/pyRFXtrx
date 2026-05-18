@@ -24,6 +24,19 @@ RFXtrx.
 # pylint: disable=C0302,R0902,R0903,R0911,R0913
 # pylint: disable= too-many-lines, too-many-statements
 
+# RFXtrx response packet types (device-to-host) that acknowledge a request
+PACKETTYPE_INTERFACE_RESPONSE = 0x01
+PACKETTYPE_TRANSMITTER_RESPONSE = 0x02
+ACK_PACKETTYPES = (
+    PACKETTYPE_INTERFACE_RESPONSE,
+    PACKETTYPE_TRANSMITTER_RESPONSE,
+)
+
+# Device command packet types (host-to-device) start at 0x10; commands below
+# this are interface/control messages that the firmware answers with 0x01.
+PACKETTYPE_DEVICE_COMMAND_MIN = 0x10
+
+
 ###############################################################################
 # Packet class
 ###############################################################################
