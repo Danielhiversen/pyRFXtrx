@@ -36,6 +36,12 @@ ACK_PACKETTYPES = (
 # this are interface/control messages that the firmware answers with 0x01.
 PACKETTYPE_DEVICE_COMMAND_MIN = 0x10
 
+COMMAND_RESET = b'\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+COMMAND_START = b'\x0D\x00\x00\x03\x07\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+COMMAND_GET_STATUS = (
+    b'\x0D\x00\x00\x01\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+)
+
 
 ###############################################################################
 # Packet class
@@ -74,6 +80,10 @@ class Packet():
         """
         return getattr(self, datatype, None)
 
+    def __bool__(self):
+        """Consider an empty packet non truthy."""
+        return self.data is not None
+
     def __getattr__(self, name):
         typename = name.replace("has_", "", 1)
         if not name == typename:
@@ -93,6 +103,59 @@ class Packet():
 
 
 ###############################################################################
+# InterfaceResponse class
+###############################################################################
+
+class InterfaceResponse(Packet):
+    """
+    Data class for the Interface Response packet type
+    """
+
+    TYPES = {
+        0x00: "response on a mode command",
+        0x01: "unknown RTS remote",
+        0x02: "no extended hardware present",
+        0x03: "List RFY remotes",
+        0x04: "List ASA remotes",
+        0x07: "start RFXtrx receiver",
+        0x0B: "read TRX – reserved for internal use by RFXCOM",
+        0x0C: "write TRX – reserved for internal use by RFXCOM",
+        0xFF: "wrong command received from the application",
+    }
+
+    def __str__(self):
+        return (
+            "InterfaceResponse [subtype={0}, cmdn={1}, msg={2}]").format(
+                self.type_string,
+                self.cmnd,
+                self.msg)
+
+    def __init__(self):
+        """Constructor"""
+        super().__init__()
+        self.cmnd = None
+        self.msg = None
+
+    def load_receive(self, data):
+        """Load data from a bytearray"""
+        self.data = data
+        self.packetlength = data[0]
+        self.packettype = data[1]
+        self.subtype = data[2]
+        self.seqnbr = data[3]
+        self.cmnd = data[4]
+        self.msg = data[5:]
+        self._set_strings()
+
+    def _set_strings(self):
+        """Translate loaded numeric values into convenience strings"""
+        if self.subtype in self.TYPES:
+            self.type_string = self.TYPES[self.subtype]
+        else:
+            self.type_string = 'Unknown {}'.format(self.subtype)
+
+
+###############################################################################
 # Status class
 ###############################################################################
 
@@ -101,7 +164,7 @@ class Status(Packet):
     Data class for the Status packet type
     """
 
-    TYPES = {
+    TRANCEIVER_TYPES = {
         0x50: '310MHz',
         0x51: '315MHz',
         0x53: '433.92MHz',
@@ -114,7 +177,20 @@ class Status(Packet):
         0x5B: '868.95MHz',
         0x5C: '868.30MHz FSK PKT',
         0x5D: '868.35MHz FSK PKT',
-        0x5E: '868.40MHz FSK PKT'
+        0x5E: '868.40MHz FSK PKT',
+        0x5F: '434.50MHz'
+    }
+
+    FIRMMARE_TYPES = {
+        0x00: "Type1 RFXrec",
+        0x01: "Type1",
+        0x02: "Type2",
+        0x03: "Ext",
+        0x04: "Ext2",
+        0x05: "Pro1",
+        0x06: "Pro2",
+        0x10: "ProXL1",
+        0x11: "Internal",
     }
 
     """
@@ -162,16 +238,26 @@ class Status(Packet):
 
     def __str__(self):
         return ("Status [subtype={0}, firmware={1}, output_power={2}, "
-                "devices={3}]").format(self.type_string,
-                                       self.firmware_version,
-                                       self.output_power,
-                                       self.devices)
+                "devices={3}, firmware_type={4}, noise_level={5}]").format(
+            self.type_string,
+            self.firmware_version,
+            self.output_power,
+            self.devices,
+            self.firmware_type,
+            self.noise_level
+        )
 
     def __init__(self):
         """Constructor"""
         super().__init__()
+        self.cmnd = None
         self.tranceiver_type = None
         self.firmware_version = None
+        self.firmware_type = None
+        self.firmware_type_string = None
+        self.noise_level = None
+        self.hardware_major = None
+        self.hardware_minor = None
         self.output_power = None
         self.devices = None
 
@@ -188,10 +274,18 @@ class Status(Packet):
         self.data = data
         self.packetlength = data[0]
         self.packettype = data[1]
-
+        self.subtype = data[2]
+        self.seqnbr = data[3]
+        self.cmnd = data[4]
         self.tranceiver_type = data[5]
         self.firmware_version = data[6]
+        self.hardware_major = data[11]
+        self.hardware_minor = data[12]
         self.output_power = data[13]
+        if len(data) > 14:
+            self.firmware_type = data[14]
+        if len(data) > 15:
+            self.noise_level = data[15]
 
         devs = set()
         devs.update(self._decode_recmodes(data[7], 0))
@@ -204,11 +298,75 @@ class Status(Packet):
 
     def _set_strings(self):
         """Translate loaded numeric values into convenience strings"""
-        if self.tranceiver_type in self.TYPES:
-            self.type_string = self.TYPES[self.tranceiver_type]
+        if self.tranceiver_type in self.TRANCEIVER_TYPES:
+            self.type_string = self.TRANCEIVER_TYPES[self.tranceiver_type]
         else:
             # Degrade nicely for yet unknown subtypes
             self.type_string = 'Unknown'
+
+        if self.firmware_type in self.FIRMMARE_TYPES:
+            self.firmware_type_string = self.FIRMMARE_TYPES[self.firmware_type]
+        else:
+            self.firmware_type_string = 'Unknown ' + str(self.firmware_type)
+
+        self.id_string = "-"
+
+
+###############################################################################
+# ReceiverTransmitter class
+###############################################################################
+
+class ReceiverTransmitter(Packet):
+    """
+    Data class for the receiver transmitter packet.
+    """
+
+    TYPES = {
+        0x00: "Receiver",
+        0x01: "Transmitter",
+    }
+
+    TRANSMITTER_MSG = {
+        0x00: "ACK",
+        0x01: "ACK DELAY",
+        0x02: "NAK NOLOCK",
+        0x03: "NAK ADDRESS",
+    }
+
+    def __init__(self):
+        """Constructor"""
+        super().__init__()
+        self.msg = None
+        self.msg_string = None
+
+    def load_receive(self, data):
+        """Load data from a bytearray"""
+        self.data = data
+        self.packetlength = data[0]
+        self.packettype = data[1]
+        self.subtype = data[2]
+        self.seqnbr = data[3]
+        self.msg = data[4]
+        self._set_strings()
+
+    def __str__(self):
+        return "ReceiverTransmitter [subtype={0}, seqnbr={1}, msg={2}]".format(
+            self.type_string, self.seqnbr, self.msg_string)
+
+    def _set_strings(self):
+        """Translate loaded numeric values into convenience strings"""
+        if self.subtype in self.TYPES:
+            self.type_string = self.TYPES[self.subtype]
+        else:
+            self.type_string = self._UNKNOWN_TYPE.format(self.packettype,
+                                                         self.subtype)
+        if self.subtype == 0x01:
+            if self.msg in self.TRANSMITTER_MSG:
+                self.msg_string = self.TRANSMITTER_MSG[self.msg]
+            else:
+                self.msg_string = "Unknown {}".format(self.msg)
+        else:
+            self.msg_string = "NAK"
 
 
 def get_recmode_tuple(mode_name):
@@ -1428,7 +1586,9 @@ class Baro(SensorPacket):
     Data class for the Baro packet type
     """
 
-    TYPES = {}
+    TYPES = {
+        0x00: "Standard"
+    }
     """
     Mapping of numeric subtype values to strings, used in type_string
     """
@@ -3226,7 +3386,9 @@ class Funkbus(Packet):
 
 
 PACKET_TYPES = {
-    0x01: Status,
+    0x01: InterfaceResponse,
+    (0x01, 0x00): Status,
+    0x02: ReceiverTransmitter,
     0x03: Undecoded,
     0x10: Lighting1,
     0x11: Lighting2,
@@ -3259,17 +3421,22 @@ PACKET_TYPES = {
 }
 
 
-def get_packet(packettype):
+def get_packet(packettype, subtype=None):
     """Return a packet based on the packet type."""
+    if subtype is not None:
+        cls = PACKET_TYPES.get((packettype, subtype))
+        if cls:
+            return cls()
     cls = PACKET_TYPES.get(packettype)
-    if cls is None:
-        return None
-    return cls()
+    if cls:
+        return cls()
+
+    return None
 
 
 def get_packet_with_id(packettype, subtype, id_string):
     """Return a packet based on the type and identifiers."""
-    pkt = get_packet(packettype)
+    pkt = get_packet(packettype, subtype)
     if pkt is None or not hasattr(pkt, "parse_id"):
         return None
     pkt.parse_id(subtype, id_string)
@@ -3278,6 +3445,9 @@ def get_packet_with_id(packettype, subtype, id_string):
 
 def parse(data):
     """ Parse a packet from a bytearray """
+    if data is None:
+        return None
+
     if data[0] == 0 or len(data) < 2:
         # null length packet - sometimes happens on initialization
         return None
@@ -3286,7 +3456,7 @@ def parse(data):
     if len(data) != expected_length:
         return None
 
-    pkt = get_packet(data[1])
+    pkt = get_packet(data[1], data[2])
     if pkt is None:
         return None
 
@@ -3297,3 +3467,22 @@ def parse(data):
         return None
 
     return pkt
+
+
+def set_mode_packet(modenames, tranceiver_type, output_power):
+    """Construct a mode packet."""
+    data = bytearray([0x0D, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00,
+                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+
+    # Keep the values read during init.
+    data[5] = tranceiver_type
+    data[6] = output_power
+
+    # Build the mode data bytes from the mode names
+    for mode in modenames:
+        byteno, bitno = get_recmode_tuple(mode)
+        if byteno is None:
+            raise ValueError('Unknown mode name '+mode)
+
+        data[7 + byteno] |= 1 << bitno
+    return data
